@@ -106,6 +106,14 @@
 			UIPanel.set('loaded');
 		}
 
+		// Auto-advance from loading screen after 2 seconds
+		if ($UIPanel === 'loading') {
+			setTimeout(() => {
+				UIPanel.set('loaded');
+				show('overview');
+			}, 2000);
+		}
+
 	});
 </script>
 

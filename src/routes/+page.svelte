@@ -124,66 +124,18 @@
 <!-- <img src={lntLogo} alt="" id="lntlogo" class="absolute left-5 top-5 z-[2000000002]" /> -->
 {#if $UIPanel == 'loading'}
 	<div
-		class="absolute left-0 top-0 z-[2000000000] h-screen w-screen rounded bg-cover bg-center bg-no-repeat"
+		class="absolute left-0 top-0 z-[2000000000] flex h-screen w-screen items-center justify-center bg-black"
 	>
-		<div class="z-[2000000002] h-screen w-screen bg-gradient-to-t from-black">
-			<div
-				class="intro center absolute bottom-10 flex w-full flex-col items-center justify-center text-center font-semibold uppercase text-white"
-			>
-				<button
-					id="v-start-btn"
-					on:click={() => {
-						UIPanel.set('sign-up');
-						if (!(window.self !== window.top) && window.innerWidth < 1200) {
-							if (document.body.requestFullscreen) {
-								document.body.requestFullscreen();
-							} else if (document.body.webkitRequestFullscreen) {
-								/* Safari */
-								document.body.webkitRequestFullscreen();
-							} else if (document.body.msRequestFullscreen) {
-								/* IE11 */
-								document.body.msRequestFullscreen();
-							}
-						}
-
-						console.log('go fullscreen');
-					}}
-					class="bg-all-none !w-fit p-0"
-				>
-					<div id="v-start-img" style="width: 100px;" data-vretail-product-id="start-virtual-tour" data-vretail-name="start virtual tour">
-						<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-							<!-- Dashed Ring -->
-							<circle
-								cx="60"
-								cy="60"
-								r="50"
-								fill="none"
-								stroke="#FFD400"
-								stroke-opacity="0.4"
-								stroke-width="1"
-								stroke-dasharray="3 3"
-								stroke-linecap="round"
-							/>
-
-							<!-- Outer Circle -->
-							<circle cx="60" cy="60" r="40" fill="white" fill-opacity="0.15" />
-
-							<!-- Inner Circle -->
-							<circle cx="60" cy="60" r="30" fill="white" />
-
-							<!-- Perfectly Centered Arrow -->
-							<svg x="47" y="47" width="26" height="26" viewBox="18 17 12 12">
-								<path
-									d="M28.7346 22.4444C29.1922 22.6798 29.1922 23.3341 28.7346 23.5695L20.3792 27.8679C19.8453 28.1425 19.2649 27.5886 19.5143 27.0425L21.2373 23.2698C21.3136 23.1029 21.3136 22.9111 21.2373 22.7441L19.5143 18.9714C19.2649 18.4253 19.8453 17.8714 20.3792 18.146L28.7346 22.4444Z"
-									fill="#0F4C5C"
-								/>
-							</svg>
-						</svg>
-					</div>
-				</button>
-
-				<div class="title text-2xl">virtual tour experience</div>
-				<div class="subtitle">KL Rahega</div>
+		<div class="flex flex-col items-center">
+			<!-- Loader Animation -->
+			<div class="loader">
+				<div class="loader-ring"></div>
+				<div class="loader-ring"></div>
+				<div class="loader-ring"></div>
+			</div>
+			<div class="mt-8 text-center font-semibold uppercase text-white">
+				<div class="text-2xl">KL Rahega</div>
+				<div class="text-sm text-gray-400">Loading...</div>
 			</div>
 		</div>
 	</div>
@@ -344,5 +296,46 @@
 	}
 	.instruction-screen {
 		width: 600px;
+	}
+
+	/* Loader Animation */
+	.loader {
+		position: relative;
+		width: 80px;
+		height: 80px;
+	}
+
+	.loader-ring {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		border: 4px solid transparent;
+		border-top-color: #FFD400;
+		border-radius: 50%;
+		animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+	}
+
+	.loader-ring:nth-child(1) {
+		animation-delay: -0.45s;
+	}
+
+	.loader-ring:nth-child(2) {
+		animation-delay: -0.3s;
+	}
+
+	.loader-ring:nth-child(3) {
+		animation-delay: -0.15s;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg) scale(0.5);
+		}
+		50% {
+			transform: rotate(180deg) scale(0.8);
+		}
+		100% {
+			transform: rotate(360deg) scale(0.5);
+		}
 	}
 </style>
