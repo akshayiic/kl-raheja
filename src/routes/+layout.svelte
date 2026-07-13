@@ -109,6 +109,7 @@
 		setTimeout(() => {
 			UIPanel.set('loaded');
 			show('overview');
+			goto('/overview');
 		}, 2000);
 
 	});
