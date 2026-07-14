@@ -86,7 +86,7 @@
 	const isMainOverview = derived(selectedFloorIndex, ($index) => $index === mainFloorIndex);
 
 	// Hotspot toggle state
-	const hotspotsEnabled = writable(true);
+	const hotspotsEnabled = writable(false);
 
 	// Collapsible sidebars state
 	let floorCollapsed = false;
@@ -109,13 +109,6 @@
 		window.dragControlMethod = bowser.mobile
 			? viewer.controls().method('touchView').instance
 			: viewer.controls().method('mouseViewDrag').instance;
-
-		// Create scenes for each time of day and floor combination
-		availableTimes.forEach((time) => {
-			floors.forEach((floor) => {
-				createScene(time, floor.id);
-			});
-		});
 
 		// Load main overview by default
 		loadScene('morning', 10);
@@ -164,11 +157,35 @@
 		allScenes[sceneKey] = { source, view, scene, time };
 	};
 
+	// Track scene caching to prevent GPU memory starvation
+	const MAX_CACHED_SCENES = 6;
+	let sceneOrder = [];
+
 	const loadScene = (time, floorIndex) => {
 		const floor = floors[floorIndex];
 		if (!floor) return;
 
 		const sceneKey = `${time}_${floor.id}`;
+
+		// Lazily create scene if it doesn't exist in cache yet
+		if (!allScenes[sceneKey]) {
+			createScene(time, floor.id);
+		}
+
+		// Move current scene to most-recently-used in cache order
+		sceneOrder = sceneOrder.filter((key) => key !== sceneKey);
+		sceneOrder.push(sceneKey);
+
+		// Evict least-recently-used scenes if we exceed the cache cap
+		while (sceneOrder.length > MAX_CACHED_SCENES) {
+			const evictKey = sceneOrder.shift();
+			if (evictKey && evictKey !== sceneKey && allScenes[evictKey]) {
+				const evictData = allScenes[evictKey];
+				viewer.destroyScene(evictData.scene);
+				delete allScenes[evictKey];
+			}
+		}
+
 		const sceneData = allScenes[sceneKey];
 		if (!sceneData) return;
 
@@ -252,9 +269,7 @@
 	};
 
 	const selectTimeOfDay = (time) => {
-		if (time === 'morning') {
-			hotspotsEnabled.set(true);
-		} else {
+		if (time !== 'morning') {
 			hotspotsEnabled.set(false);
 		}
 		loadScene(time, $selectedFloorIndex);
@@ -432,7 +447,7 @@
 	</div>
 
 	<!-- Hotspot Toggle -->
-	{#if $isMainOverview}
+	{#if $isMainOverview && $selectedTime === 'morning'}
 		<div class="hotspot-toggle">
 			<span class="toggle-label">Info Hotspots</span>
 			<button
@@ -827,11 +842,11 @@
 		position: absolute;
 		width: 8px;
 		height: 8px;
-		background: #ffd400;
+		background: #ffffff;
 		border-radius: 50%;
 		left: -4px;
 		top: -4px;
-		box-shadow: 0 0 8px #ffd400;
+		box-shadow: 0 0 8px #ffffff;
 		z-index: 2;
 	}
 
@@ -839,7 +854,7 @@
 		position: absolute;
 		width: 24px;
 		height: 24px;
-		border: 1.5px solid rgba(255, 212, 0, 0.8);
+		border: 1.5px solid rgba(255, 255, 255, 0.8);
 		border-radius: 50%;
 		left: -12px;
 		top: -12px;
@@ -864,7 +879,7 @@
 		left: -1px;
 		width: 2px;
 		height: var(--hotspot-height, 75px);
-		background: linear-gradient(to top, #ffd400 0%, rgba(255, 255, 255, 0.8) 40%, rgba(255, 255, 255, 0.1) 100%);
+		background: linear-gradient(to top, #ffffff 0%, rgba(255, 255, 255, 0.8) 40%, rgba(255, 255, 255, 0.1) 100%);
 		transform-origin: bottom;
 		transform: scaleY(0);
 		transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
