@@ -86,7 +86,7 @@
 </script>
 
 <svelte:head>
-	<title>KL Rahega</title>
+	<title>K Rahega</title>
 	<meta name="description" content="kl-rahega" />
 </svelte:head>
 
@@ -134,7 +134,7 @@
 				<div class="loader-ring"></div>
 			</div>
 			<div class="mt-8 text-center font-semibold uppercase text-white">
-				<div class="text-2xl">KL Rahega</div>
+				<div class="text-2xl">K Rahega</div>
 				<div class="text-sm text-gray-400">Loading...</div>
 			</div>
 		</div>
@@ -145,7 +145,7 @@
 		<div class="left-panel--header mb-3 flex justify-between">
 			<div class="left-title flex flex-col gap-1 text-left">
 				<div class="text-2xl font-bold">Instructions</div>
-				See how to explore KL Rahega
+				See how to explore K Rahega
 			</div>
 			<button
 				on:click={() => {
@@ -209,7 +209,7 @@
 		<div class="left-panel--header mb-3 flex justify-between">
 			<div class="left-title flex flex-col gap-1 text-left">
 				<div class="text-2xl font-bold">Instructions</div>
-				See how to explore KL Rahega
+				See how to explore K Rahega
 			</div>
 			<button
 				on:click={() => {
@@ -310,7 +310,7 @@
 		width: 100%;
 		height: 100%;
 		border: 4px solid transparent;
-		border-top-color: #FFD400;
+		border-top-color: #ffd400;
 		border-radius: 50%;
 		animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 	}

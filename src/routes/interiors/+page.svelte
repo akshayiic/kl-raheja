@@ -2139,7 +2139,8 @@
 		<img src={dollhouse} id="dollhouse" class="pointer relative z-[9000]" alt="dollhouse" />
 		<button
 			id="start-tour"
-			data-vretail-product-id="3bhk-start-tour" data-vretail-name="start tour"
+			data-vretail-product-id="3bhk-start-tour"
+			data-vretail-name="start tour"
 			class="primary-btn mx-auto mt-[-1rem]"
 			on:click={() => ($hotspotName = 'foyerArea')}
 		>
@@ -2609,7 +2610,8 @@
 		<button
 			id="start-tour"
 			class="primary-btn mx-auto mt-[-1rem]"
-			data-vretail-product-id="4bhk-start-tour" data-vretail-name="start tour"
+			data-vretail-product-id="4bhk-start-tour"
+			data-vretail-name="start tour"
 			on:click={() => ($hotspotName = 'fbhkfoyerspace')}
 		>
 			<img id="startTourImg" src={startTourImg} alt="start tour" />

@@ -27,21 +27,33 @@
 
 	// Info hotspots data - using correct yaw/pitch from APP_DATA
 	const infoHotspots = [
-		{ yaw: 1.8844940263482037, pitch: -0.05054815947613989, title: 'Bandra Worli Sea Link' },
-		{ yaw: -1.9542776260578663, pitch: 0.22421612137353364, title: 'Bandstand & Carter Road Promenade' },
-		{ yaw: -0.4555211228580287, pitch: 0.01301193885635854, title: 'BKC (Bandra-Kurla Complex)' },
-		{ yaw: -0.6126043828326306, pitch: 0.12261471785871336, title: 'Lilavati Hospital' },
-		{ yaw: -0.28810601011943326, pitch: 0.059821744772238006, title: 'Dhirubhai Ambani International School' },
-		{ yaw: -1.6807002432938933, pitch: 0.08104243591002991, title: 'Otters Club' },
-		{ yaw: 2.073285248111959, pitch: -0.015141630319693178, title: 'Taj Lands End' },
-		{ yaw: -0.1492642036394205, pitch: 0.02223561794271589, title: 'Jio World Centre (NMACC)' },
-		{ yaw: -0.08302367651812048, pitch: 0.06513596391294918, title: 'Jio World Drive' },
-		{ yaw: -2.1649118474316467, pitch: -0.010187657007763917, title: 'Versova–Bandra Sea Link' },
-		{ yaw: 1.407461676916748, pitch: -0.06262553263736237, title: 'Worli business district' },
-		{ yaw: 1.41569761010296, pitch: 0.22940729869127985, title: 'Mount Mary Basilica' },
-		{ yaw: -0.32055851759378484, pitch: 0.06708659007874473, title: 'American School of Bombay' },
-		{ yaw: -0.6243483273298018, pitch: 0.03932089879253553, title: 'Asian Heart Institute' },
-		{ yaw: -1.1134199121902082, pitch: 0.013543448224595522, title: 'Pali Hill/Linking Road' }
+		{ yaw: 1.8844940263482037, pitch: -0.05054815947613989, title: 'Bandra Worli Sea Link', side: 'left', height: 80 },
+		{
+			yaw: -1.9542776260578663,
+			pitch: 0.22421612137353364,
+			title: 'Bandstand & Carter Road Promenade',
+			side: 'right',
+			height: 100
+		},
+		{ yaw: -0.4555211228580287, pitch: 0.01301193885635854, title: 'BKC (Bandra-Kurla Complex)', side: 'right', height: 140 },
+		{ yaw: -0.6126043828326306, pitch: 0.12261471785871336, title: 'Lilavati Hospital', side: 'right', height: 170 },
+		{
+			yaw: -0.58810601011943326,
+			pitch: 0.059821744772238006,
+			title: 'Dhirubhai Ambani International School',
+			side: 'left',
+			height: 120
+		},
+		{ yaw: -1.6807002432938933, pitch: 0.08104243591002991, title: 'Otters Club', side: 'left', height: 140 },
+		{ yaw: 2.073285248111959, pitch: -0.015141630319693178, title: 'Taj Lands End', side: 'right', height: 120 },
+		{ yaw: -0.1492642036394205, pitch: 0.02223561794271589, title: 'Jio World Centre (NMACC)', side: 'left', height: 200 },
+		{ yaw: -0.18302367651812048, pitch: 0.06513596391294918, title: 'Jio World Drive', side: 'right', height: 130 },
+		{ yaw: -2.1649118474316467, pitch: -0.010187657007763917, title: 'Versova–Bandra Sea Link', side: 'left', height: 60 },
+		{ yaw: 1.407461676916748, pitch: -0.06262553263736237, title: 'Worli business district', side: 'left', height: 90 },
+		{ yaw: 1.41569761010296, pitch: 0.22940729869127985, title: 'Mount Mary Basilica', side: 'right', height: 150 },
+		{ yaw: -0.32055851759378484, pitch: 0.06708659007874473, title: 'American School of Bombay', side: 'left', height: 65 },
+		{ yaw: -0.6243483273298018, pitch: 0.03932089879253553, title: 'Asian Heart Institute', side: 'left', height: 60 },
+		{ yaw: -1.1134199121902082, pitch: 0.013543448224595522, title: 'Pali Hill/Linking Road', side: 'left', height: 150 }
 	];
 
 	// Initial view parameters from APP_DATA
@@ -75,6 +87,10 @@
 
 	// Hotspot toggle state
 	const hotspotsEnabled = writable(true);
+
+	// Collapsible sidebars state
+	let floorCollapsed = false;
+	let timeCollapsed = false;
 
 	// Track which hotspots have been shown
 	const shownHotspots = new Set();
@@ -111,7 +127,22 @@
 	const createScene = (time, sceneId) => {
 		// Scene path: {time}/app-files/tiles/{sceneId}
 		const baseURL = 'https://assets.vestate.io/kl-rahega/drone-shots';
-		const scenePath = `${time}/app-files/tiles/${sceneId}`;
+
+		// Map inconsistent S3 folder names to avoid black screens
+		let folderName = sceneId;
+		if (time === 'evening') {
+			if (sceneId === '0-2nd-floor') {
+				folderName = '0-2nd';
+			} else if (sceneId === '10-22nd-floor') {
+				folderName = '10-24th-floor';
+			}
+		} else if (time === 'afternoon') {
+			if (sceneId === '2-6th-floor') {
+				folderName = '2-6th--floor';
+			}
+		}
+
+		const scenePath = `${time}/app-files/tiles/${folderName}`;
 
 		let source = Marzipano.ImageUrlSource.fromString(
 			`${baseURL}/${scenePath}/{z}/{f}/{y}/{x}.jpg`,
@@ -234,29 +265,52 @@
 	};
 
 	const toggleHotspots = () => {
-		hotspotsEnabled.update(enabled => !enabled);
+		hotspotsEnabled.update((enabled) => !enabled);
 		loadScene($selectedTime, $selectedFloorIndex);
 	};
 
 	const createInfoHotspot = (scene, hotspotData, index) => {
-		// Create hotspot similar to interiors style
 		const wrapper = document.createElement('div');
 		wrapper.classList.add('info-hotspot');
+		wrapper.classList.add('overview-hotspot');
+		
+		// Use hand-tailored side alignment from data (fallback to alternating left/right)
+		const side = hotspotData.side || (index % 2 === 0 ? 'right' : 'left');
+		wrapper.classList.add(`hotspot-${side}`);
+		
 		wrapper.id = `hotspot-wrapper-${index}`;
 
-		// Hotspot element with text label
+		// Use hand-tailored height from data (fallback to 75)
+		const height = hotspotData.height || 75;
+		wrapper.style.setProperty('--hotspot-height', `${height}px`);
+
+		// Center pulse dot
+		const pulseDot = document.createElement('div');
+		pulseDot.classList.add('hotspot-pulse-dot');
+		
+		const pulseRing = document.createElement('div');
+		pulseRing.classList.add('hotspot-pulse-ring');
+		pulseDot.appendChild(pulseRing);
+		
+		wrapper.appendChild(pulseDot);
+
+		// Vertical line
+		const line = document.createElement('div');
+		line.classList.add('hotspot-line');
+		wrapper.appendChild(line);
+
+		// Hotspot label
 		const hotspot = document.createElement('div');
 		hotspot.classList.add('hotspot');
+		hotspot.classList.add('overview-hotspot-label');
 		hotspot.innerText = hotspotData.title;
 
 		wrapper.appendChild(hotspot);
 
 		// Create hotspot at correct yaw/pitch position
-		scene.hotspotContainer().createHotspot(
-			wrapper,
-			{ yaw: hotspotData.yaw, pitch: hotspotData.pitch },
-			{}
-		);
+		scene
+			.hotspotContainer()
+			.createHotspot(wrapper, { yaw: hotspotData.yaw, pitch: hotspotData.pitch }, {});
 	};
 
 	function capitalize(str) {
@@ -272,15 +326,41 @@
 
 <div class="overview-container">
 	<!-- Time of Day Selector -->
-	<div class="time-selector">
-		<div class="time-selector-header">
-			<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM10 16C6.68629 16 4 13.3137 4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16Z" fill="currentColor"/>
-				<path d="M11 6H9V10H11V6Z" fill="currentColor"/>
-				<path d="M11 10H9V14H11V10Z" fill="currentColor"/>
+	<div class="time-selector {timeCollapsed ? 'collapsed' : ''}">
+		<button
+			class="time-selector-header"
+			on:click={() => (timeCollapsed = !timeCollapsed)}
+			type="button"
+		>
+			<svg
+				width="20"
+				height="20"
+				viewBox="0 0 20 20"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM10 16C6.68629 16 4 13.3137 4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16Z"
+					fill="currentColor"
+				/>
+				<path d="M11 6H9V10H11V6Z" fill="currentColor" />
+				<path d="M11 10H9V14H11V10Z" fill="currentColor" />
 			</svg>
 			<span>Time of Day</span>
-		</div>
+			<svg
+				class="chevron-icon-horizontal {timeCollapsed ? 'collapsed' : ''}"
+				width="16"
+				height="16"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<polyline points="9 18 15 12 9 6"></polyline>
+			</svg>
+		</button>
 		<div class="time-buttons">
 			{#each availableTimes as time}
 				<button
@@ -294,14 +374,51 @@
 	</div>
 
 	<!-- Floor Selector -->
-	<div class="floor-selector">
-		<div class="floor-selector-header">
-			<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path d="M3 3L10 1L17 3V10C17 14.97 13.5 19 10 20C6.5 19 3 14.97 3 10V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				<path d="M8 10L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+	<div class="floor-selector {floorCollapsed ? 'collapsed' : ''}">
+		<button
+			class="floor-selector-header"
+			on:click={() => (floorCollapsed = !floorCollapsed)}
+			type="button"
+		>
+			<div class="header-title">
+				<svg
+					width="20"
+					height="20"
+					viewBox="0 0 20 20"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M3 3L10 1L17 3V10C17 14.97 13.5 19 10 20C6.5 19 3 14.97 3 10V3Z"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+					<path
+						d="M8 10L10 12L14 8"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+				</svg>
+				<span>Select Floor</span>
+			</div>
+			<svg
+				class="chevron-icon {floorCollapsed ? 'collapsed' : ''}"
+				width="16"
+				height="16"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<polyline points="6 9 12 15 18 9"></polyline>
 			</svg>
-			<span>Select Floor</span>
-		</div>
+		</button>
 		<div class="floor-buttons">
 			{#each floors as floor, index}
 				<button
@@ -328,8 +445,6 @@
 		</div>
 	{/if}
 
- 
-
 	<!-- Marzipano Viewer -->
 	<div id="pano" class="pano-viewer"></div>
 </div>
@@ -352,17 +467,19 @@
 	/* Time of Day Selector */
 	.time-selector {
 		position: fixed;
-		top: 100px;
+		bottom: 20px;
 		right: 20px;
 		z-index: 1000;
 		background: rgba(15, 76, 92, 0.9);
 		border-radius: 12px;
-		padding: 16px;
-		min-width: 180px;
+		padding: 10px 16px;
 		backdrop-filter: blur(10px);
 		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-		max-height: 50vh;
-		overflow-y: auto;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 16px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.time-selector-header {
@@ -371,15 +488,37 @@
 		gap: 8px;
 		color: white;
 		font-weight: 600;
-		margin-bottom: 12px;
-		padding-bottom: 8px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+		cursor: pointer;
+		user-select: none;
+		border: none;
+		background: none;
+		padding: 0 12px 0 0;
+		margin: 0;
+		border-right: 1px solid rgba(255, 255, 255, 0.2);
+		text-align: left;
+		transition: all 0.3s ease;
+	}
+
+	.time-selector.collapsed .time-selector-header {
+		border-right-color: transparent;
+		padding-right: 0;
 	}
 
 	.time-buttons {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		gap: 8px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		max-width: 500px;
+		opacity: 1;
+		overflow: hidden;
+	}
+
+	.time-selector.collapsed .time-buttons {
+		max-width: 0;
+		opacity: 0;
+		pointer-events: none;
+		gap: 0;
 	}
 
 	.time-btn {
@@ -393,6 +532,7 @@
 		cursor: pointer;
 		transition: all 0.3s ease;
 		text-transform: capitalize;
+		white-space: nowrap;
 	}
 
 	.time-btn:hover {
@@ -402,8 +542,8 @@
 
 	.time-btn.active {
 		background: rgba(255, 212, 0, 0.3);
-		border-color: #FFD400;
-		color: #FFD400;
+		border-color: #ffd400;
+		color: #ffd400;
 	}
 
 	/* Floor Selector */
@@ -420,23 +560,76 @@
 		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 		max-height: 70vh;
 		overflow-y: auto;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.floor-selector.collapsed {
+		max-height: 50px;
+		overflow: hidden;
 	}
 
 	.floor-selector-header {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
+		width: 100%;
 		gap: 8px;
 		color: white;
 		font-weight: 600;
+		cursor: pointer;
+		user-select: none;
+		border: none;
+		background: none;
+		padding: 0 0 8px 0;
 		margin-bottom: 12px;
-		padding-bottom: 8px;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+		text-align: left;
+		transition: all 0.3s ease;
+	}
+
+	.floor-selector.collapsed .floor-selector-header {
+		border-bottom-color: transparent;
+		margin-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	.header-title {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.chevron-icon {
+		transition: transform 0.3s ease;
+		transform: rotate(180deg); /* Points up when expanded */
+	}
+
+	.chevron-icon.collapsed {
+		transform: rotate(0deg); /* Points down when collapsed */
+	}
+
+	.chevron-icon-horizontal {
+		transition: transform 0.3s ease;
+		transform: rotate(180deg); /* Points left when expanded */
+	}
+
+	.chevron-icon-horizontal.collapsed {
+		transform: rotate(0deg); /* Points right when collapsed */
 	}
 
 	.floor-buttons {
 		display: flex;
 		flex-direction: column;
 		gap: 6px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		max-height: 500px;
+		opacity: 1;
+	}
+
+	.floor-selector.collapsed .floor-buttons {
+		max-height: 0;
+		opacity: 0;
+		pointer-events: none;
 	}
 
 	.floor-btn {
@@ -460,8 +653,8 @@
 
 	.floor-btn.active {
 		background: rgba(255, 212, 0, 0.3);
-		border-color: #FFD400;
-		color: #FFD400;
+		border-color: #ffd400;
+		color: #ffd400;
 	}
 
 	/* Hotspot Toggle */
@@ -500,7 +693,7 @@
 	}
 
 	.toggle-switch.on {
-		background: #FFD400;
+		background: #ffd400;
 	}
 
 	.toggle-slider {
@@ -532,7 +725,7 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		color: #0F4C5C;
+		color: #0f4c5c;
 		font-size: 13px;
 		font-weight: 600;
 		box-shadow: 0 4px 16px rgba(255, 212, 0, 0.3);
@@ -558,11 +751,10 @@
 	/* Responsive */
 	@media (max-width: 768px) {
 		.time-selector {
-			top: auto;
 			bottom: 20px;
 			right: 20px;
-			min-width: 150px;
-			max-height: 40vh;
+			top: auto;
+			max-height: none;
 		}
 
 		.floor-selector {
@@ -593,6 +785,15 @@
 		}
 	}
 
+	@media (max-width: 600px) {
+		.time-selector-header span {
+			display: none;
+		}
+		.time-selector-header {
+			padding-right: 8px;
+		}
+	}
+
 	/* Scrollbar styling */
 	.time-selector::-webkit-scrollbar,
 	.floor-selector::-webkit-scrollbar {
@@ -614,5 +815,160 @@
 	.time-selector::-webkit-scrollbar-thumb:hover,
 	.floor-selector::-webkit-scrollbar-thumb:hover {
 		background: rgba(255, 255, 255, 0.5);
+	}
+
+	/* Hotspots Animations & Glassmorphism styles */
+	:global(.overview-hotspot) {
+		position: absolute;
+		pointer-events: none;
+	}
+
+	:global(.overview-hotspot .hotspot-pulse-dot) {
+		position: absolute;
+		width: 8px;
+		height: 8px;
+		background: #ffd400;
+		border-radius: 50%;
+		left: -4px;
+		top: -4px;
+		box-shadow: 0 0 8px #ffd400;
+		z-index: 2;
+	}
+
+	:global(.overview-hotspot .hotspot-pulse-ring) {
+		position: absolute;
+		width: 24px;
+		height: 24px;
+		border: 1.5px solid rgba(255, 212, 0, 0.8);
+		border-radius: 50%;
+		left: -12px;
+		top: -12px;
+		animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+		pointer-events: none;
+	}
+
+	@keyframes pulse-ring {
+		0% {
+			transform: scale(0.5);
+			opacity: 1;
+		}
+		80%, 100% {
+			transform: scale(2.2);
+			opacity: 0;
+		}
+	}
+
+	:global(.overview-hotspot .hotspot-line) {
+		position: absolute;
+		bottom: 0;
+		left: -1px;
+		width: 2px;
+		height: var(--hotspot-height, 75px);
+		background: linear-gradient(to top, #ffd400 0%, rgba(255, 255, 255, 0.8) 40%, rgba(255, 255, 255, 0.1) 100%);
+		transform-origin: bottom;
+		transform: scaleY(0);
+		transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+		z-index: 1;
+	}
+
+	:global(.overview-hotspot.visible .hotspot-line) {
+		transform: scaleY(1);
+	}
+
+	:global(.overview-hotspot .overview-hotspot-label) {
+		/* Reset global .hotspot styles */
+		margin-top: 0 !important;
+		padding: 4px 8px !important;
+		border-radius: 8px !important;
+		font-size: 13px !important;
+		font-weight: 600 !important;
+		color: #ffffff !important;
+		
+		/* Glassmorphism background */
+		background: rgba(15, 76, 92, 0.65) !important;
+		backdrop-filter: blur(12px) saturate(160%) !important;
+		-webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+		border: 1px solid rgba(255, 255, 255, 0.25) !important;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+
+		/* Positioning and initial state */
+		position: absolute !important;
+		bottom: var(--hotspot-height, 75px) !important;
+		pointer-events: auto !important;
+		cursor: pointer !important;
+		white-space: nowrap !important;
+		z-index: 3;
+	}
+
+	/* Remove the ::before arrow from our overview hotspot */
+	:global(.overview-hotspot .overview-hotspot-label::before) {
+		display: none !important;
+		content: none !important;
+	}
+
+	/* Alignment-specific styles */
+	:global(.overview-hotspot.hotspot-right .overview-hotspot-label) {
+		left: 10px !important;
+		right: auto !important;
+		transform: translateX(-15px) scale(0.95) !important;
+		opacity: 0 !important;
+		clip-path: inset(0 100% 0 0) !important;
+		transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+		            transform 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+		            clip-path 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+		            background-color 0.3s ease,
+		            border-color 0.3s ease,
+		            box-shadow 0.3s ease !important;
+	}
+
+	:global(.overview-hotspot.hotspot-right.visible .overview-hotspot-label) {
+		opacity: 1 !important;
+		transform: translateX(0) scale(1) !important;
+		clip-path: inset(0 0 0 0) !important;
+		transition-delay: 0.5s !important;
+	}
+
+	:global(.overview-hotspot.hotspot-left .overview-hotspot-label) {
+		right: 10px !important;
+		left: auto !important;
+		transform: translateX(15px) scale(0.95) !important;
+		opacity: 0 !important;
+		clip-path: inset(0 0 0 100%) !important;
+		transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+		            transform 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+		            clip-path 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+		            background-color 0.3s ease,
+		            border-color 0.3s ease,
+		            box-shadow 0.3s ease !important;
+	}
+
+	:global(.overview-hotspot.hotspot-left.visible .overview-hotspot-label) {
+		opacity: 1 !important;
+		transform: translateX(0) scale(1) !important;
+		clip-path: inset(0 0 0 0) !important;
+		transition-delay: 0.5s !important;
+	}
+
+	/* Premium Hover effect */
+	:global(.overview-hotspot.hotspot-right .overview-hotspot-label:hover) {
+		background: rgba(15, 76, 92, 0.85) !important;
+		border-color: rgba(255, 212, 0, 0.6) !important;
+		box-shadow: 0 8px 32px rgba(255, 212, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+		transform: translateX(2px) scale(1.03) !important;
+	}
+
+	:global(.overview-hotspot.hotspot-left .overview-hotspot-label:hover) {
+		background: rgba(15, 76, 92, 0.85) !important;
+		border-color: rgba(255, 212, 0, 0.6) !important;
+		box-shadow: 0 8px 32px rgba(255, 212, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+		transform: translateX(-2px) scale(1.03) !important;
+	}
+
+	@media (max-width: 768px) {
+		:global(.overview-hotspot .overview-hotspot-label) {
+			font-size: 11px !important;
+			padding: 6px 12px !important;
+		}
 	}
 </style>
