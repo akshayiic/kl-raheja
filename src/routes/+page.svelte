@@ -2,7 +2,9 @@
 	import Home from './Home.svelte';
 	import { setContext, getContext } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { goto } from '$app/navigation';
 	import 'iconify-icon';
+	import poweredByVretail from '$lib/images/powered-vretail.png';
 	import instructionIcon from '$lib/images/instruction-icon.svg';
 	import instructionPanoIcon from '$lib/images/instruction-pano.svg';
 	import { onMount } from 'svelte';
@@ -124,18 +126,47 @@
 <!-- <img src={lntLogo} alt="" id="lntlogo" class="absolute left-5 top-5 z-[2000000002]" /> -->
 {#if $UIPanel == 'loading'}
 	<div
-		class="absolute left-0 top-0 z-[2000000000] flex h-screen w-screen items-center justify-center bg-black"
+		class="fixed left-0 top-0 z-[2000000000] h-screen w-screen rounded bg-cover bg-center bg-no-repeat"
 	>
-		<div class="flex flex-col items-center">
-			<!-- Loader Animation -->
-			<div class="loader">
-				<div class="loader-ring"></div>
-				<div class="loader-ring"></div>
-				<div class="loader-ring"></div>
-			</div>
-			<div class="mt-8 text-center font-semibold uppercase text-white">
-				<div class="text-2xl">K Rahega</div>
-				<div class="text-sm text-gray-400">Loading...</div>
+		<div class="z-[2000000002] h-screen w-screen bg-gradient-to-t from-black">
+			<video
+				class="intro-video"
+				src="/video/main-intro.mp4"
+				autoplay
+				muted
+				loop
+				playsinline
+				style="width: 100vw; height: 100vh; object-fit: cover; position: absolute; left: 0; top: 0; z-index: -1;"
+			></video>
+			<div
+				class="intro center absolute bottom-10 flex w-full flex-col items-center justify-center text-center font-semibold uppercase text-white"
+			>
+				<button
+					id="v-start-btn"
+					on:click={() => {
+						UIPanel.set('loaded');
+						goto('/overview');
+						if (!(window.self !== window.top) && window.innerWidth < 1200) {
+							if (document.body.requestFullscreen) {
+								document.body.requestFullscreen();
+							} else if (document.body.webkitRequestFullscreen) {
+								/* Safari */
+								document.body.webkitRequestFullscreen();
+							} else if (document.body.msRequestFullscreen) {
+								/* IE11 */
+								document.body.msRequestFullscreen();
+							}
+						}
+
+						console.log('go fullscreen');
+					}}
+					class="bg-all-none !w-fit p-0 cursor-pointer"
+				>
+					<img id="v-start-img" style="width: 100px;" src="/startbtn.png" alt="Start Tour" />
+				</button>
+
+				<div class="title text-2xl">virtual tour experience</div>
+				<div class="subtitle">by K Raheja</div>
 			</div>
 		</div>
 	</div>

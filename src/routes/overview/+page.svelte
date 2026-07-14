@@ -361,7 +361,7 @@
 				<path d="M11 6H9V10H11V6Z" fill="currentColor" />
 				<path d="M11 10H9V14H11V10Z" fill="currentColor" />
 			</svg>
-			<span>Time of Day</span>
+			<span>Time</span>
 			<svg
 				class="chevron-icon-horizontal {timeCollapsed ? 'collapsed' : ''}"
 				width="16"
@@ -764,12 +764,26 @@
 	}
 
 	/* Responsive */
-	@media (max-width: 768px) {
+	@media (max-width: 1080px) {
 		.time-selector {
-			bottom: 20px;
-			right: 20px;
+			bottom: 16px;
+			right: 16px;
 			top: auto;
 			max-height: none;
+			padding: 6px 8px;
+			gap: 10px;
+			border-radius: 10px;
+		}
+
+		.time-btn {
+			padding: 4px 6px;
+			font-size: 12px;
+			border-radius: 6px;
+		}
+
+		.time-selector-header {
+			padding-right: 2px;
+			gap: 2px;
 		}
 
 		.floor-selector {
@@ -801,11 +815,27 @@
 	}
 
 	@media (max-width: 600px) {
+		.time-selector {
+			bottom: 10px;
+			right: 10px;
+			padding: 6px 10px;
+			gap: 8px;
+			border-radius: 8px;
+		}
+
+		.time-btn {
+			padding: 6px 10px;
+			font-size: 11px;
+			border-radius: 4px;
+		}
+
+		.time-selector-header {
+			padding-right: 6px;
+			gap: 4px;
+		}
+
 		.time-selector-header span {
 			display: none;
-		}
-		.time-selector-header {
-			padding-right: 8px;
 		}
 	}
 

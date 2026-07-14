@@ -5,6 +5,7 @@
 	import { writable } from 'svelte/store';
 	import '../app.pcss';
 	import './styles.css';
+	import rahejaLogo from '$lib/images/raheja_logo.png';
 
 	const navSlide = writable();
 	setContext('navSlide', navSlide);
@@ -104,17 +105,27 @@
 			show('overview');
 			UIPanel.set('loaded');
 		}
-
-		// Auto-advance from loading screen after 2 seconds
-		setTimeout(() => {
-			UIPanel.set('loaded');
-			show('overview');
-			goto('/overview');
-		}, 2000);
 	});
 </script>
 
 <div class="app">
+	<img src={rahejaLogo} alt="Raheja Logo" class="raheja-logo" />
+
+	<!-- Device Rotation Overlay for Portrait Mobile Screens -->
+	<div class="rotate-overlay">
+		<div class="rotate-content">
+			<div class="phone-icon-wrapper">
+				<svg class="phone-rotate-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+					<path class="phone-body" d="M35 15h30c2.2 0 4 1.8 4 4v62c0 2.2-1.8 4-4 4H35c-2.2 0-4-1.8-4-4V19c0-2.2 1.8-4 4-4z" fill="none" stroke="white" stroke-width="3" />
+					<circle class="phone-btn" cx="50" cy="77" r="3" fill="white" />
+					<path class="arrow" d="M65 30a20 20 0 0 1 10 15m0 0l-5-2m5 2l2-5" fill="none" stroke="#ffd400" stroke-width="3" stroke-linecap="round" />
+				</svg>
+			</div>
+			<h2>Rotate Your Device</h2>
+			<p>Please rotate your device to landscape mode for the best experience.</p>
+		</div>
+	</div>
+
 	<slot />
 
 	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')}>
@@ -165,7 +176,7 @@
 				</div>
 			{/if}
 
-			<div class:hidden={$page.url.hash == '#hidenav'}>
+			<div class:hidden={$page.url.hash == '#hidenav'} >
 				<svg
 					on:click={() => navSlide.set(!$navSlide)}
 					type="button"

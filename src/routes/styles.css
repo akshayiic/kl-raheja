@@ -801,3 +801,184 @@ button {
 		height: auto;
 	}
 }
+
+/* Raheja Logo Styles */
+.raheja-logo {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	z-index: 10000;
+	background: #ffffff;
+	padding: 2px ;
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	max-height: 100px;
+	width: auto;
+	object-fit: contain;
+	transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+	.raheja-logo {
+		top: 15px;
+		right: 15px;
+		padding: 2px;
+		max-height: 60px;
+		border-radius: 6px;
+	}
+}
+
+@media (max-width: 480px) {
+	.raheja-logo {
+		top: 10px;
+		right: 10px;
+		padding: 4px 8px;
+		max-height: 60px;
+	}
+}
+
+/* Rotate Warning Overlay */
+.rotate-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #0b252c;
+	z-index: 99999999;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	text-align: center;
+	font-family: 'Outfit', 'Inter', sans-serif;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+/* Only show on mobile/tablet screens in portrait mode */
+@media (max-width: 900px) and (orientation: portrait) {
+	.rotate-overlay {
+		display: flex;
+	}
+}
+
+.rotate-content {
+	max-width: 320px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+.phone-icon-wrapper {
+	width: 80px;
+	height: 80px;
+	margin-bottom: 8px;
+}
+
+.phone-rotate-icon {
+	width: 100%;
+	height: 100%;
+}
+
+.phone-rotate-icon .phone-body {
+	animation: rotate-phone 2.5s ease-in-out infinite;
+	transform-origin: 50% 50%;
+}
+
+.phone-rotate-icon .phone-btn {
+	animation: rotate-phone-btn 2.5s ease-in-out infinite;
+	transform-origin: 50% 50%;
+}
+
+.phone-rotate-icon .arrow {
+	animation: fade-arrow 2.5s ease-in-out infinite;
+}
+
+@keyframes rotate-phone {
+	0% {
+		transform: rotate(0deg);
+	}
+	50%, 100% {
+		transform: rotate(-90deg);
+	}
+}
+
+@keyframes rotate-phone-btn {
+	0% {
+		transform: rotate(0deg);
+	}
+	50%, 100% {
+		transform: rotate(-90deg);
+	}
+}
+
+@keyframes fade-arrow {
+	0%, 100% {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.rotate-content h2 {
+	font-size: 20px;
+	font-weight: 600;
+	margin: 0;
+	color: #ffd400;
+	letter-spacing: 0.5px;
+}
+
+.rotate-content p {
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.7);
+	line-height: 1.5;
+	margin: 0;
+}
+
+/* Fix bottom navbar blocking clicks on elements underneath it (like time selector) */
+.nav-wrapper {
+	width: fit-content;
+	margin: auto;
+}
+
+.nav-wrapper nav,
+.nav-wrapper button,
+.nav-wrapper svg,
+.nav-wrapper a {
+	pointer-events: auto !important;
+}
+
+/* Shrink navbar and elements on small mobile viewports */
+@media (max-width: 600px) {
+	.nav-wrapper {
+		bottom: 8px !important;
+	}
+
+	nav .btn-group {
+		gap: 0.25rem !important;
+		padding: 4px !important;
+	}
+
+	.nav-wrapper nav svg.pointer {
+		width: 80px !important;
+		height: auto !important;
+	}
+
+	.nav-wrapper button,
+	nav .transparent-btn {
+		padding: 0.35rem 0.6rem !important;
+		gap: 0.25rem !important;
+		font-size: 11px !important;
+	}
+
+	.nav-wrapper button svg {
+		width: 12px !important;
+		height: 12px !important;
+	}
+}
