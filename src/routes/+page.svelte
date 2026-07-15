@@ -56,6 +56,29 @@
 		}
 
 		localStorage.getItem('instructions-view-count') == 4 && instructionPano.set(false);
+
+		const video = document.querySelector('.intro-video');
+		if (video) {
+			// Attempt to autoplay with sound (unmuted)
+			video.muted = false;
+			video.play().catch((err) => {
+				console.log('Unmuted autoplay blocked, falling back to muted playback:', err);
+				video.muted = true;
+				video.play().catch((e) => console.error('Video playback failed completely:', e));
+			});
+		}
+
+		// Unmute video on first user interaction to bypass browser autoplay policy
+		const unmuteVideo = () => {
+			if (video) {
+				video.muted = false;
+				video.play().catch(err => console.log('Audio playback permission error:', err));
+			}
+			window.removeEventListener('click', unmuteVideo);
+			window.removeEventListener('touchstart', unmuteVideo);
+		};
+		window.addEventListener('click', unmuteVideo);
+		window.addEventListener('touchstart', unmuteVideo);
 	});
 	setContext('currentUI', currentUI);
 
@@ -131,9 +154,8 @@
 		<div class="z-[2000000002] h-screen w-screen bg-gradient-to-t from-black">
 			<video
 				class="intro-video"
-				src="/video/main-intro.mp4"
+				src="https://assets.vestate.io/webtool/kraheja/kraheja/Logos/output.mp4"
 				autoplay
-				muted
 				loop
 				playsinline
 				style="width: 100vw; height: 100vh; object-fit: cover; position: absolute; left: 0; top: 0; z-index: -1;"
@@ -144,8 +166,17 @@
 				<button
 					id="v-start-btn"
 					on:click={() => {
+						$currentUI = {
+							overview: false,
+							views: true,
+							Exterior: false,
+							interiors: false,
+							amenities: false,
+							highlights: false,
+							vicinity: false
+						};
 						UIPanel.set('loaded');
-						goto('/overview');
+						goto('/views');
 						if (!(window.self !== window.top) && window.innerWidth < 1200) {
 							if (document.body.requestFullscreen) {
 								document.body.requestFullscreen();

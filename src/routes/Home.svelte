@@ -30,26 +30,26 @@
 </script>
 
 <div
-	class={$hotspotName == 'Exterior' && $UIPanel == 'loading'
+	class={(($hotspotName == 'overview' || $hotspotName == 'Exterior') && $UIPanel == 'loading')
 		? 'cloudimage-360  exterior-cloudi z-[1000000]'
-		: $hotspotName == 'Exterior' || $UIPanel == 'sign-up'
+		: ($hotspotName == 'overview' || $hotspotName == 'Exterior') || $UIPanel == 'sign-up'
 			? 'cloudimage-360 exterior-cloudi'
 			: 'cloudimage-360 none'}
-	data-folder="https://framer-assets.vestate.iiclab.com/evara/exterior/"
-	data-filename="360Building_000{'{'}index{'}'}.webp"
+	data-folder="https://assets.vestate.io/webtool/kraheja/kraheja/overview/day/"
+	data-filename="{'{'}index{'}'}.webp"
 	data-amount="24"
 	data-keys="false"
 	data-filters="blur:20"
 	data-drag-speed="400"
 	data-request-responsive-images="true"
 	data-info="false"
-	data-ratio=" 1"
+	data-ratio="1"
 ></div>
 
 {#if $hotspotName == 'ExteriorImg'}
 	<img
 		class="h-screen w-screen"
-		src="https://framer-assets.vestate.iiclab.com/evara/exterior/360Building_00024.webp"
+		src="https://assets.vestate.io/webtool/kraheja/kraheja/overview/day/24.webp"
 		alt="exteriorImg"
 	/>
 	{#if $currentUI.interiors != true}

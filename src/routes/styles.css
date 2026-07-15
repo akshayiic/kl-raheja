@@ -3,7 +3,7 @@
 .hidden {
 	display: none !important;
 }
-/*👉#0f4c5c - primary 
+/*👉#0f5da8 - primary 
 
 primary font - The Seasons
 
@@ -105,7 +105,7 @@ input[type='checkbox'] {
 
 .primary-btn {
 	border-radius: 99rem;
-	background: #0f4c5c !important;
+	background: #0f5da8 !important;
 	box-shadow:
 		-4.15px 4.15px 5.54px 0px #fffef940 inset,
 		4.15px -4.15px 5.54px 0px #00000040 inset;
@@ -125,7 +125,7 @@ input[type='checkbox'] {
 }
 
 .left-title {
-	color: #0f4c5c;
+	color: #0f5da8;
 }
 
 .inner-btn-group {
@@ -163,7 +163,7 @@ input[type='checkbox'] {
 	background-color: transparent;
 	border: 1px dashed transparent !important;
 	color: #fff;
-	background: #0f4c5c;
+	background: #0f5da8;
 }
 
 .transparent-btn {
@@ -187,7 +187,7 @@ input[type='checkbox'] {
 	background-color: transparent;
 	border: 1px dashed transparent !important;
 	color: #fff;
-	background: #0f4c5c;
+	background: #0f5da8;
 }
 
 .transparent-btn:hover {
@@ -198,10 +198,10 @@ input[type='checkbox'] {
 .transparent-btn.active {
 	background-color: #fff;
 	border: 1px dashed transparent;
-	color: #0f4c5c;
+	color: #0f5da8;
 
 	svg {
-		color: #0f4c5c;
+		color: #0f5da8;
 	}
 }
 
@@ -618,7 +618,7 @@ button {
 	margin-inline: auto;
 	width: fit-content;
 	position: static;
-	background: #0f4c5c;
+	background: #0f5da8;
 	padding: 0.6rem;
 	border-radius: 99rem;
 }
