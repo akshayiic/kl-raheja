@@ -26,6 +26,19 @@
 		}
 	}
 	let isIframe = inIframe();
+	let introVideoMuted = true;
+
+	const toggleIntroAudio = (event) => {
+		if (event) event.stopPropagation();
+		const video = document.querySelector('.intro-video');
+		if (video) {
+			video.muted = !video.muted;
+			introVideoMuted = video.muted;
+			if (!video.muted) {
+				video.play().catch((err) => console.log('Audio playback permission error:', err));
+			}
+		}
+	};
 
 	onMount(async () => {
 		function setElementHeight() {
@@ -59,26 +72,10 @@
 
 		const video = document.querySelector('.intro-video');
 		if (video) {
-			// Attempt to autoplay with sound (unmuted)
-			video.muted = false;
-			video.play().catch((err) => {
-				console.log('Unmuted autoplay blocked, falling back to muted playback:', err);
-				video.muted = true;
-				video.play().catch((e) => console.error('Video playback failed completely:', e));
-			});
+			video.muted = true;
+			introVideoMuted = true;
+			video.play().catch((e) => console.error('Video playback failed completely:', e));
 		}
-
-		// Unmute video on first user interaction to bypass browser autoplay policy
-		const unmuteVideo = () => {
-			if (video) {
-				video.muted = false;
-				video.play().catch(err => console.log('Audio playback permission error:', err));
-			}
-			window.removeEventListener('click', unmuteVideo);
-			window.removeEventListener('touchstart', unmuteVideo);
-		};
-		window.addEventListener('click', unmuteVideo);
-		window.addEventListener('touchstart', unmuteVideo);
 	});
 	setContext('currentUI', currentUI);
 
@@ -156,10 +153,31 @@
 				class="intro-video"
 				src="https://assets.vestate.io/webtool/kraheja/kraheja/Logos/output.mp4"
 				autoplay
+				muted
 				loop
 				playsinline
 				style="width: 100vw; height: 100vh; object-fit: cover; position: absolute; left: 0; top: 0; z-index: -1;"
 			></video>
+			<button
+				on:click={toggleIntroAudio}
+				class="fixed top-5 left-5 z-[2000000003] p-3 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center"
+				aria-label={introVideoMuted ? "Unmute audio" : "Mute audio"}
+			>
+				{#if introVideoMuted}
+					<!-- Muted Speaker Icon -->
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+						<line x1="23" y1="9" x2="17" y2="15"></line>
+						<line x1="17" y1="9" x2="23" y2="15"></line>
+					</svg>
+				{:else}
+					<!-- Playing Speaker Icon -->
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+						<path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+					</svg>
+				{/if}
+			</button>
 			<div
 				class="intro center absolute bottom-10 flex w-full flex-col items-center justify-center text-center font-semibold uppercase text-white"
 			>
