@@ -88,11 +88,11 @@
 	const isMainOverview = derived(selectedFloorIndex, ($index) => $index === mainFloorIndex);
 
 	// Hotspot toggle state
-	const hotspotsEnabled = writable(false);
+	const hotspotsEnabled = writable(true);
 
 	// Collapsible sidebars state
 	let floorCollapsed = true;
-	let timeCollapsed = false;
+	let timeCollapsed = true;
 
 	// Track which hotspots have been shown
 	const shownHotspots = new Set();
