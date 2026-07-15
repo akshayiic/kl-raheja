@@ -24,6 +24,23 @@
 	$: isAmenitiesMinimized.set(isSafariMobile ? true : false);
 
 	let vicinityImg = getContext('vicinityImg');
+	let isLoaded = true;
+	let activeSrc = '';
+	let prevSrc = '';
+	let imgEl;
+
+	$: displaySrc = $vicinityImg != '-' ? 'https://assets.vestate.io/webtool/kraheja/kraheja/vicinities/' + $vicinityImg : '';
+	$: {
+		if (displaySrc && displaySrc !== activeSrc) {
+			prevSrc = activeSrc;
+			activeSrc = displaySrc;
+			isLoaded = false;
+		}
+	}
+	$: if (imgEl && imgEl.complete && imgEl.naturalWidth > 0) {
+		isLoaded = true;
+	}
+
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	onMount(async () => {
@@ -235,11 +252,23 @@
 	></div> -->
 
 	{#if $vicinityImg != '-'}
-		<img
-			src={'https://assets.vestate.io/webtool/kraheja/kraheja/vicinities/' + $vicinityImg}
-			use:onload
-			alt="Vicinity"
-			class="absolute top-0 h-full w-full"
-		/>
+		<div class="absolute top-0 left-0 w-full h-full z-50 bg-black overflow-hidden">
+			{#if !isLoaded && prevSrc}
+				<img
+					src={prevSrc}
+					alt="Vicinity Previous"
+					class="absolute top-0 left-0 h-full w-full object-cover filter blur-[8px] scale-105 pointer-events-none"
+				/>
+			{/if}
+
+			<img
+				bind:this={imgEl}
+				src={activeSrc}
+				alt="Vicinity"
+				class="absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 {isLoaded ? 'opacity-100' : 'opacity-0'}"
+				on:load={() => { isLoaded = true; }}
+				on:error={() => { isLoaded = true; }}
+			/>
+		</div>
 	{/if}
 </div>

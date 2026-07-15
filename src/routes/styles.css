@@ -16,8 +16,7 @@ secondary fonts -DM Sans👈*/
 }
 
 * {
-	/* font-family: 'DM Sans'; */
-	font-family: 'The Seasons';
+	font-family: 'DM Sans', sans-serif;
 }
 
 #pano {
@@ -980,5 +979,33 @@ button {
 	.nav-wrapper button svg {
 		width: 12px !important;
 		height: 12px !important;
+	}
+}
+
+.vretail-watermark {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	z-index: 9999;
+	width: 250px;
+	height: auto;
+	pointer-events: none;
+	opacity: 0.85;
+	transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+	.vretail-watermark {
+		bottom: 15px;
+		right: 15px;
+		width: 90px;
+	}
+}
+
+@media (max-width: 480px) {
+	.vretail-watermark {
+		bottom: 10px;
+		right: 10px;
+		width: 80px;
 	}
 }

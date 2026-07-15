@@ -149,7 +149,7 @@
 <!-- <img src={lntLogo} alt="" id="lntlogo" class="absolute left-5 top-5 z-[2000000002]" /> -->
 {#if $UIPanel == 'loading'}
 	<div
-		class="fixed left-0 top-0 z-[2000000000] h-screen w-screen rounded bg-cover bg-center bg-no-repeat"
+		class="fixed left-0 top-0 z-[2000000000] h-screen w-screen rounded bg-black bg-cover bg-center bg-no-repeat"
 	>
 		<div class="z-[2000000002] h-screen w-screen bg-gradient-to-t from-black">
 			<video
@@ -175,7 +175,6 @@
 							highlights: false,
 							vicinity: false
 						};
-						UIPanel.set('loaded');
 						goto('/views');
 						if (!(window.self !== window.top) && window.innerWidth < 1200) {
 							if (document.body.requestFullscreen) {

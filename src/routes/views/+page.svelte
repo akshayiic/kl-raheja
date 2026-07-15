@@ -114,6 +114,7 @@
 
 		// Load main overview by default
 		loadScene('morning', 10);
+		UIPanel.set('loaded');
 	});
 
 	// Time of day states
@@ -525,12 +526,12 @@
 	}
 
 	.time-btn {
-		padding: 10px 16px;
+		padding: 6px 16px;
 		border: 1px solid rgba(255, 255, 255, 0.3);
 		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.1);
 		color: white;
-		font-size: 14px;
+		font-size: 16px;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.3s ease;
@@ -557,7 +558,7 @@
 		z-index: 1000;
 		background: rgba(15, 93, 168, 0.9);
 		border-radius: 12px;
-		padding: 16px;
+		padding: 10px;
 		min-width: 160px;
 		backdrop-filter: blur(10px);
 		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -584,7 +585,7 @@
 		border: none;
 		background: none;
 		padding: 0 0 8px 0;
-		margin-bottom: 12px;
+		margin-bottom: 6px;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 		text-align: left;
 		transition: all 0.3s ease;

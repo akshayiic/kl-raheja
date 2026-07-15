@@ -6,6 +6,7 @@
 	import '../app.pcss';
 	import './styles.css';
 	import rahejaLogo from '$lib/images/raheja_logo.png';
+	import poweredLogo from '$lib/images/powered.png';
 
 	const navSlide = writable();
 	setContext('navSlide', navSlide);
@@ -123,7 +124,8 @@
 </script>
 
 <div class="app">
-	<img src={rahejaLogo} alt="Raheja Logo" class="raheja-logo" />
+	<img src={rahejaLogo} alt="Raheja Logo" class="raheja-logo" class:hidden={$UIPanel == 'loading'} />
+	<img src={poweredLogo} alt="Powered by Vretail" class="vretail-watermark" class:hidden={$UIPanel == 'loading'} />
 
 	<!-- Device Rotation Overlay for Portrait Mobile Screens -->
 	<div class="rotate-overlay">
@@ -142,7 +144,7 @@
 
 	<slot />
 
-	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')}>
+	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')} class:hidden={$UIPanel == 'loading'}>
 		<nav class="z-[999]">
 			{#if $UIPanel == 'instructions-nav'}
 				<div class="tooltip-text relative">
