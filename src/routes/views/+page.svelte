@@ -370,8 +370,28 @@
 				<button
 					class="time-btn {$selectedTime === time ? 'active' : ''}"
 					on:click={() => selectTimeOfDay(time)}
+					title={capitalize(time)}
 				>
-					{capitalize(time)}
+					{#if time === 'morning'}
+						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="4"/>
+							<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+						</svg>
+					{:else if time === 'afternoon'}
+						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="5"/>
+							<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M5.64 18.36l-1.42 1.42M19.78 4.22l-1.42 1.42"/>
+						</svg>
+					{:else if time === 'evening'}
+						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.93 4.93l4.24 4.24M19.07 4.93l-4.24 4.24M2 18h20"/>
+						</svg>
+					{:else if time === 'night'}
+						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+						</svg>
+					{/if}
+					<span class="time-btn-text">{capitalize(time)}</span>
 				</button>
 			{/each}
 		</div>
@@ -537,6 +557,19 @@
 		transition: all 0.3s ease;
 		text-transform: capitalize;
 		white-space: nowrap;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+	}
+
+	.time-icon {
+		display: inline-block;
+		flex-shrink: 0;
+	}
+
+	.time-btn-text {
+		display: inline-block;
 	}
 
 	.time-btn:hover {
@@ -563,13 +596,14 @@
 		backdrop-filter: blur(10px);
 		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 		max-height: 70vh;
-		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.floor-selector.collapsed {
 		max-height: 50px;
-		overflow: hidden;
 	}
 
 	.floor-selector-header {
@@ -627,6 +661,7 @@
 		gap: 6px;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		max-height: 500px;
+		overflow-y: auto;
 		opacity: 1;
 	}
 
@@ -634,6 +669,7 @@
 		max-height: 0;
 		opacity: 0;
 		pointer-events: none;
+		overflow-y: hidden;
 	}
 
 	.floor-btn {
@@ -780,7 +816,7 @@
 			bottom: 80px;
 			left: 20px;
 			min-width: 140px;
-			max-height: 35vh;
+			max-height: 58vh;
 		}
 
 		.hotspot-toggle {
@@ -835,19 +871,39 @@
 	}
 
 	.time-selector::-webkit-scrollbar-track,
-	.floor-selector::-webkit-scrollbar-track {
+	.time-selector::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.time-selector::-webkit-scrollbar-track {
 		background: rgba(255, 255, 255, 0.1);
 		border-radius: 3px;
 	}
 
-	.time-selector::-webkit-scrollbar-thumb,
-	.floor-selector::-webkit-scrollbar-thumb {
+	.time-selector::-webkit-scrollbar-thumb {
 		background: rgba(255, 255, 255, 0.3);
 		border-radius: 3px;
 	}
 
-	.time-selector::-webkit-scrollbar-thumb:hover,
-	.floor-selector::-webkit-scrollbar-thumb:hover {
+	.time-selector::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.5);
+	}
+
+	.floor-buttons::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.floor-buttons::-webkit-scrollbar-track {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
+	}
+
+	.floor-buttons::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.3);
+		border-radius: 3px;
+	}
+
+	.floor-buttons::-webkit-scrollbar-thumb:hover {
 		background: rgba(255, 255, 255, 0.5);
 	}
 
@@ -1003,6 +1059,22 @@
 		:global(.overview-hotspot .overview-hotspot-label) {
 			font-size: 11px !important;
 			padding: 6px 12px !important;
+		}
+	}
+
+	@media (max-width: 950px) {
+		.time-btn-text {
+			display: none !important;
+		}
+		.time-btn {
+			padding: 0 !important;
+			width: 32px !important;
+			height: 32px !important;
+			display: inline-flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			border-radius: 8px !important;
+			gap: 0 !important;
 		}
 	}
 </style>

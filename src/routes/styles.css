@@ -629,8 +629,6 @@ button {
 	.active-drop-wrapper {
 		transform: translate(-50%, 4.5rem) !important;
 	}
-}
-@media (max-width: 1020px) {
 	.left-panel--header {
 		svg {
 			width: 22px;
@@ -638,7 +636,7 @@ button {
 		}
 	}
 	.inner-btn-group {
-		max-height: 8rem;
+		max-height: 55vh;
 	}
 	.left-panel-wrapper {
 		bottom: 8rem;
@@ -677,44 +675,11 @@ button {
 	}
 }
 
-@media (max-width: 1020px) {
-	.left-panel--header {
-		svg {
-			width: 22px;
-			height: auto;
-		}
-	}
-	.inner-btn-group {
-		max-height: 8rem;
-	}
-	.left-panel-wrapper {
-		bottom: 8rem;
-	}
-
-	.nav-wrapper {
-		position: absolute;
-		bottom: 14px;
-		width: 100%;
-		z-index: 9999;
-	}
-	button,
-	.inner-btn-group,
-	.left-title {
-		font-size: 0.765rem;
-	}
-
-	.nav-wrapper button {
-		padding: 0.5rem !important;
-	}
-	.ghost-input {
-		padding: 0.5rem;
-	}
-}
 @media (max-width: 999px) {
 	.left-panel-wrapper {
 		bottom: 5rem;
 		.inner-btn-group {
-			max-height: 6rem;
+			max-height: 40vh;
 		}
 	}
 }
@@ -796,7 +761,7 @@ button {
 		height: 70px;
 	}
 	img[alt='powered by vretail'] {
-		width: 120px;
+		width: 70px;
 		height: auto;
 	}
 }
@@ -816,6 +781,16 @@ button {
 	width: auto;
 	object-fit: contain;
 	transition: all 0.3s ease;
+}
+
+@media (max-width: 950px) and (orientation: landscape) {
+	.raheja-logo {
+		top: 10px;
+		right: 10px;
+		padding: 2px 4px;
+		max-height: 60px !important;
+		border-radius: 6px;
+	}
 }
 
 @media (max-width: 768px) {
@@ -994,11 +969,11 @@ button {
 	transition: all 0.3s ease;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
 	.vretail-watermark {
 		bottom: 15px;
 		right: 15px;
-		width: 90px;
+		width: 160px;
 	}
 }
 
@@ -1006,6 +981,44 @@ button {
 	.vretail-watermark {
 		bottom: 10px;
 		right: 10px;
-		width: 80px;
+		width: 60px;
+	}
+}
+
+/* Mobile styles for vicinity tab header and accordion dropdown headers */
+@media (max-width: 900px) {
+	.left-panel {
+		padding: 0.35rem !important;
+	}
+	.left-panel--header {
+		padding: 2px 4px !important;
+		gap: 1rem !important;
+	}
+	.left-panel--header .left-title {
+		font-size: 0.7rem !important;
+	}
+	.left-panel--header svg {
+		width: 14px !important;
+		height: 14px !important;
+		margin-right: 4px !important;
+	}
+	.left-panel--header .close-btn img {
+		width: 14px !important;
+		height: 14px !important;
+	}
+
+	/* Accordion triggers (dropdown headers) */
+	.inner-btn-group [id$="-level"] {
+		padding-top: 6px !important;
+		padding-bottom: 6px !important;
+		font-size: 0.72rem !important;
+	}
+	.inner-btn-group [id$="-level"] svg {
+		width: 10px !important;
+		height: 10px !important;
+	}
+	.inner-modal-btn {
+		padding: 0.25rem 0.5rem !important;
+		font-size: 0.68rem !important;
 	}
 }
