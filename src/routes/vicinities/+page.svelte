@@ -66,12 +66,19 @@
 	let activeFolder = '';
 	let activeCategoryFolder = '';
 	let activeLabel = '';
+	let activeDistance = '';
 	let activeVideo = '';
+	let cardSlideIndex = 1;
+
+	$: if ($vicinityImg) {
+		cardSlideIndex = 1;
+	}
 
 	$: {
 		activeFolder = '';
 		activeCategoryFolder = '';
 		activeLabel = '';
+		activeDistance = '';
 		activeVideo = '';
 
 		for (const cat of vicinityCategories) {
@@ -80,6 +87,7 @@
 				activeFolder = found.folder || '';
 				activeCategoryFolder = cat.folder || '';
 				activeLabel = found.label || '';
+				activeDistance = found.distance || '';
 				if (found.video) {
 					activeVideo = found.video;
 				} else if (found.folder && cat.folder) {
@@ -130,13 +138,13 @@
 			name: 'Connectivity',
 			folder: 'Connectivity',
 			items: [
-				{ id: 'Connectivity/BandraTerminus.webp', label: 'Bandra Terminus', folder: 'Bandra Terminus', subcategory: 'Railway' },
-				{ id: 'Connectivity/BKCMetrostation.webp', label: 'BKC Metro Station', folder: 'BKC Metro station', videoName: 'BKC Metro Station', subcategory: 'Metro' },
-				{ id: 'Connectivity/SantacruzMetroLine.webp', label: 'Santa Cruz Metro Line', folder: 'Santacruz Metro line 3', videoName: 'Santacruz Metro Line 3', subcategory: 'Metro' },
-				{ id: 'Connectivity/CoastalRoad.webp', label: 'Coastal Road', folder: 'Coastal Road', subcategory: 'Roadways' },
-				{ id: 'Connectivity/Versova Bandra Sea Link.webp', label: 'Versova Bandra Sea Link', folder: 'Versova-Bandra sea link', videoName: 'Versova', subcategory: 'Roadways' },
-				{ id: 'Connectivity/WesternExpressHighway.webp', label: 'Western Express Highway', folder: 'Western Express Highway', subcategory: 'Roadways' },
-				{ id: 'Connectivity/WorliSeaLink.webp', label: 'Worli Sea Link', folder: 'Bandra Worli Sea Link', subcategory: 'Roadways' }
+				{ id: 'Connectivity/BandraTerminus.webp', label: 'Bandra Terminus', folder: 'Bandra Terminus', distance: '2.5 KM', subcategory: 'Railway' },
+				{ id: 'Connectivity/BKCMetrostation.webp', label: 'BKC Metro Station', folder: 'BKC Metro station', videoName: 'BKC Metro Station', distance: '1.8 KM', subcategory: 'Metro' },
+				{ id: 'Connectivity/SantacruzMetroLine.webp', label: 'Santa Cruz Metro Line', folder: 'Santacruz Metro line 3', videoName: 'Santacruz Metro Line 3', distance: '2.1 KM', subcategory: 'Metro' },
+				{ id: 'Connectivity/CoastalRoad.webp', label: 'Coastal Road', folder: 'Coastal Road', distance: '4.2 KM', subcategory: 'Roadways' },
+				{ id: 'Connectivity/Versova Bandra Sea Link.webp', label: 'Versova Bandra Sea Link', folder: 'Versova-Bandra sea link', videoName: 'Versova', distance: '3.5 KM', subcategory: 'Roadways' },
+				{ id: 'Connectivity/WesternExpressHighway.webp', label: 'Western Express Highway', folder: 'Western Express Highway', distance: '1.0 KM', subcategory: 'Roadways' },
+				{ id: 'Connectivity/WorliSeaLink.webp', label: 'Worli Sea Link', folder: 'Bandra Worli Sea Link', distance: '3.8 KM', subcategory: 'Roadways' }
 			]
 		},
 		{
@@ -144,16 +152,16 @@
 			name: 'Cafes & Clubs',
 			folder: 'Cafe%20%26%20Clubs',
 			items: [
-				{ id: 'Cafe%20and%20Club/Bastian.webp', label: 'Bastian', video: bastianVid, folder: 'Bastian' },
-				{ id: 'Cafe%20and%20Club/Khar Gymkhana.webp', label: 'Khar Gymkhana', video: kharVid, folder: 'Khar Gymkhana' },
-				{ id: 'Cafe%20and%20Club/MIG.webp', label: 'MIG', video: migVid, folder: 'MIG' },
-				{ id: 'Cafe%20and%20Club/NationalSportsClubofIndia.webp', label: 'National Sports Club of India', video: nsciVid, folder: 'National Sports Club of India' },
-				{ id: 'Cafe%20and%20Club/Otters.webp', label: 'Otters', video: ottersVid, folder: 'Otter_s' },
-				{ id: 'Cafe%20and%20Club/PaliVillageCafé.webp', label: 'Pali Village Café', video: paliVid, folder: 'Pali Village Cafe' },
-				{ id: 'Cafe%20and%20Club/Taj lounges .webp', label: 'Taj Lounges', video: tajVid, folder: 'Taj Lounges' },
-				{ id: 'Cafe%20and%20Club/Toto\'s.webp', label: 'Toto\'s', video: totosVid, folder: 'Toto_s' },
-				{ id: 'Cafe%20and%20Club/Veronicas Pali Hill Cafes.webp', label: 'Veronicas Pali Hill Cafes', video: veronicasVid, folder: 'Veronica_s-Pali Hill Cafes' },
-				{ id: 'Cafe%20and%20Club/WillingdonClub .webp', label: 'Willingdon Club', video: willingdonVid, folder: 'Willingdon club' }
+				{ id: 'Cafe%20and%20Club/Bastian.webp', label: 'Bastian', video: bastianVid, folder: 'Bastian', distance: '1.2 KM' },
+				{ id: 'Cafe%20and%20Club/Khar Gymkhana.webp', label: 'Khar Gymkhana', video: kharVid, folder: 'Khar Gymkhana', distance: '0.8 KM' },
+				{ id: 'Cafe%20and%20Club/MIG.webp', label: 'MIG', video: migVid, folder: 'MIG', distance: '1.5 KM' },
+				{ id: 'Cafe%20and%20Club/NationalSportsClubofIndia.webp', label: 'National Sports Club of India', video: nsciVid, folder: 'National Sports Club of India', distance: '5.0 KM' },
+				{ id: 'Cafe%20and%20Club/Otters.webp', label: 'Otters', video: ottersVid, folder: 'Otter_s', distance: '1.1 KM' },
+				{ id: 'Cafe%20and%20Club/PaliVillageCafé.webp', label: 'Pali Village Café', video: paliVid, folder: 'Pali Village Cafe', distance: '0.9 KM' },
+				{ id: 'Cafe%20and%20Club/Taj lounges .webp', label: 'Taj Lounges', video: tajVid, folder: 'Taj Lounges', distance: '4.5 KM' },
+				{ id: 'Cafe%20and%20Club/Toto\'s.webp', label: 'Toto\'s', video: totosVid, folder: 'Toto_s', distance: '0.7 KM' },
+				{ id: 'Cafe%20and%20Club/Veronicas Pali Hill Cafes.webp', label: 'Veronicas Pali Hill Cafes', video: veronicasVid, folder: 'Veronica_s-Pali Hill Cafes', distance: '0.6 KM' },
+				{ id: 'Cafe%20and%20Club/WillingdonClub .webp', label: 'Willingdon Club', video: willingdonVid, folder: 'Willingdon club', distance: '6.2 KM' }
 			]
 		},
 		{
@@ -161,11 +169,11 @@
 			name: 'Commercial',
 			folder: 'Commercial',
 			items: [
-				{ id: 'Commercial/BKC  .webp', label: 'BKC', folder: 'BKC' },
-				{ id: 'Commercial/JioWorldCentre.webp', label: 'Jio World Centre', folder: 'Jio World Centre' },
-				{ id: 'Commercial/LowerParel.webp', label: 'Lower Parel', folder: 'Lower Parel' },
-				{ id: 'Commercial/NMAC .webp', label: 'NMAC', folder: 'NMAC', videoName: 'NMACC (1)' },
-				{ id: 'Commercial/Worli.webp', label: 'Worli', folder: 'Worli' }
+				{ id: 'Commercial/BKC  .webp', label: 'BKC', folder: 'BKC', distance: '1.8 KM' },
+				{ id: 'Commercial/JioWorldCentre.webp', label: 'Jio World Centre', folder: 'Jio World Centre', distance: '2.0 KM' },
+				{ id: 'Commercial/LowerParel.webp', label: 'Lower Parel', folder: 'Lower Parel', distance: '8.5 KM' },
+				{ id: 'Commercial/NMAC .webp', label: 'NMAC', folder: 'NMAC', videoName: 'NMACC (1)', distance: '2.0 KM' },
+				{ id: 'Commercial/Worli.webp', label: 'Worli', folder: 'Worli', distance: '9.0 KM' }
 			]
 		},
 		{
@@ -173,9 +181,9 @@
 			name: 'Hospitals',
 			folder: 'Hospitals',
 			items: [
-				{ id: 'Hospital/Asian Heart Institute.webp', label: 'Asian Heart Institute', folder: 'Asian Heart Institute' },
-				{ id: 'Hospital/HolyFamily  .webp', label: 'Holy Family', folder: 'Holy Family Hospital' },
-				{ id: 'Hospital/LilavatiHospital.webp', label: 'Lilavati Hospital', folder: 'Lilavati Hospital', videoName: 'Lilavati Hospital & Research Centre' }
+				{ id: 'Hospital/Asian Heart Institute.webp', label: 'Asian Heart Institute', folder: 'Asian Heart Institute', distance: '2.2 KM' },
+				{ id: 'Hospital/HolyFamily  .webp', label: 'Holy Family', folder: 'Holy Family Hospital', distance: '1.6 KM' },
+				{ id: 'Hospital/LilavatiHospital.webp', label: 'Lilavati Hospital', folder: 'Lilavati Hospital', videoName: 'Lilavati Hospital & Research Centre', distance: '1.3 KM' }
 			]
 		},
 		{
@@ -183,10 +191,10 @@
 			name: 'Education Institutes',
 			folder: 'Education%20Institutes',
 			items: [
-				{ id: 'Education/AmericanSchoolofBombay.webp', label: 'American School of Bombay', folder: 'American School of Bombay' },
-				{ id: 'Education/DhirubhaiAmbani.webp', label: 'Dhirubhai Ambani', folder: 'Dhirubhai Ambani International School' },
-				{ id: 'Education/StAndrews .webp', label: 'St. Andrews', folder: 'St. Andrews College', videoName: 'St. Andrew_s College' },
-				{ id: 'Education/StStanislaus.webp', label: 'St. Stanislaus', folder: 'St. Stanislaus International School', videoName: 'St. Stanislaus High School' }
+				{ id: 'Education/AmericanSchoolofBombay.webp', label: 'American School of Bombay', folder: 'American School of Bombay', distance: '2.4 KM' },
+				{ id: 'Education/DhirubhaiAmbani.webp', label: 'Dhirubhai Ambani', folder: 'Dhirubhai Ambani International School', distance: '2.2 KM' },
+				{ id: 'Education/StAndrews .webp', label: 'St. Andrews', folder: 'St. Andrews College', videoName: 'St. Andrew_s College', distance: '1.1 KM' },
+				{ id: 'Education/StStanislaus.webp', label: 'St. Stanislaus', folder: 'St. Stanislaus International School', videoName: 'St. Stanislaus High School', distance: '0.8 KM' }
 			]
 		},
 		{
@@ -194,7 +202,7 @@
 			name: 'Faith & Heritage',
 			folder: 'Faith%20%26%20Heritage',
 			items: [
-				{ id: 'Faith%20And%20Heritage/Mount Mary Basilica.webp', label: 'Mount Mary Basilica', folder: 'Mount Mary', videoName: 'Mount Mary Basilica' }
+				{ id: 'Faith%20And%20Heritage/Mount Mary Basilica.webp', label: 'Mount Mary Basilica', folder: 'Mount Mary', videoName: 'Mount Mary Basilica', distance: '1.7 KM' }
 			]
 		},
 		{
@@ -202,10 +210,10 @@
 			name: 'Retail & Lifestyle',
 			folder: 'Retail%20%26%20Lifestyle',
 			items: [
-				{ id: 'Retail%20And%20Lifestyle/Bandstand.webp', label: 'Bandstand', folder: 'Bandstand' },
-				{ id: 'Retail%20And%20Lifestyle/CarterRoad.webp', label: 'Carter Road', folder: 'Carter Road' },
-				{ id: 'Retail%20And%20Lifestyle/JioWorldDrive.webp', label: 'Jio World Drive', folder: 'Jio World Drive' },
-				{ id: 'Retail%20And%20Lifestyle/LinkingHillRoad .webp', label: 'Linking Hill Road', folder: 'Linking-Hill Road', videoName: 'Linking Hill Road' }
+				{ id: 'Retail%20And%20Lifestyle/Bandstand.webp', label: 'Bandstand', folder: 'Bandstand', distance: '1.4 KM' },
+				{ id: 'Retail%20And%20Lifestyle/CarterRoad.webp', label: 'Carter Road', folder: 'Carter Road', distance: '1.5 KM' },
+				{ id: 'Retail%20And%20Lifestyle/JioWorldDrive.webp', label: 'Jio World Drive', folder: 'Jio World Drive', distance: '2.3 KM' },
+				{ id: 'Retail%20And%20Lifestyle/LinkingHillRoad .webp', label: 'Linking Hill Road', folder: 'Linking-Hill Road', videoName: 'Linking Hill Road', distance: '0.5 KM' }
 			]
 		}
 	];
@@ -338,102 +346,130 @@
 	{/if}
 </div>
 
-<!-- Right-side gallery thumbnails -->
+<!-- Right-side gallery card (preview with dots) -->
 {#if activeFolder && activeCategoryFolder}
-	<div class="fixed right-6 top-1/2 -translate-y-1/2 z-[1000] flex flex-col gap-4 bg-black/40 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl animate-fade-in select-none">
-		<span class="text-[9px] tracking-widest text-[#dead66] uppercase text-center font-semibold mb-1">Gallery</span>
-		{#each [1, 2, 3] as imgNum}
-			{@const imgUrl = `https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${imgNum}.png`}
+	{@const activePreviewUrl = `https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${cardSlideIndex}.png`}
+	<div class="fixed right-6 top-1/2 -translate-y-1/2 z-[1000] w-[345px] bg-[#0c1c28]/70 backdrop-blur-2xl border border-white/10 rounded-[28px] shadow-2xl p-5 select-none animate-fade-in text-left">
+		<!-- Header with Title & Distance & Close Button -->
+		<div class="flex justify-between items-start mb-4">
+			<div class="flex flex-col pr-4">
+				<h3 class="text-white text-[19px] font-semibold tracking-wide leading-tight uppercase font-serif" style="font-family: 'The Seasons', serif;">
+					{activeLabel}
+				</h3>
+				{#if activeDistance}
+					<div class="flex items-center gap-1.5 text-white/50 text-[11px] mt-1.5 font-medium">
+						<!-- Custom direction/road split icon -->
+						<svg class="w-4 h-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+							<line x1="9" y1="3" x2="9" y2="21"></line>
+							<line x1="15" y1="3" x2="15" y2="21"></line>
+							<line x1="3" y1="9" x2="21" y2="9"></line>
+							<line x1="3" y1="15" x2="21" y2="15"></line>
+						</svg>
+						{activeDistance}
+					</div>
+				{/if}
+			</div>
+
+			<!-- Close button -->
 			<button
-				class="group relative w-28 h-20 rounded-xl overflow-hidden border border-white/15 cursor-pointer shadow-md hover:border-[#dead66] transition-all duration-300 transform hover:scale-105 active:scale-95 p-0 bg-transparent"
-				on:click={() => openLightbox(imgNum)}
+				class="text-white/60 hover:text-white cursor-pointer transition-colors p-1.5 rounded-full hover:bg-white/10 border border-white/10 flex items-center justify-center w-8 h-8"
+				on:click={() => vicinityImg.set('-')}
 				type="button"
 			>
-				<img
-					src={imgUrl}
-					alt="Gallery preview"
-					class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-				/>
-				<div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300"></div>
+				<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
 			</button>
-		{/each}
+		</div>
+
+		<!-- Image Container with dots overlay -->
+		<div class="relative w-full h-[190px] rounded-[18px] overflow-hidden border border-white/10 group cursor-pointer shadow-lg">
+			<!-- Image click opens lightbox -->
+			<div class="w-full h-full" on:click={() => openLightbox(cardSlideIndex)}>
+				<img
+					src={activePreviewUrl}
+					alt={activeLabel}
+					class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+				/>
+				<div class="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors"></div>
+			</div>
+
+			<!-- Indicator dots centered at the bottom of the image -->
+			<div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2.5 z-10" on:click|stopPropagation>
+				{#each [1, 2, 3] as imgNum}
+					<button
+						class="w-2 h-2 rounded-full transition-all duration-300 p-0 cursor-pointer {cardSlideIndex === imgNum ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/70'}"
+						on:click={() => cardSlideIndex = imgNum}
+						type="button"
+						aria-label={`Slide ${imgNum}`}
+					></button>
+				{/each}
+			</div>
+		</div>
 	</div>
 {/if}
 
 <!-- Center Lightbox Overlay -->
 {#if lightboxOpen && activeFolder && activeCategoryFolder}
-	<div class="fixed inset-0 bg-black/85 backdrop-blur-md z-[10000] flex items-center justify-center animate-fade-in" on:click={closeLightbox}>
-		<div class="bg-black/80 border border-white/15 p-6 rounded-3xl max-w-4xl w-[90%] max-h-[85vh] flex flex-col relative shadow-2xl" on:click|stopPropagation>
-			<!-- Close button -->
+	<div class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[10000] flex flex-col items-center justify-center animate-fade-in" on:click={closeLightbox}>
+		
+		<!-- Viewport close button (top right) -->
+		<button
+			class="absolute top-6 right-6 text-white/50 hover:text-white cursor-pointer transition-colors p-2.5 rounded-full hover:bg-white/10 border border-white/10 flex items-center justify-center w-10 h-10 shadow-lg"
+			on:click={closeLightbox}
+			type="button"
+		>
+			<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+
+		<!-- Main Image Container -->
+		<div 
+			class="relative max-w-5xl w-[85vw] h-[65vh] rounded-[24px] overflow-hidden border border-white/10 bg-black/20 shadow-2xl flex items-center justify-center"
+			on:click|stopPropagation
+		>
+			<img
+				src={`https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${lightboxIndex}.png`}
+				alt={`${activeLabel} Gallery`}
+				class="w-full h-full object-cover select-none"
+			/>
+		</div>
+
+		<!-- Navigation Pill below the Image -->
+		<div 
+			class="flex items-center gap-6 mt-6 select-none bg-black/40 backdrop-blur-md px-5 py-2 rounded-full border border-white/10 shadow-lg"
+			on:click|stopPropagation
+		>
+			<!-- Prev Button -->
 			<button
-				class="absolute top-5 right-5 text-white/50 hover:text-white cursor-pointer transition-colors p-2 rounded-full hover:bg-white/10"
-				on:click={closeLightbox}
+				class="text-white/50 hover:text-white cursor-pointer transition-all p-1 rounded-full hover:bg-white/10 flex items-center justify-center w-8 h-8"
+				on:click={prevImage}
 				type="button"
 			>
-				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="18" y1="6" x2="6" y2="18"></line>
-					<line x1="6" y1="6" x2="18" y2="18"></line>
+				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="15 18 9 12 15 6"></polyline>
 				</svg>
 			</button>
 
-			<!-- Title -->
-			<div class="text-center mb-4">
-				<h3 class="text-white text-xl font-semibold tracking-wider uppercase font-serif" style="font-family: 'The Seasons', serif;">
-					{activeLabel}
-				</h3>
-				<p class="text-white/40 text-xs tracking-widest uppercase mt-1">Image {lightboxIndex} of 3</p>
-			</div>
+			<!-- Page count text -->
+			<span class="text-white/80 text-xs font-semibold tracking-widest font-mono">
+				{lightboxIndex} / 3
+			</span>
 
-			<!-- Main Image & Navigation -->
-			<div class="flex-1 min-h-0 flex items-center justify-between gap-4 py-2">
-				<!-- Left Arrow -->
-				<button
-					class="text-white/50 hover:text-white cursor-pointer transition-all p-3 rounded-full hover:bg-white/10"
-					on:click={prevImage}
-					type="button"
-				>
-					<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="15 18 9 12 15 6"></polyline>
-					</svg>
-				</button>
-
-				<!-- Image -->
-				<div class="flex-1 h-[50vh] flex items-center justify-center overflow-hidden rounded-xl bg-black/30 border border-white/5">
-					<img
-						src={`https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${lightboxIndex}.png`}
-						alt={`${activeLabel} Gallery`}
-						class="max-h-full max-w-full object-contain select-none"
-					/>
-				</div>
-
-				<!-- Right Arrow -->
-				<button
-					class="text-white/50 hover:text-white cursor-pointer transition-all p-3 rounded-full hover:bg-white/10"
-					on:click={nextImage}
-					type="button"
-				>
-					<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="9 18 15 12 9 6"></polyline>
-					</svg>
-				</button>
-			</div>
-
-			<!-- Mini selector thumbnails below -->
-			<div class="flex justify-center gap-3 mt-6">
-				{#each [1, 2, 3] as imgNum}
-					<button
-						class="w-20 h-14 rounded-lg overflow-hidden border transition-all duration-300 p-0 bg-transparent cursor-pointer {lightboxIndex === imgNum ? 'border-[#dead66] scale-105 shadow-md' : 'border-white/10 hover:border-white/40 opacity-60 hover:opacity-100'}"
-						on:click={() => lightboxIndex = imgNum}
-						type="button"
-					>
-						<img
-							src={`https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${imgNum}.png`}
-							alt="Gallery nav thumbnail"
-							class="w-full h-full object-cover"
-						/>
-					</button>
-				{/each}
-			</div>
+			<!-- Next Button -->
+			<button
+				class="text-white/50 hover:text-white cursor-pointer transition-all p-1 rounded-full hover:bg-white/10 flex items-center justify-center w-8 h-8"
+				on:click={nextImage}
+				type="button"
+			>
+				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="9 18 15 12 9 6"></polyline>
+				</svg>
+			</button>
 		</div>
 	</div>
 {/if}

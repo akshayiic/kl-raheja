@@ -745,7 +745,7 @@
 		display: flex;
 		align-items: center;
 		gap: 1.5rem;
-		padding-left: 2.5rem;
+		padding-left: 2rem;
 		padding-right: 1.5rem;
 		padding-top: 1.5rem;
 		padding-bottom: 1.5rem;

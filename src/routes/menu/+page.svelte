@@ -12,6 +12,9 @@
 	let card2W = $state(420);
 	let card2H = $state(180);
 
+	import views1Video from '$lib/videos/views1.mp4';
+	import vicinityVideo from '$lib/videos/vicinity.mp4';
+
 	onMount(() => {
 		$UIPanel = 'loaded';
 		$currentUI = {
@@ -55,15 +58,25 @@
 <div class="menu-container fixed inset-0 w-screen h-screen bg-black overflow-hidden select-none">
 	<!-- Settled Parallax Background Building -->
 	<div class="fixed inset-0 pointer-events-none flex items-center justify-center" style="z-index: 1;">
-		<img class="w-full h-full object-cover scale-110" src="/building.png" alt="Building background" />
+		<img class="w-full h-full object-cover scale-110 -translate-y-10" src="/building.png" alt="Building background" />
 	</div>
+
+	<!-- Subtle progressive gradient blur columns behind side items -->
+	<div 
+		class="fixed left-0 top-0 w-[40vw] h-screen backdrop-blur-[6px] bg-black/5 pointer-events-none z-[5]"
+		style="mask-image: linear-gradient(to right, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 60%, transparent 100%);"
+	></div>
+	<div 
+		class="fixed right-0 top-0 w-[40vw] h-screen backdrop-blur-[6px] bg-black/5 pointer-events-none z-[5]"
+		style="mask-image: linear-gradient(to left, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to left, black 60%, transparent 100%);"
+	></div>
 
 	<!-- Bottom Dark Overlay Gradient -->
 	<div class="fixed bottom-0 left-0 w-full h-[20rem] bg-gradient-to-t z-10 from-black/90 via-black/45 to-transparent pointer-events-none"></div>
 
 	<!-- Navigation UI Description Overlay -->
-	<div class="fixed bottom-12 left-12 max-w-[800px] z-[25] flex flex-col gap-2 pointer-events-auto text-left animate-fade-in">
-		<p class="text-white/80 text-xs md:text-sm font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
+	<div class="fixed bottom-6 left-12 max-w-[720px] z-[25] flex flex-col gap-2 pointer-events-auto text-left animate-fade-in">
+		<p class="text-white/80 text-xs md:text-lg font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
 			In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
 		</p>
 	</div>
@@ -99,7 +112,7 @@
 				</svg>
 
 				<!-- Text section -->
-				<div class="flex flex-col flex-1 text-left relative z-10 pr-[48%]">
+				<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
 					<h2 class="text-xl tracking-[0.15em] text-white mb-1.5 font-semibold uppercase" style="font-family: 'The Seasons', serif;">
 						VICINITY
 					</h2>
@@ -121,13 +134,16 @@
 					</button>
 				</div>
 				
-				<!-- Thumbnail Image -->
+				<!-- Thumbnail Video -->
 				<div class="thumbnail-cutout z-10">
-					<img 
+					<video 
 						class="w-full h-full object-cover pointer-events-none" 
-						src="/vicinity-thumbnail.png" 
-						alt="Vicinity" 
-					/>
+						src={vicinityVideo} 
+						autoplay 
+						loop 
+						muted 
+						playsinline
+					></video>
 				</div>
 			</div>
 
@@ -146,7 +162,7 @@
 				</svg>
 
 				<!-- Text section -->
-				<div class="flex flex-col flex-1 text-left relative z-10 pr-[48%]">
+				<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
 					<h2 class="text-xl tracking-[0.15em] text-white mb-1.5 font-semibold uppercase" style="font-family: 'The Seasons', serif;">
 						VIEWS
 					</h2>
@@ -168,13 +184,16 @@
 					</button>
 				</div>
 				
-				<!-- Thumbnail Image -->
+				<!-- Thumbnail Video -->
 				<div class="thumbnail-cutout z-10">
-					<img 
+					<video 
 						class="w-full h-full object-cover pointer-events-none" 
-						src="/views-thumbnail.png" 
-						alt="Views" 
-					/>
+						src={views1Video} 
+						autoplay 
+						loop 
+						muted 
+						playsinline
+					></video>
 				</div>
 			</div>
 		</div>
@@ -292,7 +311,7 @@
 	}
 
 	.nav-card.back {
-		transform: scale(0.85) translate3d(24px, -24px, 0);
+		transform: scale(0.94) translate3d(0, -22px, 0);
 		z-index: 10;
 		opacity: 0.35;
 		filter: blur(4px);
@@ -301,16 +320,15 @@
 	/* Concentric Cutout Mask for Thumbnail on Right Side */
 	.thumbnail-cutout {
 		position: absolute;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		width: 45%;
+		top: 14px;
+		bottom: 14px;
+		right: 14px;
+		width: 48%;
 		background: transparent;
-		border-top-right-radius: 2.5rem;
-		border-bottom-right-radius: 2.5rem;
+		border-radius: 2.2rem;
 		overflow: hidden;
-		-webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 48px, black 49px);
-		mask-image: radial-gradient(circle at 100% 100%, transparent 48px, black 49px);
+		-webkit-mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 14px), transparent 48px, black 49px);
+		mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 14px), transparent 48px, black 49px);
 	}
 
 	.thumbnail-cutout img {
@@ -325,10 +343,10 @@
 
 	.indicator-item:not(:first-child)::before {
 		content: "";
-		width: 4rem;
-		height: 1.5px;
-		background: rgba(255, 255, 255, 0.2);
-		margin-right: 1rem;
+		width: 4.5rem;
+		height: 1px;
+		background: rgba(255, 255, 255, 0.35);
+		margin-right: 1.5rem;
 		display: block;
 	}
 
@@ -338,15 +356,16 @@
 		border: 0 !important;
 		padding: 0 !important;
 		user-select: none !important;
-		transition: all 0.5s ease !important;
-		color: rgba(255, 255, 255, 0.3) !important;
-		font-size: 14px !important;
-		font-weight: 300 !important;
+		transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+		color: rgba(255, 255, 255, 0.45) !important;
+		font-size: 32px !important;
+		font-weight: 400 !important;
+		font-family: 'The Seasons', serif;
 	}
 
 	.indicator-btn.active {
 		color: #ffffff !important;
-		font-size: 24px !important;
+		font-size: 64px !important;
 		font-weight: 400 !important;
 	}
 </style>
