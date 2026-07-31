@@ -16,7 +16,9 @@
 	const UIPanel = getContext('UIPanel');
 
 	const instructionPano = writable();
-	$: instructionPano.set(true);
+	$effect(() => {
+		instructionPano.set(true);
+	});
 
 	function inIframe() {
 		try {
@@ -25,8 +27,81 @@
 			return true;
 		}
 	}
-	let isIframe = inIframe();
-	let introVideoMuted = true;
+	let isIframe = $state(inIframe());
+	let introVideoMuted = $state(true);
+	let isTransitioning = $state(false);
+	let showParallax = $state(false);
+	let hasScrolled = $state(false);
+	let foliageSlidOut = $state(false);
+	let foliageSettled = $state(false);
+	let hasScrolledOnce = $state(false);
+
+	$effect(() => {
+		if (hasScrolled) {
+			setTimeout(() => {
+				goto('/menu');
+			}, 3600);
+		}
+	});
+	let touchStartY = 0;
+	let accumulatedDelta = 0;
+	const SCROLL_THRESHOLD = 40;
+
+	function handleWheel(e) {
+		accumulatedDelta += e.deltaY;
+		if (accumulatedDelta > SCROLL_THRESHOLD) {
+			hasScrolled = true;
+			hasScrolledOnce = true;
+			accumulatedDelta = SCROLL_THRESHOLD; // Cap it
+		} else if (accumulatedDelta < -SCROLL_THRESHOLD) {
+			hasScrolled = false;
+			accumulatedDelta = -SCROLL_THRESHOLD; // Cap it
+		}
+	}
+
+	function handleTouchStart(e) {
+		touchStartY = e.touches[0].clientY;
+	}
+
+	function handleTouchMove(e) {
+		const touchEndY = e.touches[0].clientY;
+		const diffY = touchStartY - touchEndY; // positive = swipe up, negative = swipe down
+		if (Math.abs(diffY) > SCROLL_THRESHOLD) {
+			if (diffY > 0) {
+				hasScrolled = true;
+				hasScrolledOnce = true;
+			} else {
+				hasScrolled = false;
+			}
+			touchStartY = touchEndY; // reset anchor to prevent continuous triggering on a single swipe
+		}
+	}
+
+	function handleExploreClick() {
+		if (currentSlide === 1) {
+			$currentUI = {
+				overview: false,
+				views: true,
+				Exterior: false,
+				interiors: false,
+				amenities: false,
+				highlights: false,
+				vicinity: false
+			};
+			goto('/views');
+		} else {
+			$currentUI = {
+				overview: false,
+				views: false,
+				Exterior: false,
+				interiors: false,
+				amenities: false,
+				highlights: false,
+				vicinity: true
+			};
+			goto('/vicinities');
+		}
+	}
 
 	const toggleIntroAudio = (event) => {
 		if (event) event.stopPropagation();
@@ -179,42 +254,59 @@
 				{/if}
 			</button>
 			<div
-				class="intro center absolute bottom-10 flex w-full flex-col items-center justify-center text-center font-semibold uppercase text-white"
+				class="intro center absolute bottom-12 z-[2000000003] flex w-full flex-col items-center justify-center text-center text-white px-6"
 			>
+				<div class="mb-6 flex flex-col items-center">
+					<!-- STEP › INTO -->
+					<div class="flex items-center justify-center gap-3 text-xs md:text-sm font-light tracking-[0.3em] uppercase text-white/90" style="font-family: 'Imprima', sans-serif;">
+						<span>STEP</span>
+						<span class="text-[#c5a880] text-lg font-normal leading-none" style="transform: translateY(-1px);">›</span>
+						<span>INTO</span>
+					</div>
+
+					<!-- K RAHEJA -->
+					<h1 class="text-4xl md:text-6xl tracking-[0.15em] uppercase text-white my-3 font-normal" style="font-family: 'The Seasons', serif;">
+						K RAHEJA
+					</h1>
+
+					<!-- Description -->
+					<p class="max-w-[580px] text-xs md:text-sm font-light text-white/80 leading-relaxed tracking-wider normal-case" style="font-family: 'Imprima', sans-serif;">
+						Discover a location surrounded by South Mumbai's finest landmarks, cultural destinations, and lifestyle experiences, all thoughtfully connected to your everyday life.
+					</p>
+				</div>
+
+				<!-- Get Started Button -->
 				<button
 					id="v-start-btn"
 					on:click={() => {
-						$currentUI = {
-							overview: false,
-							views: true,
-							Exterior: false,
-							interiors: false,
-							amenities: false,
-							highlights: false,
-							vicinity: false
-						};
-						goto('/views');
+						// Request fullscreen immediately under direct user gesture
 						if (!(window.self !== window.top) && window.innerWidth < 1200) {
 							if (document.body.requestFullscreen) {
 								document.body.requestFullscreen();
 							} else if (document.body.webkitRequestFullscreen) {
-								/* Safari */
 								document.body.webkitRequestFullscreen();
 							} else if (document.body.msRequestFullscreen) {
-								/* IE11 */
 								document.body.msRequestFullscreen();
 							}
-						}
+						} 
 
-						console.log('go fullscreen');
+						isTransitioning = true;
+						setTimeout(() => {
+							isTransitioning = false;
+							$UIPanel = 'loaded';
+							showParallax = true;
+							setTimeout(() => {
+								foliageSlidOut = true;
+								setTimeout(() => {
+									foliageSettled = true;
+								}, 3000);
+							}, 50);
+						}, 2000);
 					}}
-					class="bg-all-none !w-fit p-0 cursor-pointer"
+					class="get-started-btn cursor-pointer"
 				>
-					<img id="v-start-img" style="width: 100px;" src="/startbtn.png" alt="Start Tour" />
+					Get Started
 				</button>
-
-				<div class="title text-2xl">virtual tour experience</div>
-				<div class="subtitle">by K Raheja</div>
 			</div>
 		</div>
 	</div>
@@ -348,6 +440,96 @@
 	</div>
 {/if}
 
+{#if isTransitioning}
+	<div
+		class="secondary-loading-screen fixed left-0 top-0 z-[2000000010] h-screen w-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat"
+		style="background-image: url('/blurbg.png');"
+	>
+		<img class="loading-building-img mb-6 max-h-[150px] w-auto" src="Vector.png" alt="" />
+		<div class="loading-text text-xl md:text-2xl font-light tracking-[0.25em] text-[#e5d5be]" style="font-family: 'The Seasons', serif;">
+			LOADING<span class="dot-anim"></span>
+		</div>
+	</div>
+{/if}
+
+{#if showParallax}
+	<div
+		on:wheel={handleWheel}
+		on:touchstart={handleTouchStart}
+		on:touchmove={handleTouchMove}
+		class="parallax-scroll-container fixed left-0 top-0 z-[2000000020] h-screen w-screen bg-black overflow-hidden select-none"
+		class:has-scrolled-once={hasScrolledOnce}
+	>
+		<div class="h-full w-full relative">
+			<!-- Background building image (z-index: 1) -->
+			<div
+				class="fixed inset-0 pointer-events-none flex items-center justify-center"
+				style="transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}; transform: scale({hasScrolled ? 1.1 : 1.0}); z-index: 1;"
+			>
+				<img class="w-full h-full object-cover" src="/building.png" alt="Building background" />
+			</div>
+
+			<!-- Middle aperture mask image (z-index: 2) -->
+			<div
+				class="fixed inset-0 pointer-events-none flex items-center justify-center"
+				style="
+					transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}, opacity {hasScrolled ? '3.5s ease-in-out' : '1.8s ease-out'};
+					transform: scale({hasScrolled ? 7.0 : 0.7});
+					opacity: {hasScrolled ? 0 : 1};
+					z-index: 2;
+				"
+			>
+				<img
+					class="w-full h-full object-cover transition-transform duration-500 scale-150"
+					src="/bg1.png"
+					alt="Aperture mask layer"
+				/>
+			</div>
+
+			<!-- Left side floral PNG (z-index: 3) -->
+			<div
+				class="foliage-container left-foliage {foliageSettled ? 'settled' : ''}"
+				class:scrolled={hasScrolled}
+				class:slid-out={foliageSlidOut && !hasScrolled}
+				style="left: 0;"
+			>
+				<img class="w-full h-full object-cover object-right" src="/leftfull1.png" alt="Floral frame left" />
+			</div>
+
+			<!-- Right side floral PNG (z-index: 3) -->
+			<div
+				class="foliage-container right-foliage {foliageSettled ? 'settled' : ''}"
+				class:scrolled={hasScrolled}
+				class:slid-out={foliageSlidOut && !hasScrolled}
+				style="right: 0;"
+			>
+				<img class="w-full h-full object-cover object-left" src="/rightfull1.png" alt="Floral frame right" />
+			</div>
+
+			<!-- Bottom Dark Overlay Gradient for Scroll Badge -->
+			<div
+				class="fixed bottom-0 left-0 w-full h-[15rem]  bg-gradient-to-t z-10 from-black/85 via-black/40 to-transparent pointer-events-none transition-opacity duration-500"
+				style="opacity: {hasScrolled ? 0 : 1};"
+			></div>
+
+			<!-- Scroll Indicator Badge -->
+			<button
+				on:click={() => hasScrolled = true}
+				class="fixed bottom-4 left-1/2 -translate-x-1/2 brightness-150 cursor-pointer flex flex-col items-center z-10 transition-opacity duration-500 bg-transparent border-0 p-0 outline-none"
+				style="opacity: {hasScrolled ? 0 : 1}; pointer-events: {hasScrolled ? 'none' : 'auto'};"
+			>
+				<img 
+					class="w-[80%] h-[80%] object-cover " 
+					src="/mousewheel.png"
+					alt="Scroll to experience"
+				/>
+			</button>
+
+
+		</div>
+	</div>
+{/if}
+
 <style>
 	button {
 		background-size: 100% 100%;
@@ -355,6 +537,38 @@
 		padding: 1rem 0.5rem;
 		font-size: 1rem;
 		border: 0;
+	}
+
+	.get-started-btn {
+		background-color: rgba(30, 30, 30, 0.45) !important;
+		border: 1.5px solid #c5a880 !important;
+		border-radius: 9999px !important;
+		color: #e5d5be !important;
+		padding: 0.75rem 2.5rem !important;
+		font-size: 1.05rem !important;
+		letter-spacing: 0.12em !important;
+		text-transform: none !important;
+		font-weight: normal !important;
+		transition: all 0.4s ease-in-out !important;
+		cursor: pointer !important;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+		font-family: 'The Seasons', serif !important;
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		height: auto !important;
+		width: auto !important;
+		min-width: 160px !important;
+		animation: none !important;
+	}
+
+	.get-started-btn:hover {
+		background-color: #c5a880 !important;
+		color: #1e1e1e !important;
+		box-shadow: 0 0 25px rgba(197, 168, 128, 0.65) !important;
+		border-color: #c5a880 !important;
+		transform: scale(1.03) !important;
+		animation: none !important;
 	}
 
 	.centered-panel {
@@ -416,5 +630,156 @@
 		100% {
 			transform: rotate(360deg) scale(0.5);
 		}
+	}
+
+	.dot-anim::after {
+		content: '';
+		animation: dots 1.5s steps(4, end) infinite !important;
+	}
+
+	@keyframes dots {
+		0%, 20% { content: ''; }
+		40% { content: '.'; }
+		60% { content: '..'; }
+		80%, 100% { content: '...'; }
+	}
+
+	@keyframes mouse-wheel {
+		0% {
+			transform: translateY(-2px);
+			opacity: 0;
+		}
+		50% {
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(4px);
+			opacity: 0;
+		}
+	}
+	
+	.mouse-wheel-anim {
+		animation: mouse-wheel 1.6s infinite ease-in-out;
+		transform-origin: center;
+	}
+
+	.foliage-container {
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		width: 55vw;
+		z-index: 3;
+		pointer-events: none;
+		transform: translateX(0%);
+	}
+
+	/* Left Foliage States */
+	.left-foliage.slid-out {
+		transform: translateX(-35%);
+		transition: transform 3.0s cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: 0s;
+	}
+
+	.has-scrolled-once .left-foliage.slid-out {
+		transition-delay: 0.8s; /* Wait for mask to return first */
+	}
+
+	.left-foliage.scrolled {
+		transform: translateX(-105%);
+		transition: transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: 0s;
+	}
+
+	/* Right Foliage States */
+	.right-foliage.slid-out {
+		transform: translateX(35%);
+		transition: transform 3.0s cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: 0s;
+	}
+
+	.has-scrolled-once .right-foliage.slid-out {
+		transition-delay: 0.8s; /* Wait for mask to return first */
+	}
+
+	.right-foliage.scrolled {
+		transform: translateX(105%);
+		transition: transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: 0s;
+	}
+
+	/* Initial load state (before slided out) */
+	.foliage-container:not(.slid-out):not(.scrolled) {
+		transform: translateX(0%);
+		transition: transform 3.0s cubic-bezier(0.16, 1, 0.3, 1);
+		transition-delay: 0s;
+	}
+
+	/* Hover States (Settle Phase) */
+	.foliage-container.settled {
+		pointer-events: auto !important;
+	}
+
+	/* .left-foliage.settled:hover {
+		transform: translateX(-31%) scale(1.02) !important;
+		transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+		transition-delay: 0s !important;
+	}
+
+	.right-foliage.settled:hover {
+		transform: translateX(31%) scale(1.02) !important;
+		transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+		transition-delay: 0s !important;
+	} */
+
+	.foliage-container img {
+		transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+	}
+
+	/* Navigation Cards Stack & Design */
+	.nav-card {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+		padding-left: 2.5rem;
+		padding-right: 1.5rem;
+		padding-top: 1.5rem;
+		padding-bottom: 1.5rem;
+		border-radius: 2.5rem;
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+	}
+
+	.nav-card.front {
+		z-index: 20;
+		opacity: 1;
+		transform: translate(0, 0) scale(1);
+		pointer-events: auto;
+	}
+
+	.nav-card.back {
+		z-index: 10;
+		opacity: 0.35;
+		transform: translate(16px, -16px) scale(0.95);
+		pointer-events: none;
+		filter: blur(1.5px);
+	}
+
+	.thumbnail-cutout {
+		position: absolute;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		width: 45%;
+		mask: radial-gradient(circle at 100% 100%, transparent 48px, black 49px);
+		-webkit-mask: radial-gradient(circle at 100% 100%, transparent 48px, black 49px);
+		border-top-left-radius: 2.5rem;
+		border-bottom-left-radius: 2.5rem;
+		border-top-right-radius: 2.5rem;
+		overflow: hidden;
 	}
 </style>

@@ -5,7 +5,7 @@
 	import { writable } from 'svelte/store';
 	import '../app.pcss';
 	import './styles.css';
-	import rahejaLogo from '$lib/images/raheja_logo.png';
+	import rahejaLogo from '$lib/images/rahejanew.png';
 	import poweredLogo from '$lib/images/powered.png';
 
 	const navSlide = writable();
@@ -93,11 +93,25 @@
 				break;
 		}
 	};
+	UIPanel.subscribe((val) => {
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem('rahega_UIPanel', val);
+		}
+	});
+
 	onMount(() => {
+		const savedUIPanel = sessionStorage.getItem('rahega_UIPanel');
+		if (savedUIPanel) {
+			UIPanel.set(savedUIPanel);
+		}
 		switchChecker();
 		console.log('page changed', $page.url);
 		if ($page.url.pathname === '/') {
 			show('overview');
+			UIPanel.set('loading');
+		} else if ($page.url.pathname === '/menu') {
+			show('overview');
+			UIPanel.set('loaded');
 		}
 		if ($page.url.href.includes('brochure')) {
 			show('Brochure');
@@ -144,7 +158,7 @@
 
 	<slot />
 
-	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')} class:hidden={$UIPanel == 'loading'}>
+	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')} class:hidden={$UIPanel == 'loading' || $page.url.pathname == '/views' || $page.url.pathname == '/menu' || $page.url.pathname == '/vicinities'}>
 		<nav class="z-[999]">
 			{#if $UIPanel == 'instructions-nav'}
 				<div class="tooltip-text relative">
@@ -285,6 +299,9 @@
 							vicinity: false
 						};
 						UIPanel.set('loading');
+						if (typeof sessionStorage !== 'undefined') {
+							sessionStorage.clear();
+						}
 						goto('/');
 					}}
 					class={$UIPanel == 'loading' ? 'transparent-btn active' : 'transparent-btn'}

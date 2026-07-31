@@ -3,6 +3,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { getContext } from 'svelte';
 	import { writable, derived } from 'svelte/store';
+    import { goto } from '$app/navigation';
 	let Marzipano;
 
 	const hotspotName = getContext('hotspotName');
@@ -321,6 +322,27 @@
 		return str.charAt(0).toUpperCase() + str.slice(1);
 	}
 
+	function handleFloorWheel(e) {
+		e.preventDefault();
+		// Scroll up (deltaY < 0) goes to higher floor index, scroll down (deltaY > 0) goes to lower floor index
+		const direction = e.deltaY < 0 ? 1 : -1;
+		const nextIndex = $selectedFloorIndex + direction;
+		if (nextIndex >= 0 && nextIndex < floors.length) {
+			selectFloor(nextIndex);
+		}
+	}
+
+	function handleTimeWheel(e) {
+		e.preventDefault();
+		// Scroll down (deltaY > 0) goes to later time of day, scroll up (deltaY < 0) goes to earlier time of day
+		const direction = e.deltaY > 0 ? 1 : -1;
+		const activeTimeIdx = availableTimes.indexOf($selectedTime);
+		const nextIndex = activeTimeIdx + direction;
+		if (nextIndex >= 0 && nextIndex < availableTimes.length) {
+			selectTimeOfDay(availableTimes[nextIndex]);
+		}
+	}
+
 	onDestroy(() => {
 		if (viewer) {
 			viewer = null;
@@ -329,145 +351,188 @@
 </script>
 
 <div class="overview-container">
-	<!-- Time of Day Selector -->
-	<div class="time-selector {timeCollapsed ? 'collapsed' : ''}">
+	<!-- Time of Day Selector (Semi-circular dial on right edge) -->
+	<div class="time-dial {timeCollapsed ? 'collapsed' : ''}" on:wheel={handleTimeWheel}>
+		<!-- Collapse/Expand Arrow -->
 		<button
-			class="time-selector-header"
+			class="dial-toggle-btn right-dial-toggle"
 			on:click={() => (timeCollapsed = !timeCollapsed)}
 			type="button"
 		>
 			<svg
-				width="20"
-				height="20"
-				viewBox="0 0 20 20"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM10 16C6.68629 16 4 13.3137 4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16Z"
-					fill="currentColor"
-				/>
-				<path d="M11 6H9V10H11V6Z" fill="currentColor" />
-				<path d="M11 10H9V14H11V10Z" fill="currentColor" />
-			</svg>
-			<span>Time</span>
-			<svg
-				class="chevron-icon-horizontal {timeCollapsed ? 'collapsed' : ''}"
-				width="16"
-				height="16"
+				class="w-4 h-4 text-white transition-transform duration-300"
+				style="transform: rotate({timeCollapsed ? '180deg' : '0deg'})"
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="2"
+				stroke-width="2.5"
 				stroke-linecap="round"
 				stroke-linejoin="round"
 			>
 				<polyline points="9 18 15 12 9 6"></polyline>
 			</svg>
 		</button>
-		<div class="time-buttons">
-			{#each availableTimes as time}
+
+		<!-- Center text labels for Time Dial -->
+		<div class="dial-center-label right-dial-label">
+			<span class="text-[8px] tracking-widest text-white/40 uppercase">Sun Angle</span>
+			<span class="text-[22px] font-semibold text-white mt-1 uppercase" style="font-family: 'The Seasons', serif;">
+				{$selectedTime}
+			</span>
+		</div>
+
+		<!-- Radial Tick Marks -->
+		{#each Array(20) as _, i}
+			{@const tickAngle = -60 + (i * 120) / 19}
+			{@const tickRad = (tickAngle * Math.PI) / 180}
+			{@const tx = Math.cos(tickRad) * 175}
+			{@const ty = Math.sin(tickRad) * 175}
+			<div 
+				class="dial-tick" 
+				style="right: {tx}px; top: calc(50% + {ty}px); transform: translate(50%, -50%) rotate({-tickAngle}deg);"
+			></div>
+		{/each}
+
+		<!-- Time Buttons along the arc -->
+		<div class="dial-buttons">
+			{#each availableTimes as time, idx}
+				{@const activeTimeIdx = availableTimes.indexOf($selectedTime)}
+				{@const relativeDistance = idx - activeTimeIdx}
+				{@const angle = relativeDistance * 30}
+				{@const rad = (angle * Math.PI) / 180}
+				{@const tx = Math.cos(rad) * 185}
+				{@const ty = Math.sin(rad) * 185}
+				{@const opacity = Math.max(0, 1 - Math.abs(angle) / 75)}
+				{@const visible = Math.abs(angle) <= 75}
 				<button
-					class="time-btn {$selectedTime === time ? 'active' : ''}"
+					class="dial-time-btn {$selectedTime === time ? 'active' : ''}"
+					style="right: {tx}px; top: calc(50% + {ty}px); opacity: {opacity}; pointer-events: {visible ? 'auto' : 'none'};"
 					on:click={() => selectTimeOfDay(time)}
 					title={capitalize(time)}
 				>
 					{#if time === 'morning'}
-						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<svg class="{$selectedTime === time ? 'w-5 h-5' : 'w-4 h-4'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<circle cx="12" cy="12" r="4"/>
 							<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
 						</svg>
 					{:else if time === 'afternoon'}
-						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<svg class="{$selectedTime === time ? 'w-5 h-5' : 'w-4 h-4'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<circle cx="12" cy="12" r="5"/>
 							<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M5.64 18.36l-1.42 1.42M19.78 4.22l-1.42 1.42"/>
 						</svg>
 					{:else if time === 'evening'}
-						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<svg class="{$selectedTime === time ? 'w-5 h-5' : 'w-4 h-4'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.93 4.93l4.24 4.24M19.07 4.93l-4.24 4.24M2 18h20"/>
 						</svg>
-					{:else if time === 'night'}
-						<svg class="time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					{:else}
+						<svg class="{$selectedTime === time ? 'w-5 h-5' : 'w-4 h-4'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
 						</svg>
 					{/if}
-					<span class="time-btn-text">{capitalize(time)}</span>
 				</button>
 			{/each}
 		</div>
 	</div>
 
-	<!-- Floor Selector -->
-	<div class="floor-selector {floorCollapsed ? 'collapsed' : ''}">
+	<!-- Floor Selector (Semi-circular dial on left edge) -->
+	<div class="floor-dial {floorCollapsed ? 'collapsed' : ''}" on:wheel={handleFloorWheel}>
+		<!-- Collapse/Expand Arrow -->
 		<button
-			class="floor-selector-header"
+			class="dial-toggle-btn left-dial-toggle"
 			on:click={() => (floorCollapsed = !floorCollapsed)}
 			type="button"
 		>
-			<div class="header-title">
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 20 20"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						d="M3 3L10 1L17 3V10C17 14.97 13.5 19 10 20C6.5 19 3 14.97 3 10V3Z"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-					<path
-						d="M8 10L10 12L14 8"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-				</svg>
-				<span>Select Floor</span>
-			</div>
 			<svg
-				class="chevron-icon {floorCollapsed ? 'collapsed' : ''}"
-				width="16"
-				height="16"
+				class="w-4 h-4 text-white transition-transform duration-300"
+				style="transform: rotate({floorCollapsed ? '180deg' : '0deg'})"
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="2"
+				stroke-width="2.5"
 				stroke-linecap="round"
 				stroke-linejoin="round"
 			>
-				<polyline points="6 9 12 15 18 9"></polyline>
+				<polyline points="15 18 9 12 15 6"></polyline>
 			</svg>
 		</button>
-		<div class="floor-buttons">
-			{#each reversedFloorsWithIndices as floor}
+
+		<!-- Center text labels -->
+		<div class="dial-center-label">
+			<span class="text-[14px] tracking-widest text-white/40 uppercase">Total Floors</span>
+			<span class="text-3xl font-semibold text-white mt-1" style="font-family: 'The Seasons', serif;">
+				22<span class="text-xs font-normal align-top ml-0.5 text-[#dead66]">th</span>
+			</span>
+		</div>
+
+		<!-- Radial Tick Marks -->
+		{#each Array(32) as _, i}
+			{@const tickAngle = -72 + (i * 144) / 31}
+			{@const tickRad = (tickAngle * Math.PI) / 180}
+			{@const tx = Math.cos(tickRad) * 175}
+			{@const ty = Math.sin(tickRad) * 175}
+			<div 
+				class="dial-tick" 
+				style="left: {tx}px; top: calc(50% + {ty}px); transform: translate(-50%, -50%) rotate({tickAngle}deg);"
+			></div>
+		{/each}
+
+		<!-- Floor Buttons along the arc -->
+		<div class="dial-buttons">
+			{#each reversedFloorsWithIndices as floor, idx}
+				{@const activeFloorIdx = reversedFloorsWithIndices.findIndex(f => f.originalIndex === $selectedFloorIndex)}
+				{@const relativeDistance = activeFloorIdx - idx}
+				{@const angle = relativeDistance * 24}
+				{@const rad = (angle * Math.PI) / 180}
+				{@const fx = Math.cos(rad) * 175}
+				{@const fy = Math.sin(rad) * 175}
+				{@const opacity = Math.max(0, 1 - Math.abs(angle) / 75)}
+				{@const visible = Math.abs(angle) <= 75}
+				{@const floorNum = floor.name.match(/\d+/)[0]}
 				<button
-					class="floor-btn {$selectedFloorIndex === floor.originalIndex ? 'active' : ''}"
+					class="dial-floor-btn {$selectedFloorIndex === floor.originalIndex ? 'active' : ''}"
+					style="left: {fx}px; top: calc(50% + {fy}px); opacity: {opacity}; pointer-events: {visible ? 'auto' : 'none'};"
 					on:click={() => selectFloor(floor.originalIndex)}
 				>
-					{floor.name}
+					{floorNum}
 				</button>
 			{/each}
 		</div>
 	</div>
 
-	<!-- Hotspot Toggle -->
+	<!-- Hotspot Toggle Pill -->
 	{#if $isMainOverview && $selectedTime === 'morning'}
-		<div class="hotspot-toggle">
-			<span class="toggle-label">Info Hotspots</span>
+		<div class="hotspot-toggle-pill animate-fade-in">
+			<span class="toggle-pill-label">Info Hotspots</span>
 			<button
-				class="toggle-switch {$hotspotsEnabled ? 'on' : 'off'}"
+				class="toggle-pill-btn {$hotspotsEnabled ? 'active' : ''}"
 				on:click={toggleHotspots}
 				aria-label={$hotspotsEnabled ? 'Turn off hotspots' : 'Turn on hotspots'}
+				type="button"
 			>
-				<div class="toggle-slider"></div>
+				<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"></circle>
+					<line x1="12" y1="16" x2="12" y2="12"></line>
+					<line x1="12" y1="8" x2="12.01" y2="8"></line>
+				</svg>
 			</button>
 		</div>
 	{/if}
+
+	<!-- Go Back Button at bottom-left corner -->
+	<button
+		class="go-back-btn animate-fade-in"
+		on:click={() => {
+			$currentUI.views = false;
+			goto('/menu');
+		}}
+		type="button"
+	>
+		<svg class="w-3.5 h-3.5 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+			<line x1="19" y1="12" x2="5" y2="12"></line>
+			<polyline points="12 19 5 12 12 5"></polyline>
+		</svg>
+		Go Back
+	</button>
 
 	<!-- Marzipano Viewer -->
 	<div id="pano" class="pano-viewer"></div>
@@ -488,268 +553,283 @@
 		height: 100%;
 	}
 
-	/* Time of Day Selector */
-	.time-selector {
+	/* Semi-circular dials layout */
+	.floor-dial {
 		position: fixed;
-		bottom: 20px;
-		left: 20px;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 220px;
+		height: 440px;
+		border-radius: 0 220px 220px 0;
+		background: rgba(18, 18, 18, 0.55);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-left: none;
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 		z-index: 1000;
-		background: rgba(15, 93, 168, 0.9);
-		border-radius: 12px;
-		padding: 10px 16px;
+		transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.floor-dial.collapsed {
+		transform: translate(-200px, -50%);
+	}
+
+	.time-dial {
+		position: fixed;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 220px;
+		height: 440px;
+		border-radius: 220px 0 0 220px;
+		background: rgba(18, 18, 18, 0.55);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-right: none;
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+		z-index: 1000;
+		transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.time-dial.collapsed {
+		transform: translate(175px, -50%);
+	}
+
+	/* Toggle buttons styling */
+	.dial-toggle-btn {
+		position: absolute;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		border: 1.2px solid rgba(255, 255, 255, 0.15);
+		background: rgba(30, 30, 30, 0.45);
 		backdrop-filter: blur(10px);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 		display: flex;
-		flex-direction: row;
-		align-items: center;
-		gap: 16px;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.time-selector-header {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		color: white;
-		font-weight: 600;
-		cursor: pointer;
-		user-select: none;
-		border: none;
-		background: none;
-		padding: 0 12px 0 0;
-		margin: 0;
-		border-right: 1px solid rgba(255, 255, 255, 0.2);
-		text-align: left;
-		transition: all 0.3s ease;
-	}
-
-	.time-selector.collapsed .time-selector-header {
-		border-right-color: transparent;
-		padding-right: 0;
-	}
-
-	.time-buttons {
-		display: flex;
-		flex-direction: row;
-		gap: 8px;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		max-width: 500px;
-		opacity: 1;
-		overflow: hidden;
-	}
-
-	.time-selector.collapsed .time-buttons {
-		max-width: 0;
-		opacity: 0;
-		pointer-events: none;
-		gap: 0;
-	}
-
-	.time-btn {
-		padding: 6px 16px;
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.1);
-		color: white;
-		font-size: 16px;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		text-transform: capitalize;
-		white-space: nowrap;
-		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
-	}
-
-	.time-icon {
-		display: inline-block;
-		flex-shrink: 0;
-	}
-
-	.time-btn-text {
-		display: inline-block;
-	}
-
-	.time-btn:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.5);
-	}
-
-	.time-btn.active {
-		background: rgba(255, 212, 0, 0.3);
-		border-color: #ffd400;
-		color: #ffd400;
-	}
-
-	/* Floor Selector */
-	.floor-selector {
-		position: fixed;
-		top: 100px;
-		left: 20px;
-		z-index: 1000;
-		background: rgba(15, 93, 168, 0.9);
-		border-radius: 12px;
-		padding: 10px;
-		min-width: 160px;
-		backdrop-filter: blur(10px);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-		max-height: 70vh;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.floor-selector.collapsed {
-		max-height: 50px;
-	}
-
-	.floor-selector-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 100%;
-		gap: 8px;
-		color: white;
-		font-weight: 600;
 		cursor: pointer;
-		user-select: none;
-		border: none;
-		background: none;
-		padding: 0 0 8px 0;
-		margin-bottom: 6px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-		text-align: left;
-		transition: all 0.3s ease;
+		transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+		z-index: 30;
+		padding: 0;
 	}
 
-	.floor-selector.collapsed .floor-selector-header {
-		border-bottom-color: transparent;
-		margin-bottom: 0;
-		padding-bottom: 0;
+	.left-dial-toggle {
+		left: 200px;
+		top: 50%;
+		transform: translateY(-50%);
 	}
 
-	.header-title {
-		display: flex;
-		align-items: center;
-		gap: 8px;
+	.right-dial-toggle {
+		right: 200px;
+		top: 50%;
+		transform: translateY(-50%);
 	}
 
-	.chevron-icon {
-		transition: transform 0.3s ease;
-		transform: rotate(180deg); /* Points up when expanded */
+	.right-dial-toggle.active-golden {
+		background: rgba(222, 173, 102, 1) !important;
+		border-color: rgba(222, 173, 102, 1) !important;
+		box-shadow: 0 0 15px rgba(222, 173, 102, 0.5);
+		width: 48px;
+		height: 48px;
+		right: 145px;
 	}
 
-	.chevron-icon.collapsed {
-		transform: rotate(0deg); /* Points down when collapsed */
-	}
-
-	.chevron-icon-horizontal {
-		transition: transform 0.3s ease;
-		transform: rotate(180deg); /* Points left when expanded */
-	}
-
-	.chevron-icon-horizontal.collapsed {
-		transform: rotate(0deg); /* Points right when collapsed */
-	}
-
-	.floor-buttons {
+	/* Center labels for Floor Dial */
+	.dial-center-label {
+		position: absolute;
+		left: 24px;
+		top: 50%;
+		transform: translateY(-50%);
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		max-height: 500px;
-		overflow-y: auto;
-		opacity: 1;
-	}
-
-	.floor-selector.collapsed .floor-buttons {
-		max-height: 0;
-		opacity: 0;
+		align-items: flex-start;
 		pointer-events: none;
-		overflow-y: hidden;
+		user-select: none;
 	}
 
-	.floor-btn {
-		padding: 8px 12px;
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		border-radius: 6px;
-		background: rgba(255, 255, 255, 0.1);
-		color: white;
-		font-size: 13px;
+	.right-dial-label {
+		left: auto !important;
+		right: 24px !important;
+		align-items: flex-end !important;
+		text-align: right !important;
+	}
+
+	/* Dial buttons wrapper and absolute layout */
+	.dial-buttons {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	/* Radial Ticks */
+	.dial-tick {
+		position: absolute;
+		width: 6px;
+		height: 1px;
+		background: rgba(255, 255, 255, 0.18);
+		transform-origin: left center;
+		pointer-events: none;
+	}
+
+	/* Floor Button along arc */
+	.dial-floor-btn {
+		position: absolute;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		border: none;
+		background: transparent;
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 20px;
 		font-weight: 500;
 		cursor: pointer;
-		transition: all 0.3s ease;
-		text-align: left;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: auto;
+		transform: translate(-50%, -50%);
+		transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+		padding: 0;
 	}
 
-	.floor-btn:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.5);
-		transform: translateX(2px);
+	.dial-floor-btn:hover {
+		color: white;
+		font-weight: bold;
+		scale: 1.15;
 	}
 
-	.floor-btn.active {
-		background: rgba(255, 212, 0, 0.3);
-		border-color: #ffd400;
-		color: #ffd400;
+	.dial-floor-btn.active {
+		background: rgba(222, 173, 102, 1) !important;
+		color: white !important;
+		font-weight: bold;
+		width: 48px;
+		height: 48px;
+		font-size: 30px;
+		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
 	}
 
-	/* Hotspot Toggle */
-	.hotspot-toggle {
+	/* Time Button along arc */
+	.dial-time-btn {
+		position: absolute;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		background: rgba(0, 0, 0, 0.35);
+		color: rgba(255, 255, 255, 0.6);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: auto;
+		transform: translate(50%, -50%);
+		transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+		padding: 0;
+	}
+
+	.dial-time-btn:hover {
+		border-color: white;
+		color: white;
+		scale: 1.1;
+	}
+
+	.dial-time-btn.active {
+		background: rgba(222, 173, 102, 1) !important;
+		border-color: rgba(222, 173, 102, 1) !important;
+		color: white !important;
+		width: 48px;
+		height: 48px;
+		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
+	}
+	
+	/* Hotspot Toggle Pill at Top Center */
+	.hotspot-toggle-pill {
 		position: fixed;
 		top: 20px;
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 1000;
-		background: rgba(15, 93, 168, 0.9);
-		border-radius: 24px;
-		padding: 10px 20px;
+		background: rgba(30, 30, 30, 0.45);
+		border-radius: 9999px;
+		padding: 8px 12px 8px 20px;
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: 16px;
 		backdrop-filter: blur(10px);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1.2px solid rgba(255, 255, 255, 0.15);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 	}
 
-	.toggle-label {
-		color: white;
-		font-size: 14px;
+	.toggle-pill-label {
+		color: rgba(255, 255, 255, 0.85);
+		font-size: 11px;
 		font-weight: 500;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		font-family: 'Imprima', sans-serif;
 	}
 
-	.toggle-switch {
-		position: relative;
-		width: 48px;
-		height: 24px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 12px;
-		cursor: pointer;
-		transition: background 0.3s ease;
+	.toggle-pill-btn {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
 		border: none;
+		background: rgba(0, 0, 0, 0.45);
+		color: rgba(255, 255, 255, 0.6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 		padding: 0;
 	}
 
-	.toggle-switch.on {
-		background: #ffd400;
+	.toggle-pill-btn:hover {
+		color: white;
+		background: rgba(0, 0, 0, 0.65);
 	}
 
-	.toggle-slider {
-		position: absolute;
-		top: 2px;
-		left: 2px;
-		width: 20px;
-		height: 20px;
-		background: white;
-		border-radius: 50%;
-		transition: transform 0.3s ease;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	.toggle-pill-btn.active {
+		background: rgba(222, 173, 102, 1) !important;
+		color: white !important;
+		box-shadow: 0 0 10px rgba(222, 173, 102, 0.4);
 	}
 
-	.toggle-switch.on .toggle-slider {
-		transform: translateX(24px);
+	/* Go Back Button */
+	.go-back-btn {
+		position: fixed;
+		bottom: 24px;
+		left: 24px;
+		z-index: 1000;
+		background: rgba(30, 30, 30, 0.45);
+		border-radius: 9999px;
+		padding: 8px 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1.2px solid rgba(255, 255, 255, 0.15);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+		color: rgba(255, 255, 255, 0.85);
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+		font-family: 'Imprima', sans-serif;
+	}
+
+	.go-back-btn:hover {
+		background: rgba(222, 173, 102, 1);
+		border-color: rgba(222, 173, 102, 1);
+		color: white;
+		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
 	}
 
 	/* Overview Badge */
@@ -789,122 +869,25 @@
 	}
 
 	/* Responsive */
-	@media (max-width: 1080px) {
-		.time-selector {
-			bottom: 16px;
-			left: 16px;
-			top: auto;
-			max-height: none;
-			padding: 6px 8px;
-			gap: 10px;
-			border-radius: 10px;
+	/* Responsive styling for semi-circular dials */
+	@media (max-width: 768px) {
+		.floor-dial {
+			transform: translateY(-50%) scale(0.8) !important;
+			transform-origin: left center;
+		}
+		.floor-dial.collapsed {
+			transform: translate(-175px, -50%) scale(0.8) !important;
+			transform-origin: left center;
 		}
 
-		.time-btn {
-			padding: 4px 6px;
-			font-size: 12px;
-			border-radius: 6px;
+		.time-dial {
+			transform: translateY(-50%) scale(0.8) !important;
+			transform-origin: right center;
 		}
-
-		.time-selector-header {
-			padding-right: 2px;
-			gap: 2px;
+		.time-dial.collapsed {
+			transform: translate(135px, -50%) scale(0.8) !important;
+			transform-origin: right center;
 		}
-
-		.floor-selector {
-			top: auto;
-			bottom: 80px;
-			left: 20px;
-			min-width: 140px;
-			max-height: 58vh;
-		}
-
-		.hotspot-toggle {
-			top: 15px;
-			padding: 8px 16px;
-		}
-
-		.toggle-label {
-			font-size: 12px;
-		}
-
-		.overview-badge {
-			bottom: auto;
-			top: 65px;
-		}
-
-		.floor-btn {
-			font-size: 12px;
-			padding: 6px 10px;
-		}
-	}
-
-	@media (max-width: 600px) {
-		.time-selector {
-			bottom: 10px;
-			left: 10px;
-			padding: 6px 10px;
-			gap: 8px;
-			border-radius: 8px;
-		}
-
-		.time-btn {
-			padding: 6px 10px;
-			font-size: 11px;
-			border-radius: 4px;
-		}
-
-		.time-selector-header {
-			padding-right: 6px;
-			gap: 4px;
-		}
-
-		.time-selector-header span {
-			display: none;
-		}
-	}
-
-	/* Scrollbar styling */
-	.time-selector::-webkit-scrollbar,
-	.floor-selector::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.time-selector::-webkit-scrollbar-track,
-	.time-selector::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.time-selector::-webkit-scrollbar-track {
-		background: rgba(255, 255, 255, 0.1);
-		border-radius: 3px;
-	}
-
-	.time-selector::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.3);
-		border-radius: 3px;
-	}
-
-	.time-selector::-webkit-scrollbar-thumb:hover {
-		background: rgba(255, 255, 255, 0.5);
-	}
-
-	.floor-buttons::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.floor-buttons::-webkit-scrollbar-track {
-		background: rgba(255, 255, 255, 0.1);
-		border-radius: 3px;
-	}
-
-	.floor-buttons::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.3);
-		border-radius: 3px;
-	}
-
-	.floor-buttons::-webkit-scrollbar-thumb:hover {
-		background: rgba(255, 255, 255, 0.5);
 	}
 
 	/* Hotspots Animations & Glassmorphism styles */
@@ -957,12 +940,19 @@
 		background: linear-gradient(to top, #ffffff 0%, rgba(255, 255, 255, 0.8) 40%, rgba(255, 255, 255, 0.1) 100%);
 		transform-origin: bottom;
 		transform: scaleY(0);
-		transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-		z-index: 1;
+	}
+	
+	:global(.overview-hotspot .hotspot-pulse-dot),
+	:global(.overview-hotspot .hotspot-pulse-ring) {
+		pointer-events: auto !important;
+		cursor: pointer !important;
 	}
 
 	:global(.overview-hotspot.visible .hotspot-line) {
-		transform: scaleY(1);
+		transform: scaleY(0) !important;
+	}
+	:global(.overview-hotspot.visible:hover .hotspot-line) {
+		transform: scaleY(1) !important;
 	}
 
 	:global(.overview-hotspot .overview-hotspot-label) {
@@ -1012,11 +1002,10 @@
 		            box-shadow 0.3s ease !important;
 	}
 
-	:global(.overview-hotspot.hotspot-right.visible .overview-hotspot-label) {
+	:global(.overview-hotspot.hotspot-right.visible:hover .overview-hotspot-label) {
 		opacity: 1 !important;
 		transform: translateX(0) scale(1) !important;
 		clip-path: inset(0 0 0 0) !important;
-		transition-delay: 0.5s !important;
 	}
 
 	:global(.overview-hotspot.hotspot-left .overview-hotspot-label) {
@@ -1033,25 +1022,24 @@
 		            box-shadow 0.3s ease !important;
 	}
 
-	:global(.overview-hotspot.hotspot-left.visible .overview-hotspot-label) {
+	:global(.overview-hotspot.hotspot-left.visible:hover .overview-hotspot-label) {
 		opacity: 1 !important;
 		transform: translateX(0) scale(1) !important;
 		clip-path: inset(0 0 0 0) !important;
-		transition-delay: 0.5s !important;
 	}
 
 	/* Premium Hover effect */
 	:global(.overview-hotspot.hotspot-right .overview-hotspot-label:hover) {
 		background: rgba(15, 93, 168, 0.85) !important;
-		border-color: rgba(255, 212, 0, 0.6) !important;
-		box-shadow: 0 8px 32px rgba(255, 212, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+		border-color: rgba(222, 173, 102, 0.7) !important;
+		box-shadow: 0 8px 32px rgba(222, 173, 102, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 		transform: translateX(2px) scale(1.03) !important;
 	}
 
 	:global(.overview-hotspot.hotspot-left .overview-hotspot-label:hover) {
 		background: rgba(15, 93, 168, 0.85) !important;
-		border-color: rgba(255, 212, 0, 0.6) !important;
-		box-shadow: 0 8px 32px rgba(255, 212, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+		border-color: rgba(222, 173, 102, 0.7) !important;
+		box-shadow: 0 8px 32px rgba(222, 173, 102, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 		transform: translateX(-2px) scale(1.03) !important;
 	}
 
@@ -1062,19 +1050,5 @@
 		}
 	}
 
-	@media (max-width: 950px) {
-		.time-btn-text {
-			display: none !important;
-		}
-		.time-btn {
-			padding: 0 !important;
-			width: 32px !important;
-			height: 32px !important;
-			display: inline-flex !important;
-			align-items: center !important;
-			justify-content: center !important;
-			border-radius: 8px !important;
-			gap: 0 !important;
-		}
-	}
+
 </style>
