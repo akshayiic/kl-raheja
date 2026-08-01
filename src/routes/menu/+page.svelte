@@ -8,9 +8,9 @@
 
 	let currentSlide = $state(1);
 	let card1W = $state(420);
-	let card1H = $state(180);
+	let card1H = $state(231);
 	let card2W = $state(420);
-	let card2H = $state(180);
+	let card2H = $state(231);
 
 	import views1Video from '$lib/videos/views1.mp4';
 	import vicinityVideo from '$lib/videos/vicinity.mp4';
@@ -83,7 +83,7 @@
 
 	<!-- Bottom Right Navigation Card & Controls -->
 	<div class="fixed bottom-12 right-6 z-[25] flex items-end gap-10 pointer-events-auto animate-fade-in">
-		<div class="relative w-[420px] h-[180px]">
+		<div class="relative w-[420px] h-[210px]">
 			<!-- Toggle/Next circular button -->
 			<button
 				on:click={() => currentSlide = currentSlide === 1 ? 2 : 1}
@@ -101,7 +101,7 @@
 			<div 
 				bind:clientWidth={card2W} 
 				bind:clientHeight={card2H}
-				class="nav-card {currentSlide === 2 ? 'front' : 'back'} cursor-pointer p-4"
+				class="nav-card {currentSlide === 2 ? 'front' : 'back'} cursor-pointer"
 				on:click={() => currentSlide !== 2 && (currentSlide = 2)}
 			>
 				<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
@@ -151,7 +151,7 @@
 			<div 
 				bind:clientWidth={card1W} 
 				bind:clientHeight={card1H}
-				class="nav-card {currentSlide === 1 ? 'front' : 'back'} cursor-pointer p-4"
+				class="nav-card {currentSlide === 1 ? 'front' : 'back'} cursor-pointer"
 				on:click={() => currentSlide !== 1 && (currentSlide = 1)}
 			>
 				<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
@@ -273,7 +273,7 @@
 	height: 110%;
 	display: flex;
 	align-items: center;
-	padding: 1rem 2rem;
+	padding: 1.75rem 2rem;
 	overflow: hidden;
 	border-radius: 2.5rem;
 
@@ -311,7 +311,7 @@
 	}
 
 	.nav-card.back {
-		transform: scale(0.92) translate3d(0, -28px, 0);
+		transform: scale(0.92) translate3d(0, -32px, 0);
 		z-index: 10;
 		opacity: 0.4;
 		filter: blur(3px);
