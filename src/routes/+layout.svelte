@@ -99,13 +99,9 @@
 		}
 	});
 
-	onMount(() => {
-		const savedUIPanel = sessionStorage.getItem('rahega_UIPanel');
-		if (savedUIPanel) {
-			UIPanel.set(savedUIPanel);
-		}
+	// Reactive statement to handle client-side route transitions
+	$: if ($page.url) {
 		switchChecker();
-		console.log('page changed', $page.url);
 		if ($page.url.pathname === '/') {
 			show('overview');
 			UIPanel.set('loading');
@@ -116,7 +112,6 @@
 		if ($page.url.href.includes('brochure')) {
 			show('Brochure');
 			UIPanel.set('Brochure');
-			// CI360.
 		}
 		if ($page.url.href.includes('amenities')) {
 			show('amenities');
@@ -133,6 +128,13 @@
 		if ($page.url.href.includes('vicinities')) {
 			show('vicinity');
 			UIPanel.set('loaded');
+		}
+	}
+
+	onMount(() => {
+		const savedUIPanel = sessionStorage.getItem('rahega_UIPanel');
+		if (savedUIPanel && $page.url.pathname !== '/') {
+			UIPanel.set(savedUIPanel);
 		}
 	});
 </script>
