@@ -43,6 +43,13 @@
 	let activeSrc = '';
 	let prevSrc = '';
 	let imgEl;
+	let videoLoading = true;
+
+	$: {
+		if (activeVideo) {
+			videoLoading = true;
+		}
+	}
 
 	$: displaySrc = $vicinityImg != '-' ? 'https://assets.vestate.io/webtool/kraheja/kraheja/vicinities/' + $vicinityImg : '';
 	$: {
@@ -414,31 +421,50 @@
 
 	{#if $vicinityImg != '-'}
 		<div class="absolute top-0 left-0 w-full h-full z-50 bg-black overflow-hidden">
-			{#if !isLoaded && prevSrc}
-				<img
-					src={prevSrc}
-					alt="Vicinity Previous"
-					class="absolute top-0 left-0 h-full w-full object-cover filter blur-[8px] scale-105 pointer-events-none"
-				/>
-			{/if}
-
-			<img
-				bind:this={imgEl}
-				src={activeSrc}
-				alt="Vicinity"
-				class="absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 {isLoaded ? 'opacity-100' : 'opacity-0'}"
-				on:load={() => { isLoaded = true; }}
-				on:error={() => { isLoaded = true; }}
-			/>
-
 			{#if activeVideo}
+				{#if videoLoading}
+					<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300">
+						<!-- Premium custom luxury gold spinner -->
+						<div class="relative w-16 h-16 mb-4 animate-fade-in">
+							<!-- Spinner track -->
+							<div class="absolute inset-0 rounded-full border-4 border-white/10"></div>
+							<!-- Spinner active line -->
+							<div class="absolute inset-0 rounded-full border-4 border-t-[#DEAD66] border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+						</div>
+						<span class="text-white/85 text-[10px] uppercase tracking-[0.2em] font-light font-mono animate-pulse">
+							LOADING VIDEO...
+						</span>
+					</div>
+				{/if}
+
 				<video
 					src={activeVideo}
 					autoplay
 					muted
 					playsinline
-					class="absolute top-0 left-0 h-full w-full object-cover"
+					class="absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 {videoLoading ? 'opacity-0' : 'opacity-100'}"
+					on:playing={() => videoLoading = false}
+					on:canplay={() => videoLoading = false}
+					on:loadstart={() => videoLoading = true}
+					on:waiting={() => videoLoading = true}
 				></video>
+			{:else}
+				{#if !isLoaded && prevSrc}
+					<img
+						src={prevSrc}
+						alt="Vicinity Previous"
+						class="absolute top-0 left-0 h-full w-full object-cover filter blur-[8px] scale-105 pointer-events-none"
+					/>
+				{/if}
+
+				<img
+					bind:this={imgEl}
+					src={activeSrc}
+					alt="Vicinity"
+					class="absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 {isLoaded ? 'opacity-100' : 'opacity-0'}"
+					on:load={() => { isLoaded = true; }}
+					on:error={() => { isLoaded = true; }}
+				/>
 			{/if}
 		</div>
 	{/if}
