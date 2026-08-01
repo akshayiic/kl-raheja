@@ -35,6 +35,70 @@
 	let foliageSlidOut = $state(false);
 	let foliageSettled = $state(false);
 	let hasScrolledOnce = $state(false);
+	let parallaxImagesLoaded = $state(false);
+
+	function preloadParallaxImages() {
+		const images = [
+			'/building.png',
+			'/bg1.png',
+			'/leftfull1.png',
+			'/rightfull1.png',
+			'/mousewheel.png'
+		];
+		let loadedCount = 0;
+		images.forEach(src => {
+			const img = new Image();
+			img.onload = () => {
+				loadedCount++;
+				if (loadedCount === images.length) {
+					parallaxImagesLoaded = true;
+				}
+			};
+			img.onerror = () => {
+				loadedCount++;
+				if (loadedCount === images.length) {
+					parallaxImagesLoaded = true;
+				}
+			};
+			img.src = src;
+		});
+	}
+
+	function startExperience() {
+		// Request fullscreen immediately under direct user gesture
+		if (!(window.self !== window.top) && window.innerWidth < 1200) {
+			if (document.body.requestFullscreen) {
+				document.body.requestFullscreen();
+			} else if (document.body.webkitRequestFullscreen) {
+				document.body.webkitRequestFullscreen();
+			} else if (document.body.msRequestFullscreen) {
+				document.body.msRequestFullscreen();
+			}
+		} 
+
+		isTransitioning = true;
+		const startTime = Date.now();
+		const minLoaderTime = 2000;
+
+		function checkReady() {
+			const elapsed = Date.now() - startTime;
+			if (parallaxImagesLoaded && elapsed >= minLoaderTime) {
+				isTransitioning = false;
+				$UIPanel = 'loaded';
+				showParallax = true;
+				setTimeout(() => {
+					foliageSlidOut = true;
+					setTimeout(() => {
+						foliageSettled = true;
+					}, 3000);
+				}, 50);
+			} else {
+				setTimeout(checkReady, 100);
+			}
+		}
+
+		checkReady();
+	}
 
 	$effect(() => {
 		if (hasScrolled) {
@@ -145,6 +209,8 @@
 
 		localStorage.getItem('instructions-view-count') == 4 && instructionPano.set(false);
 
+		preloadParallaxImages();
+
 		const video = document.querySelector('.intro-video');
 		if (video) {
 			video.muted = true;
@@ -235,7 +301,7 @@
 			></video>
 			<button
 				on:click={toggleIntroAudio}
-				class="fixed top-5 left-5 z-[2000000003] p-3 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center"
+				class="fixed top-5 left-5 z-[2000000003] p-3 rounded-full px-6  text-white border border-white/20 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center"
 				aria-label={introVideoMuted ? "Unmute audio" : "Mute audio"}
 			>
 				{#if introVideoMuted}
@@ -258,14 +324,14 @@
 			>
 				<div class="mb-6 flex flex-col items-center">
 					<!-- STEP › INTO -->
-					<div class="flex items-center justify-center gap-3 text-xs md:text-sm font-light tracking-[0.3em] uppercase text-white/90" style="font-family: 'Imprima', sans-serif;">
-						<span>STEP</span>
-						<span class="text-[#c5a880] text-lg font-normal leading-none" style="transform: translateY(-1px);">›</span>
-						<span>INTO</span>
+					<div class="flex items-center justify-center gap-3 text-xs md:text-4xl font-light tracking-[0.3em] uppercase text-white/90">
+						<span style="font-family: 'Viaoda Libre', serif !important;">STEP</span>
+						<span class="text-[#c5a880] text-4xl font-normal leading-none" style="transform: translateY(-2px); font-family: 'Viaoda Libre', serif !important;">›</span>
+						<span style="font-family: 'Viaoda Libre', serif !important;">INTO</span>
 					</div>
 
 					<!-- K RAHEJA -->
-					<h1 class="text-4xl md:text-6xl tracking-[0.15em] uppercase text-white my-3 font-normal" style="font-family: 'The Seasons', serif;">
+					<h1 class="text-4xl md:text-6xl tracking-[0.15em] uppercase text-white my-3 font-normal" style="font-family: 'Viaoda Libre', serif;">
 						K RAHEJA
 					</h1>
 
@@ -278,31 +344,7 @@
 				<!-- Get Started Button -->
 				<button
 					id="v-start-btn"
-					on:click={() => {
-						// Request fullscreen immediately under direct user gesture
-						if (!(window.self !== window.top) && window.innerWidth < 1200) {
-							if (document.body.requestFullscreen) {
-								document.body.requestFullscreen();
-							} else if (document.body.webkitRequestFullscreen) {
-								document.body.webkitRequestFullscreen();
-							} else if (document.body.msRequestFullscreen) {
-								document.body.msRequestFullscreen();
-							}
-						} 
-
-						isTransitioning = true;
-						setTimeout(() => {
-							isTransitioning = false;
-							$UIPanel = 'loaded';
-							showParallax = true;
-							setTimeout(() => {
-								foliageSlidOut = true;
-								setTimeout(() => {
-									foliageSettled = true;
-								}, 3000);
-							}, 50);
-						}, 2000);
-					}}
+					on:click={startExperience}
 					class="get-started-btn cursor-pointer"
 				>
 					Get Started
@@ -463,7 +505,7 @@
 		<div class="h-full w-full relative">
 			<!-- Background building image (z-index: 1) -->
 			<div
-				class="fixed inset-0 pointer-events-none flex items-center justify-center"
+				class="fixed inset-0 pointer-events-none flex items-center justify-center parallax-bg-container"
 				style="transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}; transform: scale({hasScrolled ? 1.1 : 1.0}); z-index: 1;"
 			>
 				<img class="w-full h-full object-cover" src="/building.png" alt="Building background" />
@@ -471,7 +513,7 @@
 
 			<!-- Middle aperture mask image (z-index: 2) -->
 			<div
-				class="fixed inset-0 pointer-events-none flex items-center justify-center"
+				class="fixed inset-0 pointer-events-none flex items-center justify-center parallax-mask-container"
 				style="
 					transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}, opacity {hasScrolled ? '3.5s ease-in-out' : '1.8s ease-out'};
 					transform: scale({hasScrolled ? 7.0 : 0.7});
@@ -563,10 +605,10 @@
 	}
 
 	.get-started-btn:hover {
-		background-color: #c5a880 !important;
-		color: #1e1e1e !important;
-		box-shadow: 0 0 25px rgba(197, 168, 128, 0.65) !important;
-		border-color: #c5a880 !important;
+		background-color: #DEAD66 !important; 
+		font-weight: bold !important;
+		color: #ffffff !important;
+		border-color: #DEAD66 !important;
 		transform: scale(1.03) !important;
 		animation: none !important;
 	}
@@ -632,6 +674,12 @@
 		}
 	}
 
+	.dot-anim {
+		display: inline-block;
+		width: 1.5em;
+		text-align: left;
+	}
+
 	.dot-anim::after {
 		content: '';
 		animation: dots 1.5s steps(4, end) infinite !important;
@@ -663,6 +711,18 @@
 		transform-origin: center;
 	}
 
+	.parallax-bg-container {
+		will-change: transform;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+	}
+
+	.parallax-mask-container {
+		will-change: transform, opacity;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+	}
+
 	.foliage-container {
 		position: fixed;
 		top: 0;
@@ -671,6 +731,9 @@
 		z-index: 3;
 		pointer-events: none;
 		transform: translateX(0%);
+		will-change: transform;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
 	}
 
 	/* Left Foliage States */

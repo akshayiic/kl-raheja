@@ -76,7 +76,7 @@
 
 	<!-- Navigation UI Description Overlay -->
 	<div class="fixed bottom-6 left-12 max-w-[720px] z-[25] flex flex-col gap-2 pointer-events-auto text-left animate-fade-in">
-		<p class="text-white/80 text-xs md:text-lg font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
+		<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
 			In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
 		</p>
 	</div>
@@ -87,10 +87,10 @@
 			<!-- Toggle/Next circular button -->
 			<button
 				on:click={() => currentSlide = currentSlide === 1 ? 2 : 1}
-				class="absolute -left-12 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-[#c5a880]/60 hover:border-[#c5a880] bg-black/40 hover:bg-black/60 transition-all duration-300 flex items-center justify-center text-[#e5d5be] hover:text-white cursor-pointer z-30 !p-0"
+				class="toggle-slide-btn absolute -left-12 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 transition-all duration-300 flex items-center justify-center text-[#DEAD66] cursor-pointer z-30 !p-0"
 				aria-label="Next slide"
 			>
-				<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor">
+				<svg width="8" height="8" viewBox="0 0 10 10" fill="#DEAD66">
 					<circle cx="5" cy="2" r="1.1" />
 					<circle cx="2" cy="6.8" r="1.1" />
 					<circle cx="8" cy="6.8" r="1.1" />
@@ -105,12 +105,12 @@
 				on:click={() => currentSlide !== 2 && (currentSlide = 2)}
 			>
 				<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
-					<path d="M 40,0 L {card2W - 40},0 A 40,40 0 0 1 {card2W},40 L {card2W},{card2H - 48} A 48,48 0 0 0 {card2W - 48},{card2H} L 40,{card2H} A 40,40 0 0 1 0,{card2H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
+					<path d="M 40,0 L {card2W - 40},0 A 40,40 0 0 1 {card2W},40 L {card2W},{card2H - 40} A 40,40 0 0 1 {card2W - 40},{card2H} L 40,{card2H} A 40,40 0 0 1 0,{card2H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
 					      fill="rgba(255, 255, 255, 0.08)" 
 					      stroke="rgba(255, 255, 255, 0.15)" 
 					      stroke-width="1.2" />
 				</svg>
-
+				
 				<!-- Text section -->
 				<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
 					<h2 class="text-xl tracking-[0.15em] text-white mb-1.5 font-semibold uppercase" style="font-family: 'The Seasons', serif;">
@@ -155,7 +155,7 @@
 				on:click={() => currentSlide !== 1 && (currentSlide = 1)}
 			>
 				<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
-					<path d="M 40,0 L {card1W - 40},0 A 40,40 0 0 1 {card1W},40 L {card1W},{card1H - 48} A 48,48 0 0 0 {card1W - 48},{card1H} L 40,{card1H} A 40,40 0 0 1 0,{card1H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
+					<path d="M 40,0 L {card1W - 40},0 A 40,40 0 0 1 {card1W},40 L {card1W},{card1H - 40} A 40,40 0 0 1 {card1W - 40},{card1H} L 40,{card1H} A 40,40 0 0 1 0,{card1H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
 					      fill="rgba(255, 255, 255, 0.08)" 
 					      stroke="rgba(255, 255, 255, 0.15)" 
 					      stroke-width="1.2" />
@@ -199,12 +199,12 @@
 		</div>
 
 		<!-- Page Indicators -->
-		<div class="flex items-center gap-4 mb-2 select-none" style="font-family: 'The Seasons', serif;">
-			{#each currentSlide === 1 ? [1, 2] : [2, 1] as slide, index (slide)}
-				<div animate:flip={{ duration: 500 }} class="indicator-item flex items-center">
+		<div class="flex items-baseline gap-6 select-none translate-y-2" style="font-family: 'The Seasons', serif;">
+			{#each [1, 2] as slide}
+				<div class="indicator-item">
 					<button 
 						on:click={() => currentSlide = slide}
-						class="indicator-btn {index === 0 ? 'active' : ''}"
+						class="indicator-btn {currentSlide === slide ? 'active' : ''}"
 					>
 						{slide < 10 ? `0${slide}` : slide}
 					</button>
@@ -300,7 +300,7 @@
 
  
 
-	transition: all .7s cubic-bezier(.25,1,.5,1);
+	transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 	.nav-card.front {
@@ -311,10 +311,10 @@
 	}
 
 	.nav-card.back {
-		transform: scale(0.94) translate3d(0, -22px, 0);
+		transform: scale(0.92) translate3d(0, -28px, 0);
 		z-index: 10;
-		opacity: 0.35;
-		filter: blur(4px);
+		opacity: 0.4;
+		filter: blur(3px);
 	}
 
 	/* Concentric Cutout Mask for Thumbnail on Right Side */
@@ -337,17 +337,18 @@
 	}
 
 	.indicator-item {
-		display: flex;
-		align-items: center;
+		display: inline-flex !important;
+		align-items: baseline !important;
 	}
 
 	.indicator-item:not(:first-child)::before {
 		content: "";
-		width: 4.5rem;
+		width: 32px;
 		height: 1px;
 		background: rgba(255, 255, 255, 0.35);
-		margin-right: 1.5rem;
-		display: block;
+		margin-right: 24px;
+		display: inline-block;
+		margin-bottom: 4px; /* align it to center of 18px height */
 	}
 
 	.indicator-btn {
@@ -358,14 +359,19 @@
 		user-select: none !important;
 		transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
 		color: rgba(255, 255, 255, 0.45) !important;
-		font-size: 32px !important;
+		font-size: 18px !important;
 		font-weight: 400 !important;
 		font-family: 'The Seasons', serif;
+		line-height: 1 !important;
 	}
 
 	.indicator-btn.active {
 		color: #ffffff !important;
-		font-size: 64px !important;
+		font-size: 36px !important;
 		font-weight: 400 !important;
+	}
+
+	.toggle-slide-btn {
+		border: 1.8px solid #DEAD66 !important;
 	}
 </style>

@@ -274,6 +274,69 @@
 		loadScene($selectedTime, $selectedFloorIndex);
 	};
 
+	const hotspotImageMap = {
+		'Bandra Worli Sea Link': {
+			cat: 'Connectivity',
+			folder: 'Bandra Worli Sea Link'
+		},
+		'Bandstand & Carter Road Promenade': {
+			cat: 'Retail%20%26%20Lifestyle',
+			folder: 'Bandstand'
+		},
+		'BKC (Bandra-Kurla Complex)': {
+			cat: 'Commercial',
+			folder: 'BKC'
+		},
+		'Lilavati Hospital': {
+			cat: 'Hospitals',
+			folder: 'Lilavati Hospital'
+		},
+		'Dhirubhai Ambani International School': {
+			cat: 'Education%20Institutes',
+			folder: 'Dhirubhai Ambani International School'
+		},
+		'Otters Club': {
+			cat: 'Cafe%20%26%20Clubs',
+			folder: 'Otter_s'
+		},
+		'Taj Lands End': {
+			cat: 'Cafe%20%26%20Clubs',
+			folder: 'Taj Lounges'
+		},
+		'Jio World Centre (NMACC)': {
+			cat: 'Commercial',
+			folder: 'Jio World Centre'
+		},
+		'Jio World Drive': {
+			cat: 'Retail%20%26%20Lifestyle',
+			folder: 'Jio World Drive'
+		},
+		'Versova–Bandra Sea Link': {
+			cat: 'Connectivity',
+			folder: 'Versova-Bandra sea link'
+		},
+		'Worli business district': {
+			cat: 'Commercial',
+			folder: 'Worli'
+		},
+		'Mount Mary Basilica': {
+			cat: 'Faith%20%26%20Heritage',
+			folder: 'Mount Mary'
+		},
+		'American School of Bombay': {
+			cat: 'Education%20Institutes',
+			folder: 'American School of Bombay'
+		},
+		'Asian Heart Institute': {
+			cat: 'Hospitals',
+			folder: 'Asian Heart Institute'
+		},
+		'Pali Hill/Linking Road': {
+			cat: 'Retail%20%26%20Lifestyle',
+			folder: 'Linking-Hill Road'
+		}
+	};
+
 	const createInfoHotspot = (scene, hotspotData, index) => {
 		const wrapper = document.createElement('div');
 		wrapper.classList.add('info-hotspot');
@@ -308,8 +371,30 @@
 		const hotspot = document.createElement('div');
 		hotspot.classList.add('hotspot');
 		hotspot.classList.add('overview-hotspot-label');
-		hotspot.innerText = hotspotData.title;
 
+		const imgData = hotspotImageMap[hotspotData.title];
+		if (imgData) {
+			const img = document.createElement('img');
+			img.src = `https://assets.vestate.io/kl-rahega/images/${imgData.cat}/${encodeURIComponent(imgData.folder)}/1.png`;
+			img.alt = hotspotData.title;
+			img.classList.add('hotspot-label-img');
+			hotspot.appendChild(img);
+		}
+
+		const textContainer = document.createElement('div');
+		textContainer.classList.add('hotspot-label-text-container');
+
+		const titleEl = document.createElement('div');
+		titleEl.classList.add('hotspot-label-title');
+		titleEl.innerText = hotspotData.title;
+		textContainer.appendChild(titleEl);
+
+		const subtitleEl = document.createElement('div');
+		subtitleEl.classList.add('hotspot-label-subtitle');
+		subtitleEl.innerText = 'Mumbai';
+		textContainer.appendChild(subtitleEl);
+
+		hotspot.appendChild(textContainer);
 		wrapper.appendChild(hotspot);
 
 		// Create hotspot at correct yaw/pitch position
@@ -322,8 +407,17 @@
 		return str.charAt(0).toUpperCase() + str.slice(1);
 	}
 
+	let lastFloorWheelTime = 0;
+	let lastTimeWheelTime = 0;
+
 	function handleFloorWheel(e) {
 		e.preventDefault();
+		const now = Date.now();
+		if (now - lastFloorWheelTime < 250) {
+			return;
+		}
+		lastFloorWheelTime = now;
+
 		// Scroll up (deltaY < 0) goes to higher floor index, scroll down (deltaY > 0) goes to lower floor index
 		const direction = e.deltaY < 0 ? 1 : -1;
 		const nextIndex = $selectedFloorIndex + direction;
@@ -334,6 +428,12 @@
 
 	function handleTimeWheel(e) {
 		e.preventDefault();
+		const now = Date.now();
+		if (now - lastTimeWheelTime < 250) {
+			return;
+		}
+		lastTimeWheelTime = now;
+
 		// Scroll down (deltaY > 0) goes to later time of day, scroll up (deltaY < 0) goes to earlier time of day
 		const direction = e.deltaY > 0 ? 1 : -1;
 		const activeTimeIdx = availableTimes.indexOf($selectedTime);
@@ -351,27 +451,50 @@
 </script>
 
 <div class="overview-container">
+	{#if timeCollapsed}
+		<button
+			class="minimized-sidebar-tab-right"
+			on:click={() => (timeCollapsed = false)}
+			type="button"
+			id="minimize-toggle-time"
+		>
+			<span class="chevron-group">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					<path d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</span>
+			<span class="golden-circle">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"></circle>
+					<polyline points="12 6 12 12 16 14"></polyline>
+				</svg>
+			</span>
+		</button>
+	{/if}
+
 	<!-- Time of Day Selector (Semi-circular dial on right edge) -->
 	<div class="time-dial {timeCollapsed ? 'collapsed' : ''}" on:wheel={handleTimeWheel}>
 		<!-- Collapse/Expand Arrow -->
-		<button
-			class="dial-toggle-btn right-dial-toggle"
-			on:click={() => (timeCollapsed = !timeCollapsed)}
-			type="button"
-		>
-			<svg
-				class="w-4 h-4 text-white transition-transform duration-300"
-				style="transform: rotate({timeCollapsed ? '180deg' : '0deg'})"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+		{#if !timeCollapsed}
+			<button
+				class="dial-toggle-btn right-dial-toggle"
+				on:click={() => (timeCollapsed = !timeCollapsed)}
+				type="button"
 			>
-				<polyline points="9 18 15 12 9 6"></polyline>
-			</svg>
-		</button>
+				<svg
+					class="w-4 h-4 text-white transition-transform duration-300"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<polyline points="9 18 15 12 9 6"></polyline>
+				</svg>
+			</button>
+		{/if}
 
 		<!-- Center text labels for Time Dial -->
 		<div class="dial-center-label right-dial-label">
@@ -434,27 +557,52 @@
 		</div>
 	</div>
 
+	{#if floorCollapsed}
+		<button
+			class="minimized-sidebar-tab"
+			style="position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 1001; margin-top: 0;"
+			on:click={() => (floorCollapsed = false)}
+			type="button"
+			id="minimize-toggle-floor"
+		>
+			<span class="chevron-group">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					<path d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</span>
+			<span class="golden-circle">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+					<polyline points="2 17 12 22 22 17"></polyline>
+					<polyline points="2 12 12 17 22 12"></polyline>
+				</svg>
+			</span>
+		</button>
+	{/if}
+
 	<!-- Floor Selector (Semi-circular dial on left edge) -->
 	<div class="floor-dial {floorCollapsed ? 'collapsed' : ''}" on:wheel={handleFloorWheel}>
 		<!-- Collapse/Expand Arrow -->
-		<button
-			class="dial-toggle-btn left-dial-toggle"
-			on:click={() => (floorCollapsed = !floorCollapsed)}
-			type="button"
-		>
-			<svg
-				class="w-4 h-4 text-white transition-transform duration-300"
-				style="transform: rotate({floorCollapsed ? '180deg' : '0deg'})"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+		{#if !floorCollapsed}
+			<button
+				class="dial-toggle-btn left-dial-toggle"
+				on:click={() => (floorCollapsed = !floorCollapsed)}
+				type="button"
 			>
-				<polyline points="15 18 9 12 15 6"></polyline>
-			</svg>
-		</button>
+				<svg
+					class="w-4 h-4 text-white transition-transform duration-300"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<polyline points="15 18 9 12 15 6"></polyline>
+				</svg>
+			</button>
+		{/if}
 
 		<!-- Center text labels -->
 		<div class="dial-center-label">
@@ -958,19 +1106,19 @@
 	:global(.overview-hotspot .overview-hotspot-label) {
 		/* Reset global .hotspot styles */
 		margin-top: 0 !important;
-		padding: 4px 8px !important;
-		border-radius: 8px !important;
-		font-size: 13px !important;
-		font-weight: 600 !important;
-		color: #ffffff !important;
+		padding: 6px 28px 6px 6px !important;
+		border-radius: 9999px !important;
 		
-		/* Glassmorphism background */
-		background: rgba(15, 93, 168, 0.65) !important;
-		backdrop-filter: blur(12px) saturate(160%) !important;
-		-webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-		border: 1px solid rgba(255, 255, 255, 0.25) !important;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+		/* White capsule background */
+		background: #ffffff !important;
+		border: 1.2px solid rgba(0, 0, 0, 0.08) !important;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+		text-shadow: none !important;
+
+		/* Flex layout */
+		display: flex !important;
+		align-items: center !important;
+		gap: 16px !important;
 
 		/* Positioning and initial state */
 		position: absolute !important;
@@ -979,6 +1127,44 @@
 		cursor: pointer !important;
 		white-space: nowrap !important;
 		z-index: 3;
+	}
+
+	/* Image styling inside label */
+	:global(.overview-hotspot .hotspot-label-img) {
+		width: 60px !important;
+		height: 60px !important;
+		border-radius: 50% !important;
+		object-fit: cover !important;
+		display: block !important;
+		pointer-events: none !important;
+	}
+
+	/* Text container styling */
+	:global(.overview-hotspot .hotspot-label-text-container) {
+		display: flex !important;
+		flex-direction: column !important;
+		align-items: flex-start !important;
+		justify-content: center !important;
+		gap: 2px !important;
+		pointer-events: none !important;
+	}
+
+	/* Title styling */
+	:global(.overview-hotspot .hotspot-label-title) {
+		color: #b08d4f !important;
+		font-size: 17px !important;
+		font-weight: 550 !important;
+		font-family: 'Outfit', 'Inter', sans-serif !important;
+		line-height: 1.2 !important;
+	}
+
+	/* Subtitle styling */
+	:global(.overview-hotspot .hotspot-label-subtitle) {
+		color: #2c3539 !important;
+		font-size: 14px !important;
+		font-weight: 400 !important;
+		font-family: 'Outfit', 'Inter', sans-serif !important;
+		line-height: 1.2 !important;
 	}
 
 	/* Remove the ::before arrow from our overview hotspot */
@@ -1030,23 +1216,31 @@
 
 	/* Premium Hover effect */
 	:global(.overview-hotspot.hotspot-right .overview-hotspot-label:hover) {
-		background: rgba(15, 93, 168, 0.85) !important;
-		border-color: rgba(222, 173, 102, 0.7) !important;
-		box-shadow: 0 8px 32px rgba(222, 173, 102, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+		border-color: rgba(176, 141, 79, 0.7) !important;
+		box-shadow: 0 12px 36px rgba(176, 141, 79, 0.25), 0 6px 16px rgba(0, 0, 0, 0.12) !important;
 		transform: translateX(2px) scale(1.03) !important;
 	}
 
 	:global(.overview-hotspot.hotspot-left .overview-hotspot-label:hover) {
-		background: rgba(15, 93, 168, 0.85) !important;
-		border-color: rgba(222, 173, 102, 0.7) !important;
-		box-shadow: 0 8px 32px rgba(222, 173, 102, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+		border-color: rgba(176, 141, 79, 0.7) !important;
+		box-shadow: 0 12px 36px rgba(176, 141, 79, 0.25), 0 6px 16px rgba(0, 0, 0, 0.12) !important;
 		transform: translateX(-2px) scale(1.03) !important;
 	}
 
 	@media (max-width: 768px) {
 		:global(.overview-hotspot .overview-hotspot-label) {
-			font-size: 11px !important;
-			padding: 6px 12px !important;
+			padding: 4px 16px 4px 4px !important;
+			gap: 10px !important;
+		}
+		:global(.overview-hotspot .hotspot-label-img) {
+			width: 44px !important;
+			height: 44px !important;
+		}
+		:global(.overview-hotspot .hotspot-label-title) {
+			font-size: 13px !important;
+		}
+		:global(.overview-hotspot .hotspot-label-subtitle) {
+			font-size: 10px !important;
 		}
 	}
 

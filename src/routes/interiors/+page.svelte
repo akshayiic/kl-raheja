@@ -2175,52 +2175,94 @@
 		>
 	</label>
 </div>
-<div class="left-panel-wrapper">
-	{#if $currentbhk == '3bhk'}
-		<div class="left-panel p-2">
-			<div class="left-panel--header flex justify-between gap-[3rem]">
-				<div class="left-title flex items-center font-bold">
-					<svg
-						width="25"
-						height="25"
-						viewBox="0 0 32 31"
-						class="mr-2"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M15.7834 30.1853C11.9139 30.1853 8.05047 30.1677 4.18106 30.1971C3.40362 30.203 2.89323 29.6084 2.89323 28.9079C2.89917 25.4642 2.89917 22.0205 2.89917 18.5768C2.89917 16.7225 2.89917 14.8682 2.89917 13.0139C2.89917 12.9079 2.95258 12.7666 2.85763 12.7078C2.76267 12.6489 2.67365 12.7784 2.58463 12.8314C2.00897 13.2023 1.4333 13.579 0.851705 13.9499C0.786424 13.9911 0.697404 14.0499 0.643991 14.0323C0.543102 13.997 0.584645 13.8792 0.584645 13.7968C0.584645 12.59 0.584645 11.3833 0.57871 10.1765C0.57871 9.98225 0.649926 9.8704 0.804228 9.77033C2.9051 8.38696 5.00598 7.00359 7.11279 5.62611C8.3294 4.82552 9.54601 4.03082 10.7626 3.23612C12.3412 2.20007 13.9258 1.17578 15.4985 0.133843C15.7181 -0.0133237 15.8902 -0.00743706 16.1098 0.13973C17.5103 1.06982 18.9169 1.98815 20.3234 2.90647C22.8931 4.59594 25.4687 6.28542 28.0385 7.96901C28.9524 8.56945 29.8604 9.16989 30.7803 9.75856C30.9583 9.8704 31.0295 9.99991 31.0236 10.2118C31.0117 11.4009 31.0177 12.5842 31.0177 13.7733C31.0177 13.8616 31.0533 13.9793 30.9761 14.0205C30.8812 14.0794 30.7981 13.9734 30.7209 13.9204C30.1334 13.5437 29.5518 13.1611 28.9643 12.7843C28.899 12.7431 28.8218 12.6371 28.7388 12.696C28.6972 12.7254 28.7031 12.8432 28.7031 12.9197C28.7031 15.6158 28.7031 18.3119 28.7031 21.0139C28.7031 23.6511 28.6913 26.2883 28.7091 28.9315C28.715 29.6202 28.1097 30.1853 27.4391 30.1853C23.5518 30.1735 19.6646 30.1853 15.7834 30.1853ZM15.8071 27.7894C19.1661 27.7894 22.5311 27.7894 25.8901 27.7894C26.2818 27.7894 26.2818 27.7894 26.2818 27.4009C26.2818 22.0382 26.2818 16.6695 26.2877 11.3068C26.2877 11.0889 26.2046 10.9771 26.0325 10.8653C24.6201 9.95282 23.2136 9.0345 21.813 8.11029C19.8842 6.84465 17.9495 5.57313 16.0267 4.30161C15.8605 4.18976 15.7418 4.19565 15.5816 4.3075C14.8219 4.81964 14.0564 5.31412 13.2908 5.81448C10.7092 7.50396 8.12762 9.19932 5.54604 10.8829C5.37393 10.9948 5.32052 11.1184 5.32645 11.3185C5.33239 16.6636 5.33239 22.0087 5.33239 27.3538C5.33239 27.7953 5.33239 27.7953 5.78936 27.7953C9.11871 27.7894 12.4599 27.7894 15.8071 27.7894Z"
-							fill="#0F5DA8"
-						/>
-						<path
-							d="M20.4084 26.7112C20.3193 26.7112 20.2303 26.7112 20.1413 26.7112C19.4173 26.7112 19.2036 26.5229 19.1739 25.8223C19.1621 25.5751 19.0137 25.5928 18.8535 25.5928C17.536 25.5928 16.2244 25.5928 14.9069 25.5928C14.1829 25.5928 13.4648 25.5986 12.7407 25.5869C12.5034 25.581 12.4321 25.6634 12.4381 25.893C12.444 26.4404 12.1592 26.7112 11.6013 26.7112C11.2927 26.7112 10.99 26.7171 10.6814 26.7112C10.2601 26.7053 9.93958 26.3992 9.90991 25.9813C9.90991 25.9401 9.90397 25.9048 9.90991 25.8635C9.99299 25.2337 9.8565 24.7098 9.37579 24.2271C8.97223 23.8209 8.82386 23.2499 8.78232 22.6671C8.77045 22.4728 8.74078 22.2786 8.72891 22.0843C8.72297 21.9783 8.65176 21.9371 8.56867 21.89C7.80903 21.4956 7.49449 20.8952 7.60132 20.024C7.67847 19.3705 8.30161 18.7171 9.0019 18.5523C9.95145 18.3345 10.9485 18.9879 11.1443 19.9357C11.2155 20.2712 11.1681 20.6185 11.2571 20.9541C11.4648 21.737 11.8031 22.0078 12.628 22.0078C14.7407 22.0078 16.8594 22.0078 18.9722 22.0078C19.9158 22.0078 20.3015 21.6605 20.4084 20.5714C20.4558 20.1005 20.4855 19.6413 20.7941 19.2469C21.2333 18.6818 21.803 18.4463 22.5033 18.5405C23.1502 18.6288 23.6131 19.0115 23.8742 19.5825C24.2303 20.3654 24.0344 21.4603 23.0374 21.8842C22.8831 21.9489 22.895 22.0725 22.8831 22.202C22.8416 22.9202 22.711 23.6207 22.2422 24.2035C22.1294 24.3389 22.0404 24.5155 21.898 24.6038C21.5953 24.7922 21.5597 25.0571 21.5775 25.3632C21.5894 25.6104 21.5834 25.8518 21.5834 26.099C21.5775 26.4758 21.3579 26.6936 20.9721 26.7053C20.7822 26.7171 20.5923 26.7171 20.4084 26.7112Z"
-							fill="#0F5DA8"
-						/>
-						<path
-							d="M15.9302 14.0137C17.1171 14.0137 18.304 14.0255 19.491 14.0137C21.2417 13.9901 22.8797 15.4795 22.945 17.216C22.945 17.2631 22.9509 17.3161 22.9687 17.3632C23.0221 17.5339 22.9806 17.5987 22.7847 17.5692C22.0666 17.4515 21.3841 17.5869 20.7729 17.9695C19.9954 18.4522 19.5919 19.1704 19.5028 20.0711C19.491 20.177 19.4791 20.283 19.4613 20.389C19.3604 20.9482 19.3604 20.9482 18.8026 20.9482C16.7729 20.9482 14.7492 20.9482 12.7195 20.9482C12.3159 20.9482 12.3219 20.9482 12.2803 20.5538C12.2151 19.9298 12.1557 19.3058 11.7581 18.776C11.0815 17.8812 10.2151 17.4044 9.05781 17.5633C8.89164 17.5869 8.84416 17.5339 8.85009 17.3809C8.90351 16.4743 9.24772 15.6855 9.88273 15.0438C10.5059 14.414 11.2714 14.0372 12.1676 14.0196C13.4198 13.996 14.6779 14.0137 15.9302 14.0137Z"
-							fill="#0F5DA8"
-						/>
+
+<!-- Minimized Tabs Container (Fixed left vertical center) -->
+{#if $isInteriorUnitMinimized || $isInteriorUnitDataMinimized}
+	<div class="fixed left-0 top-1/2 -translate-y-1/2 z-[1001] flex flex-col gap-3">
+		{#if $isInteriorUnitMinimized}
+			<button
+				class="minimized-sidebar-tab"
+				style="margin-top: 0;"
+				on:click={() => ($isInteriorUnitMinimized = false)}
+				type="button"
+				id="interior-toggle-amenities"
+			>
+				<span class="chevron-group">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
+				</span>
+				<span class="golden-circle">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+						<polyline points="2 17 12 22 22 17"></polyline>
+						<polyline points="2 12 12 17 22 12"></polyline>
+					</svg>
+				</span>
+			</button>
+		{/if}
 
-					Interior Unit
+		{#if $isInteriorUnitDataMinimized}
+			<button
+				class="minimized-sidebar-tab"
+				style="margin-top: 0;"
+				on:click={() => ($isInteriorUnitDataMinimized = false)}
+				type="button"
+				id="minimize-interior-data-amenities"
+			>
+				<span class="chevron-group">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</span>
+				<span class="golden-circle">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+						<polyline points="2 17 12 22 22 17"></polyline>
+						<polyline points="2 12 12 17 22 12"></polyline>
+					</svg>
+				</span>
+			</button>
+		{/if}
+	</div>
+{/if}
+
+<div class="left-panel-wrapper flex flex-col gap-3">
+	{#if !$isInteriorUnitMinimized}
+		{#if $currentbhk == '3bhk'}
+			<div class="left-panel p-2">
+				<div class="left-panel--header flex justify-between gap-[3rem]">
+					<div class="left-title flex items-center font-bold">
+						<svg
+							width="25"
+							height="25"
+							viewBox="0 0 32 31"
+							class="mr-2"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M15.7834 30.1853C11.9139 30.1853 8.05047 30.1677 4.18106 30.1971C3.40362 30.203 2.89323 29.6084 2.89323 28.9079C2.89917 25.4642 2.89917 22.0205 2.89917 18.5768C2.89917 16.7225 2.89917 14.8682 2.89917 13.0139C2.89917 12.9079 2.95258 12.7666 2.85763 12.7078C2.76267 12.6489 2.67365 12.7784 2.58463 12.8314C2.00897 13.2023 1.4333 13.579 0.851705 13.9499C0.786424 13.9911 0.697404 14.0499 0.643991 14.0323C0.543102 13.997 0.584645 13.8792 0.584645 13.7968C0.584645 12.59 0.584645 11.3833 0.57871 10.1765C0.57871 9.98225 0.649926 9.8704 0.804228 9.77033C2.9051 8.38696 5.00598 7.00359 7.11279 5.62611C8.3294 4.82552 9.54601 4.03082 10.7626 3.23612C12.3412 2.20007 13.9258 1.17578 15.4985 0.133843C15.7181 -0.0133237 15.8902 -0.00743706 16.1098 0.13973C17.5103 1.06982 18.9169 1.98815 20.3234 2.90647C22.8931 4.59594 25.4687 6.28542 28.0385 7.96901C28.9524 8.56945 29.8604 9.16989 30.7803 9.75856C30.9583 9.8704 31.0295 9.99991 31.0236 10.2118C31.0117 11.4009 31.0177 12.5842 31.0177 13.7733C31.0177 13.8616 31.0533 13.9793 30.9761 14.0205C30.8812 14.0794 30.7981 13.9734 30.7209 13.9204C30.1334 13.5437 29.5518 13.1611 28.9643 12.7843C28.899 12.7431 28.8218 12.6371 28.7388 12.696C28.6972 12.7254 28.7031 12.8432 28.7031 12.9197C28.7031 15.6158 28.7031 18.3119 28.7031 21.0139C28.7031 23.6511 28.6913 26.2883 28.7091 28.9315C28.715 29.6202 28.1097 30.1853 27.4391 30.1853C23.5518 30.1735 19.6646 30.1853 15.7834 30.1853ZM15.8071 27.7894C19.1661 27.7894 22.5311 27.7894 25.8901 27.7894C26.2818 27.7894 26.2818 27.7894 26.2818 27.4009C26.2818 22.0382 26.2818 16.6695 26.2877 11.3068C26.2877 11.0889 26.2046 10.9771 26.0325 10.8653C24.6201 9.95282 23.2136 9.0345 21.813 8.11029C19.8842 6.84465 17.9495 5.57313 16.0267 4.30161C15.8605 4.18976 15.7418 4.19565 15.5816 4.3075C14.8219 4.81964 14.0564 5.31412 13.2908 5.81448C10.7092 7.50396 8.12762 9.19932 5.54604 10.8829C5.37393 10.9948 5.32052 11.1184 5.32645 11.3185C5.33239 16.6636 5.33239 22.0087 5.33239 27.3538C5.33239 27.7953 5.33239 27.7953 5.78936 27.7953C9.11871 27.7894 12.4599 27.7894 15.8071 27.7894Z"
+								fill="currentColor"
+							/>
+						</svg>
+
+						Interior Unit
+					</div>
+					<button
+						on:click={() => ($isInteriorUnitMinimized = true)}
+						class="ghost-btn close-btn !px-0 !py-0"
+						id="interior-toggle-amenities"
+					>
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
 				</div>
-				<button
-					on:click={() => {
-						$isInteriorUnitMinimized = !$isInteriorUnitMinimized;
-					}}
-					class="ghost-btn close-btn !px-0 !py-0"
-					id="interior-toggle-amenities"
-				>
-					{#if !$isInteriorUnitMinimized}
-						<img id="mm-am-btn" src={minimizeBtn} alt="minimize" />
-					{/if}
-					{#if $isInteriorUnitMinimized}
-						<img id="mx-am-btn" src={maximizeBtn} alt="maximize" />
-					{/if}
-				</button>
-			</div>
 
-			<div class={!$isInteriorUnitMinimized ? 'block' : 'hidden'}>
 				<div class="pt-3">
 					<div class="inner-btn-group">
 						<button
@@ -2233,29 +2275,44 @@
 							id="living-am"
 							on:click={() => ($hotspotName = 'living')}>Living Room</button
 						>
-
 						<button
 							class={$hotspotName == 'dining' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
 							id="dining-am"
 							on:click={() => ($hotspotName = 'dining')}>Dining Area</button
 						>
-
 						<button
 							class={$hotspotName == 'balcony' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
 							id="balcony-am"
-							on:click={() => ($hotspotName = 'balcony')}>Balcony</button
+							on:click={() => ($hotspotName = 'balcony')}>Balcony 1</button
 						>
-
 						<button
 							class={$hotspotName == 'kitchen' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
 							id="kitchen-am"
 							on:click={() => ($hotspotName = 'kitchen')}>Kitchen</button
 						>
 						<button
-							class={$hotspotName == 'mbedroom' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
-							id="mbedroom-am"
-							on:click={() => ($hotspotName = 'mbedroom')}>Master Bedroom</button
+							class={$hotspotName == 'utilityspace' ? 'active inner-modal-btn ' : 'inner-modal-btn'}
+							id="utilityspace-am"
+							on:click={() => ($hotspotName = 'utilityspace')}>Utility Space</button
 						>
+						<button
+							class={$hotspotName == 'masterBedroom' ? 'active inner-modal-btn ' : 'inner-modal-btn'}
+							id="masterBedroom-am"
+							on:click={() => ($hotspotName = 'masterBedroom')}>Master Bedroom</button
+						>
+						<button
+							class={$hotspotName == 'masterWashroom'
+								? 'active inner-modal-btn '
+								: 'inner-modal-btn '}
+							id="masterWashroom-am"
+							on:click={() => ($hotspotName = 'masterWashroom')}>Washroom 4</button
+						>
+						<button
+							class={$hotspotName == 'bedroom1' ? 'active inner-modal-btn ' : 'inner-modal-btn'}
+							id="bedroom1-am"
+							on:click={() => ($hotspotName = 'bedroom1')}
+							>Bedroom 1
+						</button>
 						<button
 							class={$hotspotName == 'washroom1' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
 							id="washroom1-am"
@@ -2278,7 +2335,6 @@
 							on:click={() => ($hotspotName = 'bedroom3')}
 							>Bedroom 3
 						</button>
-
 						<button
 							class={$hotspotName == 'commonWashroom'
 								? 'active inner-modal-btn '
@@ -2289,53 +2345,39 @@
 					</div>
 				</div>
 			</div>
-		</div>
-	{/if}
-	{#if $currentbhk == '4bhk'}
-		<div class="left-panel p-2">
-			<div class="left-panel--header flex justify-between gap-[3rem]">
-				<div class="left-title flex items-center font-bold">
-					<svg
-						width="25"
-						height="25"
-						viewBox="0 0 32 31"
-						class="mr-2"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
+		{/if}
+		{#if $currentbhk == '4bhk'}
+			<div class="left-panel p-2">
+				<div class="left-panel--header flex justify-between gap-[3rem]">
+					<div class="left-title flex items-center font-bold">
+						<svg
+							width="25"
+							height="25"
+							viewBox="0 0 32 31"
+							class="mr-2"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M15.7834 30.1853C11.9139 30.1853 8.05047 30.1677 4.18106 30.1971C3.40362 30.203 2.89323 29.6084 2.89323 28.9079C2.89917 25.4642 2.89917 22.0205 2.89917 18.5768C2.89917 16.7225 2.89917 14.8682 2.89917 13.0139C2.89917 12.9079 2.95258 12.7666 2.85763 12.7078C2.76267 12.6489 2.67365 12.7784 2.58463 12.8314C2.00897 13.2023 1.4333 13.579 0.851705 13.9499C0.786424 13.9911 0.697404 14.0499 0.643991 14.0323C0.543102 13.997 0.584645 13.8792 0.584645 13.7968C0.584645 12.59 0.584645 11.3833 0.57871 10.1765C0.57871 9.98225 0.649926 9.8704 0.804228 9.77033C2.9051 8.38696 5.00598 7.00359 7.11279 5.62611C8.3294 4.82552 9.54601 4.03082 10.7626 3.23612C12.3412 2.20007 13.9258 1.17578 15.4985 0.133843C15.7181 -0.0133237 15.8902 -0.00743706 16.1098 0.13973C17.5103 1.06982 18.9169 1.98815 20.3234 2.90647C22.8931 4.59594 25.4687 6.28542 28.0385 7.96901C28.9524 8.56945 29.8604 9.16989 30.7803 9.75856C30.9583 9.8704 31.0295 9.99991 31.0236 10.2118C31.0117 11.4009 31.0177 12.5842 31.0177 13.7733C31.0177 13.8616 31.0533 13.9793 30.9761 14.0205C30.8812 14.0794 30.7981 13.9734 30.7209 13.9204C30.1334 13.5437 29.5518 13.1611 28.9643 12.7843C28.899 12.7431 28.8218 12.6371 28.7388 12.696C28.6972 12.7254 28.7031 12.8432 28.7031 12.9197C28.7031 15.6158 28.7031 18.3119 28.7031 21.0139C28.7031 23.6511 28.6913 26.2883 28.7091 28.9315C28.715 29.6202 28.1097 30.1853 27.4391 30.1853C23.5518 30.1735 19.6646 30.1853 15.7834 30.1853ZM15.8071 27.7894C19.1661 27.7894 22.5311 27.7894 25.8901 27.7894C26.2818 27.7894 26.2818 27.7894 26.2818 27.4009C26.2818 22.0382 26.2818 16.6695 26.2877 11.3068C26.2877 11.0889 26.2046 10.9771 26.0325 10.8653C24.6201 9.95282 23.2136 9.0345 21.813 8.11029C19.8842 6.84465 17.9495 5.57313 16.0267 4.30161C15.8605 4.18976 15.7418 4.19565 15.5816 4.3075C14.8219 4.81964 14.0564 5.31412 13.2908 5.81448C10.7092 7.50396 8.12762 9.19932 5.54604 10.8829C5.37393 10.9948 5.32052 11.1184 5.32645 11.3185C5.33239 16.6636 5.33239 22.0087 5.33239 27.3538C5.33239 27.7953 5.33239 27.7953 5.78936 27.7953C9.11871 27.7894 12.4599 27.7894 15.8071 27.7894Z"
+								fill="currentColor"
+							/>
+						</svg>
+
+						Interior Unit
+					</div>
+					<button
+						on:click={() => ($isInteriorUnitMinimized = true)}
+						class="ghost-btn close-btn !px-0 !py-0"
+						id="interior-toggle-amenities"
 					>
-						<path
-							d="M15.7834 30.1853C11.9139 30.1853 8.05047 30.1677 4.18106 30.1971C3.40362 30.203 2.89323 29.6084 2.89323 28.9079C2.89917 25.4642 2.89917 22.0205 2.89917 18.5768C2.89917 16.7225 2.89917 14.8682 2.89917 13.0139C2.89917 12.9079 2.95258 12.7666 2.85763 12.7078C2.76267 12.6489 2.67365 12.7784 2.58463 12.8314C2.00897 13.2023 1.4333 13.579 0.851705 13.9499C0.786424 13.9911 0.697404 14.0499 0.643991 14.0323C0.543102 13.997 0.584645 13.8792 0.584645 13.7968C0.584645 12.59 0.584645 11.3833 0.57871 10.1765C0.57871 9.98225 0.649926 9.8704 0.804228 9.77033C2.9051 8.38696 5.00598 7.00359 7.11279 5.62611C8.3294 4.82552 9.54601 4.03082 10.7626 3.23612C12.3412 2.20007 13.9258 1.17578 15.4985 0.133843C15.7181 -0.0133237 15.8902 -0.00743706 16.1098 0.13973C17.5103 1.06982 18.9169 1.98815 20.3234 2.90647C22.8931 4.59594 25.4687 6.28542 28.0385 7.96901C28.9524 8.56945 29.8604 9.16989 30.7803 9.75856C30.9583 9.8704 31.0295 9.99991 31.0236 10.2118C31.0117 11.4009 31.0177 12.5842 31.0177 13.7733C31.0177 13.8616 31.0533 13.9793 30.9761 14.0205C30.8812 14.0794 30.7981 13.9734 30.7209 13.9204C30.1334 13.5437 29.5518 13.1611 28.9643 12.7843C28.899 12.7431 28.8218 12.6371 28.7388 12.696C28.6972 12.7254 28.7031 12.8432 28.7031 12.9197C28.7031 15.6158 28.7031 18.3119 28.7031 21.0139C28.7031 23.6511 28.6913 26.2883 28.7091 28.9315C28.715 29.6202 28.1097 30.1853 27.4391 30.1853C23.5518 30.1735 19.6646 30.1853 15.7834 30.1853ZM15.8071 27.7894C19.1661 27.7894 22.5311 27.7894 25.8901 27.7894C26.2818 27.7894 26.2818 27.7894 26.2818 27.4009C26.2818 22.0382 26.2818 16.6695 26.2877 11.3068C26.2877 11.0889 26.2046 10.9771 26.0325 10.8653C24.6201 9.95282 23.2136 9.0345 21.813 8.11029C19.8842 6.84465 17.9495 5.57313 16.0267 4.30161C15.8605 4.18976 15.7418 4.19565 15.5816 4.3075C14.8219 4.81964 14.0564 5.31412 13.2908 5.81448C10.7092 7.50396 8.12762 9.19932 5.54604 10.8829C5.37393 10.9948 5.32052 11.1184 5.32645 11.3185C5.33239 16.6636 5.33239 22.0087 5.33239 27.3538C5.33239 27.7953 5.33239 27.7953 5.78936 27.7953C9.11871 27.7894 12.4599 27.7894 15.8071 27.7894Z"
-							fill="#0F5DA8"
-						/>
-						<path
-							d="M20.4084 26.7112C20.3193 26.7112 20.2303 26.7112 20.1413 26.7112C19.4173 26.7112 19.2036 26.5229 19.1739 25.8223C19.1621 25.5751 19.0137 25.5928 18.8535 25.5928C17.536 25.5928 16.2244 25.5928 14.9069 25.5928C14.1829 25.5928 13.4648 25.5986 12.7407 25.5869C12.5034 25.581 12.4321 25.6634 12.4381 25.893C12.444 26.4404 12.1592 26.7112 11.6013 26.7112C11.2927 26.7112 10.99 26.7171 10.6814 26.7112C10.2601 26.7053 9.93958 26.3992 9.90991 25.9813C9.90991 25.9401 9.90397 25.9048 9.90991 25.8635C9.99299 25.2337 9.8565 24.7098 9.37579 24.2271C8.97223 23.8209 8.82386 23.2499 8.78232 22.6671C8.77045 22.4728 8.74078 22.2786 8.72891 22.0843C8.72297 21.9783 8.65176 21.9371 8.56867 21.89C7.80903 21.4956 7.49449 20.8952 7.60132 20.024C7.67847 19.3705 8.30161 18.7171 9.0019 18.5523C9.95145 18.3345 10.9485 18.9879 11.1443 19.9357C11.2155 20.2712 11.1681 20.6185 11.2571 20.9541C11.4648 21.737 11.8031 22.0078 12.628 22.0078C14.7407 22.0078 16.8594 22.0078 18.9722 22.0078C19.9158 22.0078 20.3015 21.6605 20.4084 20.5714C20.4558 20.1005 20.4855 19.6413 20.7941 19.2469C21.2333 18.6818 21.803 18.4463 22.5033 18.5405C23.1502 18.6288 23.6131 19.0115 23.8742 19.5825C24.2303 20.3654 24.0344 21.4603 23.0374 21.8842C22.8831 21.9489 22.895 22.0725 22.8831 22.202C22.8416 22.9202 22.711 23.6207 22.2422 24.2035C22.1294 24.3389 22.0404 24.5155 21.898 24.6038C21.5953 24.7922 21.5597 25.0571 21.5775 25.3632C21.5894 25.6104 21.5834 25.8518 21.5834 26.099C21.5775 26.4758 21.3579 26.6936 20.9721 26.7053C20.7822 26.7171 20.5923 26.7171 20.4084 26.7112Z"
-							fill="#0F5DA8"
-						/>
-						<path
-							d="M15.9302 14.0137C17.1171 14.0137 18.304 14.0255 19.491 14.0137C21.2417 13.9901 22.8797 15.4795 22.945 17.216C22.945 17.2631 22.9509 17.3161 22.9687 17.3632C23.0221 17.5339 22.9806 17.5987 22.7847 17.5692C22.0666 17.4515 21.3841 17.5869 20.7729 17.9695C19.9954 18.4522 19.5919 19.1704 19.5028 20.0711C19.491 20.177 19.4791 20.283 19.4613 20.389C19.3604 20.9482 19.3604 20.9482 18.8026 20.9482C16.7729 20.9482 14.7492 20.9482 12.7195 20.9482C12.3159 20.9482 12.3219 20.9482 12.2803 20.5538C12.2151 19.9298 12.1557 19.3058 11.7581 18.776C11.0815 17.8812 10.2151 17.4044 9.05781 17.5633C8.89164 17.5869 8.84416 17.5339 8.85009 17.3809C8.90351 16.4743 9.24772 15.6855 9.88273 15.0438C10.5059 14.414 11.2714 14.0372 12.1676 14.0196C13.4198 13.996 14.6779 14.0137 15.9302 14.0137Z"
-							fill="#0F5DA8"
-						/>
-					</svg>
-
-					Interior Unit
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
 				</div>
-				<button
-					on:click={() => {
-						$isInteriorUnitMinimized = !$isInteriorUnitMinimized;
-					}}
-					class="ghost-btn close-btn !px-0 !py-0"
-					id="interior-toggle-amenities"
-				>
-					{#if !$isInteriorUnitMinimized}
-						<img id="mm-am-btn" src={minimizeBtn} alt="minimize" />
-					{/if}
-					{#if $isInteriorUnitMinimized}
-						<img id="mx-am-btn" src={maximizeBtn} alt="maximize" />
-					{/if}
-				</button>
-			</div>
 
-			<div class={!$isInteriorUnitMinimized ? 'block' : 'hidden'}>
 				<div class="pt-3">
 					<div class="inner-btn-group">
 						<button
@@ -2353,120 +2395,12 @@
 							on:click={() => ($hotspotName = 'fbhklivingroom')}>Living Room</button
 						>
 						<button
-							class={$hotspotName == 'fbhklivingroom2'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhklivingroom2-am"
-							on:click={() => ($hotspotName = 'fbhklivingroom2')}>Living Room (view 2)</button
-						>
-						<button
-							class={$hotspotName == 'fbhklivingarea'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhklivingarea-am"
-							on:click={() => ($hotspotName = 'fbhklivingarea')}>Living Area</button
-						>
-						<button
-							class={$hotspotName == 'fbhkpoojaroom'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkpoojaroom-am"
-							on:click={() => ($hotspotName = 'fbhkpoojaroom')}>Pooja Room</button
-						>
-						<button
-							class={$hotspotName == 'fbhklivingbalcony'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhklivingbalcony-am"
-							on:click={() => ($hotspotName = 'fbhklivingbalcony')}>Living Balcony</button
-						>
-
-						<button
 							class={$hotspotName == 'fbhkdinningarea'
 								? 'active inner-modal-btn '
 								: 'inner-modal-btn '}
 							id="fbhkdinningarea-am"
 							on:click={() => ($hotspotName = 'fbhkdinningarea')}>Dining Area</button
 						>
-
-						<button
-							class={$hotspotName == 'fbhkkitchen' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
-							id="fbhkkitchen-am"
-							on:click={() => ($hotspotName = 'fbhkkitchen')}>Kitchen</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkutilityspace'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkutilityspace-am"
-							on:click={() => ($hotspotName = 'fbhkutilityspace')}>Utility Space</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkmasterbedroom'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkmasterbedroom-am"
-							on:click={() => ($hotspotName = 'fbhkmasterbedroom')}>Master Bedroom</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkmasterbedroom2'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkmasterbedroom2-am"
-							on:click={() => ($hotspotName = 'fbhkmasterbedroom2')}>Master Bedroom 2</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkwalkinwardrobe'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkwalkinwardrobe-am"
-							on:click={() => ($hotspotName = 'fbhkwalkinwardrobe')}>Walk in Wardrobe</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkmasterwashroom'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkmasterwashroom-am"
-							on:click={() => ($hotspotName = 'fbhkmasterwashroom')}>Master Washroom</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkmasterbalcony'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkmasterbalcony-am"
-							on:click={() => ($hotspotName = 'fbhkmasterbalcony')}>Master Balcony</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkkidsroom1'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkkidsroom1-am"
-							on:click={() => ($hotspotName = 'fbhkkidsroom1')}>Kids Room</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkkidsroom2'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkkidsroom2-am"
-							on:click={() => ($hotspotName = 'fbhkkidsroom2')}>Kids Room 2</button
-						>
-
-						<button
-							class={$hotspotName == 'fbhkwashroom2'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkwashroom2-am"
-							on:click={() => ($hotspotName = 'fbhkwashroom2')}>Washroom 2</button
-						>
-
 						<button
 							class={$hotspotName == 'fbhkbalcony2'
 								? 'active inner-modal-btn '
@@ -2474,49 +2408,92 @@
 							id="fbhkbalcony2-am"
 							on:click={() => ($hotspotName = 'fbhkbalcony2')}>Balcony 2</button
 						>
-
 						<button
-							class={$hotspotName == 'fbhkbedroom31'
+							class={$hotspotName == 'fbhkkitchen' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
+							id="fbhkkitchen-am"
+							on:click={() => ($hotspotName = 'fbhkkitchen')}>Kitchen</button
+						>
+						<button
+							class={$hotspotName == 'fbhkutilityspace'
 								? 'active inner-modal-btn '
 								: 'inner-modal-btn'}
-							id="fbhkbedroom31-am"
-							on:click={() => ($hotspotName = 'fbhkbedroom31')}
-							>Bedroom 3
-						</button>
-
+							id="fbhkutilityspace-am"
+							on:click={() => ($hotspotName = 'fbhkutilityspace')}>Utility Space</button
+						>
 						<button
-							class={$hotspotName == 'fbhkbedroom32'
+							class={$hotspotName == 'fbhkmasterbedroom'
 								? 'active inner-modal-btn '
 								: 'inner-modal-btn'}
-							id="fbhkbedroom32-am"
-							on:click={() => ($hotspotName = 'fbhkbedroom32')}
-							>Bedroom 3 (view 2)
-						</button>
-
+							id="fbhkmasterbedroom-am"
+							on:click={() => ($hotspotName = 'fbhkmasterbedroom')}>Master Bedroom</button
+						>
+						<button
+							class={$hotspotName == 'fbhkmasterwashroom'
+								? 'active inner-modal-btn '
+								: 'inner-modal-btn '}
+							id="fbhkmasterwashroom-am"
+							on:click={() => ($hotspotName = 'fbhkmasterwashroom')}>Washroom 1</button
+						>
+						<button
+							class={$hotspotName == 'fbhkmasterbalcony'
+								? 'active inner-modal-btn '
+								: 'inner-modal-btn '}
+							id="fbhkmasterbalcony-am"
+							on:click={() => ($hotspotName = 'fbhkmasterbalcony')}>Balcony 1</button
+						>
+						<button
+							class={$hotspotName == 'fbhkmasterbedroom2'
+								? 'active inner-modal-btn '
+								: 'inner-modal-btn'}
+							id="fbhkmasterbedroom2-am"
+							on:click={() => ($hotspotName = 'fbhkmasterbedroom2')}>Master Bedroom 2</button
+						>
 						<button
 							class={$hotspotName == 'fbhkmasterwashroom2'
 								? 'active inner-modal-btn '
 								: 'inner-modal-btn '}
 							id="fbhkmasterwashroom2-am"
-							on:click={() => ($hotspotName = 'fbhkmasterwashroom2')}>Master Washroom 2</button
+							on:click={() => ($hotspotName = 'fbhkmasterwashroom2')}>Washroom 2</button
 						>
-
 						<button
 							class={$hotspotName == 'fbhkmasterbalcony2'
 								? 'active inner-modal-btn '
 								: 'inner-modal-btn '}
 							id="fbhkmasterbalcony2-am"
-							on:click={() => ($hotspotName = 'fbhkmasterbalcony2')}>Master Balcony 2</button
+							on:click={() => ($hotspotName = 'fbhkmasterbalcony2')}>Balcony 3</button
 						>
-
+						<button
+							class={$hotspotName == 'fbhkkidsroom1'
+								? 'active inner-modal-btn '
+								: 'inner-modal-btn'}
+							id="fbhkkidsroom1-am"
+							on:click={() => ($hotspotName = 'fbhkkidsroom1')}
+							>Kids Room 1
+						</button>
+						<button
+							class={$hotspotName == 'fbhkbedroom31' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
+							id="fbhkbedroom31-am"
+							on:click={() => ($hotspotName = 'fbhkbedroom31')}>Washroom 3</button
+						>
+						<button
+							class={$hotspotName == 'fbhkbedroom32' ? 'active inner-modal-btn ' : 'inner-modal-btn'}
+							id="fbhkbedroom32-am"
+							on:click={() => ($hotspotName = 'fbhkbedroom32')}
+							>Bedroom 3
+						</button>
+						<button
+							class={$hotspotName == 'fbhkwashroom2' ? 'active inner-modal-btn ' : 'inner-modal-btn '}
+							id="fbhkwashroom2-am"
+							on:click={() => ($hotspotName = 'fbhkwashroom2')}>Washrooom 5</button
+						>
 						<button
 							class={$hotspotName == 'fbhkguestbedroom1'
 								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
+								: 'inner-modal-btn'}
 							id="fbhkguestbedroom1-am"
-							on:click={() => ($hotspotName = 'fbhkguestbedroom1')}>Guest bedroom</button
-						>
-
+							on:click={() => ($hotspotName = 'fbhkguestbedroom1')}
+							>Guest Bedroom 1
+						</button>
 						<button
 							class={$hotspotName == 'fbhkguestbedroom2'
 								? 'active inner-modal-btn '
@@ -2525,15 +2502,6 @@
 							on:click={() => ($hotspotName = 'fbhkguestbedroom2')}
 							>Guest Bedroom 2
 						</button>
-
-						<button
-							class={$hotspotName == 'fbhkwashroom4'
-								? 'active inner-modal-btn '
-								: 'inner-modal-btn '}
-							id="fbhkwashroom4-am"
-							on:click={() => ($hotspotName = 'fbhkwashroom4')}>Washrooom 4</button
-						>
-
 						<button
 							class={$hotspotName == 'fbhkpowderroom'
 								? 'active inner-modal-btn '
@@ -2544,46 +2512,39 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 	{/if}
 
-	<div class="left-panel p-2">
-		<div class="left-panel--header flex justify-between gap-[5rem]">
-			<div class="left-title flex items-center font-bold">
-				<svg
-					width="25"
-					height="25"
-					viewBox="0 0 32 32"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-					class="mr-2"
+	{#if !$isInteriorUnitDataMinimized}
+		<div class="left-panel p-2">
+			<div class="left-panel--header flex justify-between gap-[5rem]">
+				<div class="left-title flex items-center font-bold">
+					<svg
+						width="25"
+						height="25"
+						viewBox="0 0 32 32"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+						class="mr-2"
+					>
+						<path
+							d="M8.90798 13.3021C8.90798 10.1749 8.89311 7.0624 8.90798 3.93517C8.92285 2.07654 10.2613 0.527682 12.031 0.262163C13.9196 -0.0328582 15.6596 0.984965 16.2395 2.74034C16.3436 3.06486 16.418 3.40414 16.4477 3.74341C16.5072 4.46621 16.0462 5.02675 15.377 5.11526C14.7375 5.18901 14.2022 4.73173 14.0832 3.99418C13.9345 3.03536 13.414 2.53382 12.5961 2.57808C11.7633 2.62233 11.2874 3.21237 11.2874 4.21544C11.2874 4.76123 11.2725 5.29227 11.2874 5.83806C11.3171 6.47236 11.0197 7.28366 11.4064 7.68194C11.8079 8.09497 12.6258 7.8147 13.2653 7.8147C15.9124 7.82945 18.5743 7.8147 21.2214 7.82945C21.6973 7.82945 21.8758 7.72619 21.8609 7.22466C21.8312 6.11833 21.8312 5.012 21.8609 3.90567C21.9055 1.88478 23.4373 0.321167 25.4598 0.203159C27.4228 0.0999013 29.1033 1.4865 29.3858 3.47789C29.5048 4.33345 29.1033 4.9825 28.3894 5.10051C27.8392 5.18901 27.051 4.70223 27.0064 3.87617C26.9618 3.00586 26.3223 2.50432 25.5341 2.56333C24.7311 2.62233 24.2403 3.21237 24.2403 4.15644C24.2403 10.2781 24.2403 16.3998 24.2403 22.5067C24.2403 22.728 24.2552 22.9493 24.2255 23.1705C24.166 23.8196 23.6901 24.2769 23.0655 24.2916C22.4558 24.3064 21.9501 23.8491 21.8609 23.2148C21.846 23.0968 21.846 22.964 21.846 22.846C21.8312 21.6364 21.8312 21.6364 20.582 21.6364C17.7564 21.6364 14.9309 21.6512 12.1053 21.6217C11.4807 21.6217 11.1684 21.7249 11.2874 22.4182C11.332 22.6543 11.3023 22.905 11.2874 23.1558C11.2428 23.8048 10.7669 24.2769 10.1423 24.2916C9.50283 24.3064 8.96746 23.8343 8.92285 23.1558C8.89311 22.5658 8.90798 21.9757 8.90798 21.3857C8.90798 18.7157 8.90798 16.0015 8.90798 13.3021ZM16.6113 13.8184C18.1431 13.8184 19.6748 13.8036 21.2214 13.8331C21.7568 13.8479 21.9055 13.6709 21.8758 13.1693C21.8312 12.358 21.8609 11.5467 21.8758 10.7354C21.8907 10.3814 21.8014 10.2044 21.385 10.2044C18.1877 10.2191 15.0052 10.2191 11.8079 10.2044C11.4064 10.2044 11.3023 10.3519 11.3023 10.7207C11.3171 11.5615 11.332 12.3875 11.3023 13.2283C11.2725 13.7299 11.4807 13.8479 11.9417 13.8331C13.4883 13.097 15.0498 13.8184 16.6113 13.8184ZM16.6113 19.3058C18.1728 19.3058 19.7343 19.291 21.2958 19.3205C21.7568 19.3353 21.8907 19.1878 21.8758 18.7452C21.846 18.0519 21.8609 17.3734 21.8758 16.6801C21.8758 16.3556 21.8163 16.1933 21.4296 16.1933C18.2174 16.208 14.9904 16.208 11.7781 16.1933C11.4212 16.1933 11.3023 16.3113 11.3171 16.6653C11.332 17.3586 11.3617 18.0372 11.3171 18.7305C11.2874 19.2468 11.4956 19.3353 11.9566 19.3353C13.4883 19.291 15.0498 19.3058 16.6113 19.3058Z"
+							fill="currentColor"
+						/>
+					</svg>
+					Details
+				</div>
+				<button
+					on:click={() => ($isInteriorUnitDataMinimized = true)}
+					class="ghost-btn close-btn !px-0 !py-0"
+					id="minimize-interior-data-amenities"
 				>
-					<path
-						d="M8.90798 13.3021C8.90798 10.1749 8.89311 7.0624 8.90798 3.93517C8.92285 2.07654 10.2613 0.527682 12.031 0.262163C13.9196 -0.0328582 15.6596 0.984965 16.2395 2.74034C16.3436 3.06486 16.418 3.40414 16.4477 3.74341C16.5072 4.46621 16.0462 5.02675 15.377 5.11526C14.7375 5.18901 14.2022 4.73173 14.0832 3.99418C13.9345 3.03536 13.414 2.53382 12.5961 2.57808C11.7633 2.62233 11.2874 3.21237 11.2874 4.21544C11.2874 4.76123 11.2725 5.29227 11.2874 5.83806C11.3171 6.47236 11.0197 7.28366 11.4064 7.68194C11.8079 8.09497 12.6258 7.8147 13.2653 7.8147C15.9124 7.82945 18.5743 7.8147 21.2214 7.82945C21.6973 7.82945 21.8758 7.72619 21.8609 7.22466C21.8312 6.11833 21.8312 5.012 21.8609 3.90567C21.9055 1.88478 23.4373 0.321167 25.4598 0.203159C27.4228 0.0999013 29.1033 1.4865 29.3858 3.47789C29.5048 4.33345 29.1033 4.9825 28.3894 5.10051C27.8392 5.18901 27.051 4.70223 27.0064 3.87617C26.9618 3.00586 26.3223 2.50432 25.5341 2.56333C24.7311 2.62233 24.2403 3.21237 24.2403 4.15644C24.2403 10.2781 24.2403 16.3998 24.2403 22.5067C24.2403 22.728 24.2552 22.9493 24.2255 23.1705C24.166 23.8196 23.6901 24.2769 23.0655 24.2916C22.4558 24.3064 21.9501 23.8491 21.8609 23.2148C21.846 23.0968 21.846 22.964 21.846 22.846C21.8312 21.6364 21.8312 21.6364 20.582 21.6364C17.7564 21.6364 14.9309 21.6512 12.1053 21.6217C11.4807 21.6217 11.1684 21.7249 11.2874 22.4182C11.332 22.6543 11.3023 22.905 11.2874 23.1558C11.2428 23.8048 10.7669 24.2769 10.1423 24.2916C9.50283 24.3064 8.96746 23.8343 8.92285 23.1558C8.89311 22.5658 8.90798 21.9757 8.90798 21.3857C8.90798 18.7157 8.90798 16.0015 8.90798 13.3021ZM16.6113 13.8184C18.1431 13.8184 19.6748 13.8036 21.2214 13.8331C21.7568 13.8479 21.9055 13.6709 21.8758 13.1693C21.8312 12.358 21.8609 11.5467 21.8758 10.7354C21.8907 10.3814 21.8014 10.2044 21.385 10.2044C18.1877 10.2191 15.0052 10.2191 11.8079 10.2044C11.4064 10.2044 11.3023 10.3519 11.3023 10.7207C11.3171 11.5615 11.332 12.3875 11.3023 13.2283C11.2725 13.7299 11.4807 13.8479 11.9417 13.8331C13.4883 13.8036 15.0498 13.8184 16.6113 13.8184ZM16.6113 19.3058C18.1728 19.3058 19.7343 19.291 21.2958 19.3205C21.7568 19.3353 21.8907 19.1878 21.8758 18.7452C21.846 18.0519 21.8609 17.3734 21.8758 16.6801C21.8758 16.3556 21.8163 16.1933 21.4296 16.1933C18.2174 16.208 14.9904 16.208 11.7781 16.1933C11.4212 16.1933 11.3023 16.3113 11.3171 16.6653C11.332 17.3586 11.3617 18.0372 11.3171 18.7305C11.2874 19.2468 11.4956 19.3353 11.9566 19.3353C13.4883 19.291 15.0498 19.3058 16.6113 19.3058Z"
-						fill="#0F5DA8"
-					/>
-					<path
-						d="M25.8935 31.0057C24.6808 31.0057 23.661 30.5336 22.8204 29.6043C22.4483 29.206 22.1038 28.7635 21.5664 28.6013C20.6568 28.3357 19.954 28.7193 19.3615 29.4421C18.5208 30.4451 17.4873 30.9909 16.2195 31.0057C14.9792 31.0204 13.9594 30.5041 13.0913 29.5748C11.7683 28.144 10.9001 28.144 9.59098 29.5601C7.77193 31.522 5.20873 31.5367 3.40347 29.5748C2.87981 28.9995 2.32858 28.5423 1.5293 28.4832C0.867833 28.439 0.481975 27.849 0.550878 27.2147C0.619782 26.5656 1.08832 26.1378 1.74979 26.1673C2.93493 26.2116 3.92714 26.7131 4.74019 27.6129C5.15361 28.0702 5.55325 28.5275 6.21472 28.616C7.09668 28.734 7.68925 28.2472 8.24048 27.6129C9.27402 26.4329 10.5556 25.9756 12.0439 26.2263C12.981 26.3886 13.7665 26.8754 14.4142 27.5982C14.8414 28.0702 15.2686 28.5423 15.9576 28.616C16.8258 28.7045 17.377 28.2177 17.9145 27.6129C19.1685 26.2263 20.6706 25.8281 22.3794 26.3886C23.096 26.6246 23.661 27.1114 24.1847 27.6867C25.3836 28.9995 26.3345 28.9995 27.5334 27.6719C28.3464 26.7574 29.3249 26.2263 30.4962 26.1526C31.2128 26.1083 31.7089 26.5214 31.7778 27.1852C31.8467 27.8785 31.4609 28.4242 30.758 28.4832C30.0139 28.5423 29.4764 28.9405 28.9941 29.5011C28.1673 30.4894 27.1337 30.9909 25.8935 31.0057Z"
-						fill="#0F5DA8"
-					/>
-				</svg>
-				Details
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
 			</div>
-			<button
-				on:click={() => {
-					$isInteriorUnitDataMinimized = !$isInteriorUnitDataMinimized;
-				}}
-				id="minimize-interior-data-amenities"
-				class="ghost-btn close-btn !px-0 !py-0"
-			>
-				{#if !$isInteriorUnitDataMinimized}
-					<img id="un-mm" src={minimizeBtn} alt="minimize" />
-				{/if}
-				{#if $isInteriorUnitDataMinimized}
-					<img id="un-mx" src={maximizeBtn} alt="maximize" />
-				{/if}
-			</button>
-		</div>
 
 		<div class={!$isInteriorUnitDataMinimized ? 'block' : 'hidden'}>
 			<div class="no-hovers pt-3">
@@ -2602,6 +2563,7 @@
 			</div>
 		</div>
 	</div>
+{/if}
 </div>
 
 {#if $currentbhk == '4bhk' && !['fbhkbalcony2', 'fbhkdinningarea', 'fbhkguestbedroom2', 'fbhkkitchen', 'fbhklivingroom', 'fbhkmasterbalcony2', 'fbhkmasterwashroom', 'fbhkpowderroom', 'fbhkwashroom2', 'fbhkbedroom31', 'fbhkfoyerspace', 'fbhkkidsroom1', 'fbhklivingarea', 'fbhklivingroom2', 'fbhkmasterbedroom', 'fbhkmasterwashroom2', 'fbhkutilityspace', 'fbhkwashroom4', 'fbhkbedroom32', 'fbhkguestbedroom1', 'fbhkkidsroom2', 'fbhklivingbalcony', 'fbhkmasterbalcony', 'fbhkmasterbedroom2', 'fbhkpoojaroom', 'fbhkwalkinwardrobe'].includes($hotspotName)}

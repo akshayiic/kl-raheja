@@ -138,7 +138,15 @@
 </script>
 
 <div class="app">
-	<img src={rahejaLogo} alt="Raheja Logo" class="raheja-logo" class:hidden={$UIPanel == 'loading'} />
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+	<img 
+		src={rahejaLogo} 
+		alt="Raheja Logo" 
+		class="raheja-logo cursor-pointer" 
+		class:hidden={$UIPanel == 'loading'} 
+		on:click={() => goto('/')} 
+	/>
 	<img src={poweredLogo} alt="Powered by Vretail" class="vretail-watermark" class:hidden={$UIPanel == 'loading'} />
 
 	<!-- Device Rotation Overlay for Portrait Mobile Screens -->

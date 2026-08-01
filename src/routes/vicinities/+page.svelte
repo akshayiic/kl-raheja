@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { getContext, onMount } from 'svelte';
+	import { getContext, onMount, onDestroy } from 'svelte';
 	import minimizeBtn from '$lib/images/minimize-icon.svg';
 	import maximizeBtn from '$lib/images/maximize-icon.svg';
 	import * as Accordion from '$lib/components/ui/accordion/index.ts';
@@ -69,10 +69,42 @@
 	let activeDistance = '';
 	let activeVideo = '';
 	let cardSlideIndex = 1;
+	let galleryInterval;
+
+	function startGalleryTimer() {
+		stopGalleryTimer();
+		galleryInterval = setInterval(() => {
+			cardSlideIndex = cardSlideIndex === 3 ? 1 : cardSlideIndex + 1;
+		}, 3000);
+	}
+
+	function stopGalleryTimer() {
+		if (galleryInterval) {
+			clearInterval(galleryInterval);
+			galleryInterval = null;
+		}
+	}
+
+	function selectSlide(num) {
+		cardSlideIndex = num;
+		startGalleryTimer();
+	}
+
+	$: {
+		if (activeFolder && activeCategoryFolder) {
+			startGalleryTimer();
+		} else {
+			stopGalleryTimer();
+		}
+	}
 
 	$: if ($vicinityImg) {
 		cardSlideIndex = 1;
 	}
+
+	onDestroy(() => {
+		stopGalleryTimer();
+	});
 
 	$: {
 		activeFolder = '';
@@ -226,50 +258,62 @@
 	}
 </script>
 
-<div class="left-panel-wrapper">
-	<div class="left-panel p-2">
-		<div class="left-panel--header flex justify-between gap-[2rem] lg:gap-[5rem]">
-			<div class="left-title flex items-center font-bold">
-				<svg
-					class="mr-2"
-					width="17"
-					height="16"
-					viewBox="0 0 17 16"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
+{#if $isAmenitiesMinimized}
+	<button
+		class="minimized-sidebar-tab"
+		style="position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 1001; margin-top: 0;"
+		on:click={() => ($isAmenitiesMinimized = false)}
+		type="button"
+		id="minimize-toggle-vicinity"
+	>
+		<span class="chevron-group">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+				<path d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
+		</span>
+		<span class="golden-circle">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+				<polyline points="2 17 12 22 22 17"></polyline>
+				<polyline points="2 12 12 17 22 12"></polyline>
+			</svg>
+		</span>
+	</button>
+{:else}
+	<div class="left-panel-wrapper">
+		<div class="left-panel p-2">
+			<div class="left-panel--header flex items-center justify-between">
+				<div class="header-icon-box">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+						<line x1="9" y1="3" x2="9" y2="18"></line>
+						<line x1="15" y1="6" x2="15" y2="21"></line>
+					</svg>
+				</div>
+				<div class="left-title flex flex-col justify-center ml-3 text-left">
+					<span class="explore-subtitle">Click to Explore</span>
+					<span class="explore-title">Locations</span>
+				</div>
+				<button
+					on:click={() => {
+						$isAmenitiesMinimized = true;
+					}}
+					class="ghost-btn close-btn ml-auto !px-0 !py-0"
+					id="minimize-toggle-vicinity"
 				>
-					<path
-						d="M8.49535 0.0693359C11.2918 0.0693359 13.4186 2.10511 13.4992 4.65137C13.524 5.34636 13.3008 5.986 13.0341 6.60718C12.3087 8.32929 11.2918 9.87918 10.2315 11.4106C9.79127 12.0441 9.32622 12.653 8.87359 13.2803C8.78058 13.4095 8.71857 13.4464 8.60696 13.2926C7.05063 11.2077 5.5687 9.07964 4.46501 6.71174C3.37992 4.38075 4.31 2.43723 5.4943 1.34246C6.40578 0.499862 7.49087 0.0877871 8.49535 0.0693359ZM8.74338 6.36117C9.61145 6.36117 10.3183 5.66618 10.3245 4.80512C10.3307 3.94407 9.60525 3.21833 8.73717 3.21833C7.8691 3.21833 7.14364 3.95022 7.15604 4.81128C7.16844 5.67233 7.8753 6.36117 8.74338 6.36117Z"
-						fill="#5A4DE3"
-					/>
-					<path
-						d="M8.29317 14.232C10.3207 14.2258 11.8585 14.0167 13.3218 13.414C13.8488 13.1987 14.3511 12.9342 14.7541 12.5222C15.2006 12.067 15.1944 11.6611 14.7417 11.2121C14.3015 10.7754 13.7434 10.5233 13.173 10.308C12.9808 10.2342 12.9684 10.1789 13.0738 10.0128C13.2784 9.68068 13.4582 9.33626 13.6442 8.99184C13.7124 8.86883 13.762 8.80118 13.9232 8.86883C14.6735 9.1948 15.3866 9.58842 15.9508 10.1912C16.9305 11.2429 16.9243 12.6021 15.9198 13.6354C15.1199 14.4534 14.1031 14.9085 13.018 15.2037C9.99211 16.034 6.96625 16.0832 3.9652 15.0684C3.15913 14.7978 2.41506 14.398 1.77641 13.826C0.4805 12.6513 0.474299 11.1445 1.75781 9.9513C2.28485 9.46542 2.89871 9.11485 3.54356 8.80733C3.71098 8.72737 3.76678 8.78272 3.84119 8.92418C4.0272 9.2809 4.21322 9.63148 4.42404 9.96975C4.51704 10.1235 4.47984 10.1666 4.33103 10.2281C3.89079 10.4126 3.46915 10.6278 3.08472 10.9046C2.97931 10.9846 2.8739 11.0707 2.7747 11.1629C2.25385 11.6611 2.24765 12.0916 2.7809 12.5775C3.52496 13.2602 4.44884 13.58 5.40372 13.8322C6.50741 14.1274 7.62351 14.2443 8.29317 14.232Z"
-						fill="#5A4DE3"
-					/>
-				</svg>
-				Vicinities
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
 			</div>
-			<button
-				on:click={() => {
-					$isAmenitiesMinimized = !$isAmenitiesMinimized;
-				}}
-				class="ghost-btn close-btn !px-0 !py-0"
-				id="minimize-toggle-vicinity"
-			>
-				{#if !$isAmenitiesMinimized}
-					<img src={minimizeBtn} alt="minimize" />
-				{/if}
-				{#if $isAmenitiesMinimized}
-					<img src={maximizeBtn} alt="maximize" />
-				{/if}
-			</button>
-		</div>
-		<div
-			class={!$isAmenitiesMinimized ? 'block' : 'hidden'}
-			isInteriorUnitDataMinimized
-			transition:slide={{ duration: 100, axis: 'y' }}
-		>
-			<div class="no-hovers pt-3">
+
+			<div class="panel-divider"></div>
+
+			<div class="infrastructure-heading">Current Infrastructure</div>
+
+			<div class="no-hovers">
 				<div class="inner-btn-group">
 					<Accordion.Root class="w-full sm:max-w-full" multiple={true}>
 						<Accordion.Item class="hidden" value="item-1wqweqweqweqwe">
@@ -278,7 +322,63 @@
 
 						{#each vicinityCategories as category}
 							<Accordion.Item value={category.id}>
-								<Accordion.Trigger id={category.id + '-level'}>{category.name}</Accordion.Trigger>
+								<Accordion.Trigger id={category.id + '-level'}>
+									<div class="flex items-center gap-3 w-full text-left">
+										{#if category.id === 'connectivity'}
+											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M3 12h18" />
+												<path d="M3 18h18" />
+												<path d="M6 12v6" />
+												<path d="M18 12v6" />
+												<path d="M12 12v6" />
+												<path d="M3 12c3-4 6-4 9-4s6 0 9 4" />
+											</svg>
+										{:else if category.id === 'cafe-club'}
+											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M12 22C17.5228 22 22 17.5228 22 12C22 9.5 20 8.5 20 6.5C20 4.5 18 3 15 3C10.5 3 4 6.5 4 12C4 17.5228 7.47715 22 12 22Z" />
+												<circle cx="7.5" cy="10.5" r="1.5" fill="currentColor" />
+												<circle cx="11.5" cy="7.5" r="1.5" fill="currentColor" />
+												<circle cx="16.5" cy="9.5" r="1.5" fill="currentColor" />
+											</svg>
+										{:else if category.id === 'commercial'}
+											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+												<line x1="9" y1="22" x2="9" y2="16" />
+												<line x1="15" y1="22" x2="15" y2="16" />
+												<line x1="9" y1="16" x2="15" y2="16" />
+												<path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z" />
+											</svg>
+										{:else if category.id === 'hospital'}
+											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+												<line x1="12" y1="9" x2="12" y2="15" />
+												<line x1="9" y1="12" x2="15" y2="12" />
+											</svg>
+										{:else if category.id === 'education'}
+											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+												<path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+											</svg>
+										{:else if category.id === 'faith-heritage'}
+											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M4 22h16" />
+												<path d="M20 18H4v-2h16v2z" />
+												<path d="M12 2L2 7v3h20V7L12 2z" />
+												<line x1="6" y1="10" x2="6" y2="16" />
+												<line x1="10" y1="10" x2="10" y2="16" />
+												<line x1="14" y1="10" x2="14" y2="16" />
+												<line x1="18" y1="10" x2="18" y2="16" />
+											</svg>
+										{:else if category.id === 'retail-lifestyle'}
+											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+												<line x1="3" y1="6" x2="21" y2="6" />
+												<path d="M16 10a4 4 0 0 1-8 0" />
+											</svg>
+										{/if}
+										<span class="category-name">{category.name === 'Cafes & Clubs' ? 'Cafe & Clubs' : category.name}</span>
+									</div>
+								</Accordion.Trigger>
 								<Accordion.Content>
 									{#each category.items as item}
 										<button
@@ -299,14 +399,13 @@
 			</div>
 		</div>
 	</div>
-</div>
+{/if}
 
 <div class="d-block visible absolute bottom-0 left-0 right-0 top-0">
 	{#if $vicinityImg === '-'}
 		<video
 			src={introVid}
 			autoplay
-			loop
 			muted
 			playsinline
 			class="absolute top-0 left-0 h-full w-full object-cover z-40"
@@ -336,7 +435,6 @@
 				<video
 					src={activeVideo}
 					autoplay
-					loop
 					muted
 					playsinline
 					class="absolute top-0 left-0 h-full w-full object-cover"
@@ -401,7 +499,7 @@
 				{#each [1, 2, 3] as imgNum}
 					<button
 						class="w-2 h-2 rounded-full transition-all duration-300 p-0 cursor-pointer {cardSlideIndex === imgNum ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/70'}"
-						on:click={() => cardSlideIndex = imgNum}
+						on:click={() => selectSlide(imgNum)}
 						type="button"
 						aria-label={`Slide ${imgNum}`}
 					></button>
@@ -413,11 +511,11 @@
 
 <!-- Center Lightbox Overlay -->
 {#if lightboxOpen && activeFolder && activeCategoryFolder}
-	<div class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[10000] flex flex-col items-center justify-center animate-fade-in" on:click={closeLightbox}>
+	<div class="lightbox-overlay-glass fixed inset-0 z-[10000] flex flex-col items-center justify-center animate-fade-in" on:click={closeLightbox}>
 		
 		<!-- Viewport close button (top right) -->
 		<button
-			class="absolute top-6 right-6 text-white/50 hover:text-white cursor-pointer transition-colors p-2.5 rounded-full hover:bg-white/10 border border-white/10 flex items-center justify-center w-10 h-10 shadow-lg"
+			class="lightbox-close-glass absolute top-6 right-6 cursor-pointer transition-all flex items-center justify-center w-11 h-11 rounded-full shadow-lg"
 			on:click={closeLightbox}
 			type="button"
 		>
@@ -429,19 +527,19 @@
 
 		<!-- Main Image Container -->
 		<div 
-			class="relative max-w-5xl w-[85vw] h-[65vh] rounded-[24px] overflow-hidden border border-white/10 bg-black/20 shadow-2xl flex items-center justify-center"
+			class="lightbox-card-glass relative max-w-5xl w-[85vw] h-[65vh] rounded-[28px] overflow-hidden shadow-2xl flex items-center justify-center p-3"
 			on:click|stopPropagation
 		>
 			<img
 				src={`https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${lightboxIndex}.png`}
 				alt={`${activeLabel} Gallery`}
-				class="w-full h-full object-cover select-none"
+				class="w-full h-full object-cover rounded-[20px] select-none"
 			/>
 		</div>
 
 		<!-- Navigation Pill below the Image -->
 		<div 
-			class="flex items-center gap-6 mt-6 select-none bg-black/40 backdrop-blur-md px-5 py-2 rounded-full border border-white/10 shadow-lg"
+			class="lightbox-nav-glass flex items-center gap-6 mt-6 select-none px-6 py-2.5 rounded-full shadow-lg"
 			on:click|stopPropagation
 		>
 			<!-- Prev Button -->
@@ -533,5 +631,47 @@
 		:global(.left-panel-wrapper) {
 			bottom: 8.5rem !important;
 		}
+	}
+
+	/* Lightbox Glassmorphism Overlay styling */
+	.lightbox-overlay-glass {
+		background: rgba(10, 22, 34, 0.5) !important;
+		backdrop-filter: blur(35px) saturate(210%) !important;
+		-webkit-backdrop-filter: blur(35px) saturate(210%) !important;
+	}
+
+	/* Glass Close Button */
+	.lightbox-close-glass {
+		background: rgba(255, 255, 255, 0.06) !important;
+		backdrop-filter: blur(10px) !important;
+		-webkit-backdrop-filter: blur(10px) !important;
+		border: 1px solid rgba(255, 255, 255, 0.15) !important;
+		color: rgba(255, 255, 255, 0.6) !important;
+		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25) !important;
+	}
+
+	.lightbox-close-glass:hover {
+		color: #ffffff !important;
+		background: rgba(255, 255, 255, 0.12) !important;
+		border-color: rgba(255, 255, 255, 0.25) !important;
+		transform: scale(1.05);
+	}
+
+	/* Glass Card containing the image */
+	.lightbox-card-glass {
+		background: rgba(255, 255, 255, 0.05) !important;
+		backdrop-filter: blur(25px) saturate(180%) !important;
+		-webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+		border: 1px solid rgba(255, 255, 255, 0.12) !important;
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 255, 255, 0.05) !important;
+	}
+
+	/* Glass Navigation Pill */
+	.lightbox-nav-glass {
+		background: rgba(255, 255, 255, 0.07) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
+		border: 1px solid rgba(255, 255, 255, 0.15) !important;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
 	}
 </style>
