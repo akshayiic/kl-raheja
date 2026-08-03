@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page, navigating } from '$app/stores';
 	import { onMount, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import '../app.pcss';
@@ -47,6 +47,19 @@
 	};
 	const vicinityImg = writable('-');
 	setContext('vicinityImg', vicinityImg);
+	const cloudTransition = writable(false);
+	setContext('cloudTransition', cloudTransition);
+
+	$: if ($navigating) {
+		const fromPath = $navigating.from?.url.pathname;
+		const toPath = $navigating.to?.url.pathname;
+		if (fromPath === '/menu' && (toPath === '/views' || toPath === '/vicinities')) {
+			cloudTransition.set(true);
+			setTimeout(() => {
+				cloudTransition.set(false);
+			}, 2800);
+		}
+	}
 
 	// check for the iframe window
 	function inIframe() {
@@ -167,6 +180,12 @@
 	</div>
 
 	<slot />
+
+	{#if $cloudTransition}
+		<div class="cloud-transition-overlay">
+			<img src="/clouds.png" class="cloud-img" alt="Transitioning Clouds" />
+		</div>
+	{/if}
 
 	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')} class:hidden={$UIPanel == 'loading' || $page.url.pathname == '/views' || $page.url.pathname == '/menu' || $page.url.pathname == '/vicinities'}>
 		<nav class="z-[999]">
@@ -389,3 +408,41 @@
 		</nav>
 	</div>
 </div>
+
+<style>
+	.cloud-transition-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 3000000000;
+		pointer-events: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: transparent;
+	}
+
+	.cloud-img {
+		width: 130vw;
+		max-width: none;
+		height: 100vh;
+		object-fit: cover;
+		animation: clouds-slide-up 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+	}
+
+	@keyframes clouds-slide-up {
+		0% {
+			transform: translateY(100%);
+			opacity: 0;
+		}
+		25% {
+			opacity: 1;
+		}
+		75% {
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(-100%);
+			opacity: 0;
+		}
+	}
+</style>

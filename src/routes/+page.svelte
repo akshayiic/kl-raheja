@@ -36,6 +36,7 @@
 	let foliageSettled = $state(false);
 	let hasScrolledOnce = $state(false);
 	let parallaxImagesLoaded = $state(false);
+	let activeHover = $state(null);
 
 	function preloadParallaxImages() {
 		const images = [
@@ -249,8 +250,8 @@
 </script>
 
 <svelte:head>
-	<title>K Rahega</title>
-	<meta name="description" content="kl-rahega" />
+	<title>K Raheja</title>
+	<meta name="description" content="kl-raheja" />
 </svelte:head>
 
 <Home />
@@ -358,7 +359,7 @@
 		<div class="left-panel--header mb-3 flex justify-between">
 			<div class="left-title flex flex-col gap-1 text-left">
 				<div class="text-2xl font-bold">Instructions</div>
-				See how to explore K Rahega
+				See how to explore K Raheja
 			</div>
 			<button
 				on:click={() => {
@@ -422,7 +423,7 @@
 		<div class="left-panel--header mb-3 flex justify-between">
 			<div class="left-title flex flex-col gap-1 text-left">
 				<div class="text-2xl font-bold">Instructions</div>
-				See how to explore K Rahega
+				See how to explore K Raheja
 			</div>
 			<button
 				on:click={() => {
@@ -503,10 +504,30 @@
 		class:has-scrolled-once={hasScrolledOnce}
 	>
 		<div class="h-full w-full relative">
+			{#if foliageSettled && !hasScrolled}
+				<div class="absolute inset-0 z-[5] flex pointer-events-auto">
+					<div
+						class="w-[33vw] h-full cursor-default"
+						on:mouseenter={() => activeHover = 'left'}
+						on:mouseleave={() => activeHover = null}
+					></div>
+					<div
+						class="w-[34vw] h-full cursor-default"
+						on:mouseenter={() => activeHover = 'center'}
+						on:mouseleave={() => activeHover = null}
+					></div>
+					<div
+						class="w-[33vw] h-full cursor-default"
+						on:mouseenter={() => activeHover = 'right'}
+						on:mouseleave={() => activeHover = null}
+					></div>
+				</div>
+			{/if}
+
 			<!-- Background building image (z-index: 1) -->
 			<div
 				class="fixed inset-0 pointer-events-none flex items-center justify-center parallax-bg-container"
-				style="transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}; transform: scale({hasScrolled ? 1.1 : 1.0}); z-index: 1;"
+				style="transition: transform {hasScrolled ? '4.0s ease-in-out' : foliageSettled ? '0.8s cubic-bezier(0.25, 1, 0.5, 1)' : '2.0s ease-out'}; transform: scale({hasScrolled ? 1.1 : activeHover === 'center' ? 1.03 : 1.0}) translateX({hasScrolled ? '0px' : activeHover === 'left' ? '25px' : activeHover === 'right' ? '-25px' : '0px'}); z-index: 1;"
 			>
 				<img class="w-full h-full object-cover" src="/building.png" alt="Building background" />
 			</div>
@@ -515,8 +536,8 @@
 			<div
 				class="fixed inset-0 pointer-events-none flex items-center justify-center parallax-mask-container"
 				style="
-					transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}, opacity {hasScrolled ? '3.5s ease-in-out' : '1.8s ease-out'};
-					transform: scale({hasScrolled ? 7.0 : 0.7});
+					transition: transform {hasScrolled ? '4.0s ease-in-out' : foliageSettled ? '0.8s cubic-bezier(0.25, 1, 0.5, 1)' : '2.0s ease-out'}, opacity {hasScrolled ? '3.5s ease-in-out' : '1.8s ease-out'};
+					transform: scale({hasScrolled ? 7.0 : activeHover === 'center' ? 0.72 : 0.7}) translateX({hasScrolled ? '0px' : activeHover === 'left' ? '30px' : activeHover === 'right' ? '-30px' : '0px'});
 					opacity: {hasScrolled ? 0 : 1};
 					z-index: 2;
 				"
@@ -533,7 +554,7 @@
 				class="foliage-container left-foliage {foliageSettled ? 'settled' : ''}"
 				class:scrolled={hasScrolled}
 				class:slid-out={foliageSlidOut && !hasScrolled}
-				style="left: 0;"
+				style="left: 0; {foliageSettled && !hasScrolled ? `transform: translateX(${activeHover === 'left' ? '-32%' : activeHover === 'center' || activeHover === 'right' ? '-38%' : '-35%'}) scale(${activeHover === 'left' ? 1.02 : activeHover === 'center' || activeHover === 'right' ? 0.98 : 1.0}); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);` : ''}"
 			>
 				<img class="w-full h-full object-cover object-right" src="/leftfull1.png" alt="Floral frame left" />
 			</div>
@@ -543,7 +564,7 @@
 				class="foliage-container right-foliage {foliageSettled ? 'settled' : ''}"
 				class:scrolled={hasScrolled}
 				class:slid-out={foliageSlidOut && !hasScrolled}
-				style="right: 0;"
+				style="right: 0; {foliageSettled && !hasScrolled ? `transform: translateX(${activeHover === 'right' ? '32%' : activeHover === 'center' || activeHover === 'left' ? '38%' : '35%'}) scale(${activeHover === 'right' ? 1.02 : activeHover === 'center' || activeHover === 'left' ? 0.98 : 1.0}); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);` : ''}"
 			>
 				<img class="w-full h-full object-cover object-left" src="/rightfull1.png" alt="Floral frame right" />
 			</div>
@@ -799,37 +820,55 @@
 	}
 
 	/* Navigation Cards Stack & Design */
-	.nav-card {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
-		display: flex;
-		align-items: center;
-		gap: 1.5rem;
-		padding-left: 2rem;
-		padding-right: 1.5rem;
-		padding-top: 1.5rem;
-		padding-bottom: 1.5rem;
-		border-radius: 2.5rem;
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
-	}
+.nav-card {
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #f3efe9;
+ 
+     background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(28px) saturate(1.3);
+    -webkit-backdrop-filter: blur(28px) saturate(1.3);
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.45),
+      inset 0 1px 0 rgba(255,255,255,.08);
+ 
+    transition: transform .55s cubic-bezier(.19,1,.22,1),
+                opacity .55s ease,
+                filter .55s ease;
+    cursor: pointer;
+  }
+ 
+  .nav-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+   background: rgba(255, 255, 255, 0.1);
 
-	.nav-card.front {
-		z-index: 20;
-		opacity: 1;
-		transform: translate(0, 0) scale(1);
-		pointer-events: auto;
-	}
+    pointer-events: none;
+  }
+ 
+  /* stacking states */
+  .nav-card.front {
+    z-index: 20;
+    opacity: 1;
+    transform: translate(0,0) scale(1);
+    pointer-events: auto;
+    filter: blur(0);
+  }
 
 	.nav-card.back {
-		z-index: 10;
-		opacity: 0.35;
-		transform: translate(16px, -16px) scale(0.95);
-		pointer-events: none;
-		filter: blur(1.5px);
+   z-index: 12;
+    opacity: .55;
+    transform: translate(14px,-16px) scale(.95);
+    pointer-events: none;
+    filter: blur(1.5px);
 	}
 
 	.thumbnail-cutout {

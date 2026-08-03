@@ -355,11 +355,6 @@
 		// Center pulse dot
 		const pulseDot = document.createElement('div');
 		pulseDot.classList.add('hotspot-pulse-dot');
-		
-		const pulseRing = document.createElement('div');
-		pulseRing.classList.add('hotspot-pulse-ring');
-		pulseDot.appendChild(pulseRing);
-		
 		wrapper.appendChild(pulseDot);
 
 		// Vertical line
@@ -460,21 +455,18 @@
 		>
 			<span class="chevron-group">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-					<path d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					<path class="chevron-arrow-1" d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					<path class="chevron-arrow-2" d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg>
 			</span>
 			<span class="golden-circle">
-				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="12" cy="12" r="10"></circle>
-					<polyline points="12 6 12 12 16 14"></polyline>
-				</svg>
+				<img src="/timearrow.png" alt="Time Arrow" class="w-5 h-5 object-contain" />
 			</span>
 		</button>
 	{/if}
 
 	<!-- Time of Day Selector (Semi-circular dial on right edge) -->
-	<div class="time-dial {timeCollapsed ? 'collapsed' : ''}" on:wheel={handleTimeWheel}>
+	<div class="time-dial {timeCollapsed ? 'collapsed' : ''}" on:wheel|preventDefault|stopPropagation|nonpassive={handleTimeWheel}>
 		<!-- Collapse/Expand Arrow -->
 		{#if !timeCollapsed}
 			<button
@@ -567,8 +559,8 @@
 		>
 			<span class="chevron-group">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-					<path d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					<path class="chevron-arrow-1" d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+					<path class="chevron-arrow-2" d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg>
 			</span>
 			<span class="golden-circle">
@@ -582,7 +574,7 @@
 	{/if}
 
 	<!-- Floor Selector (Semi-circular dial on left edge) -->
-	<div class="floor-dial {floorCollapsed ? 'collapsed' : ''}" on:wheel={handleFloorWheel}>
+	<div class="floor-dial {floorCollapsed ? 'collapsed' : ''}" on:wheel|preventDefault|stopPropagation|nonpassive={handleFloorWheel}>
 		<!-- Collapse/Expand Arrow -->
 		{#if !floorCollapsed}
 			<button
@@ -606,9 +598,9 @@
 
 		<!-- Center text labels -->
 		<div class="dial-center-label">
-			<span class="text-[14px] tracking-widest text-white/40 uppercase">Total Floors</span>
-			<span class="text-3xl font-semibold text-white mt-1" style="font-family: 'The Seasons', serif;">
-				22<span class="text-xs font-normal align-top ml-0.5 text-[#dead66]">th</span>
+			<span class="text-[12px] tracking-widest text-white/40 uppercase">Total Floors</span>
+			<span class="text-3xl font-semibold text-white mt-1 mx-auto"  >
+				22<span class="text-xs font-normal align-top ml-0.5  ">th</span>
 			</span>
 		</div>
 
@@ -704,7 +696,7 @@
 	/* Semi-circular dials layout */
 	.floor-dial {
 		position: fixed;
-		left: 0;
+		left: -20px;
 		top: 50%;
 		transform: translateY(-50%);
 		width: 220px;
@@ -726,7 +718,7 @@
 
 	.time-dial {
 		position: fixed;
-		right: 0;
+		right: -40px;
 		top: 50%;
 		transform: translateY(-50%);
 		width: 220px;
@@ -788,7 +780,7 @@
 	/* Center labels for Floor Dial */
 	.dial-center-label {
 		position: absolute;
-		left: 24px;
+		left: 40px;
 		top: 50%;
 		transform: translateY(-50%);
 		display: flex;
@@ -798,8 +790,7 @@
 		user-select: none;
 	}
 
-	.right-dial-label {
-		left: auto !important;
+	.right-dial-label { 
 		right: 24px !important;
 		align-items: flex-end !important;
 		text-align: right !important;
@@ -854,8 +845,8 @@
 		color: white !important;
 		font-weight: bold;
 		width: 48px;
-		height: 48px;
-		font-size: 30px;
+		height: 35px;
+		font-size: 20px;
 		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
 	}
 
@@ -916,8 +907,7 @@
 		color: rgba(255, 255, 255, 0.85);
 		font-size: 11px;
 		font-weight: 500;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		letter-spacing: 0.08em; 
 		font-family: 'Imprima', sans-serif;
 	}
 
@@ -1016,25 +1006,93 @@
 		position: absolute;
 	}
 
-	/* Responsive */
-	/* Responsive styling for semi-circular dials */
+	/* Responsive styling for semi-circular dials and controls */
 	@media (max-width: 768px) {
 		.floor-dial {
-			transform: translateY(-50%) scale(0.8) !important;
+			transform: translateY(-50%) scale(0.65) !important;
 			transform-origin: left center;
 		}
 		.floor-dial.collapsed {
-			transform: translate(-175px, -50%) scale(0.8) !important;
+			transform: translate(-180px, -50%) scale(0.65) !important;
 			transform-origin: left center;
 		}
 
 		.time-dial {
-			transform: translateY(-50%) scale(0.8) !important;
+			transform: translateY(-50%) scale(0.65) !important;
 			transform-origin: right center;
 		}
 		.time-dial.collapsed {
-			transform: translate(135px, -50%) scale(0.8) !important;
+			transform: translate(180px, -50%) scale(0.65) !important;
 			transform-origin: right center;
+		}
+
+		:global(.minimized-sidebar-tab) {
+			transform: translateY(-50%) scale(0.65) !important;
+			transform-origin: left center !important;
+			margin-top: 0 !important;
+		}
+		
+		:global(.minimized-sidebar-tab-right) {
+			transform: translateY(-50%) scale(0.65) !important;
+			transform-origin: right center !important;
+		}
+
+		:global(.overview-hotspot .hotspot-pulse-dot) {
+			width: 32px !important;
+			height: 32px !important;
+			left: -16px !important;
+			top: -16px !important;
+		}
+
+		.go-back-btn {
+			bottom: 16px !important;
+			left: 16px !important;
+			padding: 6px 16px !important;
+			font-size: 10px !important;
+		}
+
+		.hotspot-toggle-pill {
+			top: 16px !important;
+			padding: 6px 12px 6px 16px !important;
+			gap: 10px !important;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.floor-dial {
+			transform: translateY(-50%) scale(0.52) !important;
+			transform-origin: left center;
+		}
+		.floor-dial.collapsed {
+			transform: translate(-185px, -50%) scale(0.52) !important;
+			transform-origin: left center;
+		}
+
+		.time-dial {
+			transform: translateY(-50%) scale(0.52) !important;
+			transform-origin: right center;
+		}
+		.time-dial.collapsed {
+			transform: translate(185px, -50%) scale(0.52) !important;
+			transform-origin: right center;
+		}
+
+		:global(.minimized-sidebar-tab) {
+			transform: translateY(-50%) scale(0.52) !important;
+			transform-origin: left center !important;
+			margin-top: 0 !important;
+		}
+		
+		:global(.minimized-sidebar-tab-right) {
+			transform: translateY(-50%) scale(0.52) !important;
+			transform-origin: right center !important;
+		}
+
+		:global(.overview-hotspot .hotspot-pulse-dot) {
+			width: 26px !important;
+			height: 26px !important;
+			left: -13px !important;
+			top: -13px !important;
 		}
 	}
 
@@ -1046,38 +1104,21 @@
 
 	:global(.overview-hotspot .hotspot-pulse-dot) {
 		position: absolute;
-		width: 8px;
-		height: 8px;
-		background: #ffffff;
-		border-radius: 50%;
-		left: -4px;
-		top: -4px;
-		box-shadow: 0 0 8px #ffffff;
+		width: 44px;
+		height: 44px;
+		background: url('/hotspot.png') no-repeat center center;
+		background-size: contain;
+		left: -22px;
+		top: -22px;
 		z-index: 2;
+		transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 	}
 
-	:global(.overview-hotspot .hotspot-pulse-ring) {
-		position: absolute;
-		width: 24px;
-		height: 24px;
-		border: 1.5px solid rgba(255, 255, 255, 0.8);
-		border-radius: 50%;
-		left: -12px;
-		top: -12px;
-		animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-		pointer-events: none;
+	:global(.overview-hotspot .hotspot-pulse-dot:hover) {
+		transform: scale(1.15);
 	}
 
-	@keyframes pulse-ring {
-		0% {
-			transform: scale(0.5);
-			opacity: 1;
-		}
-		80%, 100% {
-			transform: scale(2.2);
-			opacity: 0;
-		}
-	}
+
 
 	:global(.overview-hotspot .hotspot-line) {
 		position: absolute;
@@ -1090,8 +1131,7 @@
 		transform: scaleY(0);
 	}
 	
-	:global(.overview-hotspot .hotspot-pulse-dot),
-	:global(.overview-hotspot .hotspot-pulse-ring) {
+	:global(.overview-hotspot .hotspot-pulse-dot) {
 		pointer-events: auto !important;
 		cursor: pointer !important;
 	}
@@ -1243,6 +1283,5 @@
 			font-size: 10px !important;
 		}
 	}
-
 
 </style>

@@ -275,8 +275,8 @@
 	>
 		<span class="chevron-group">
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-				<path d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+				<path class="chevron-arrow-1" d="M7 6L13 12L7 18" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+				<path class="chevron-arrow-2" d="M14 6L20 12L14 18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 			</svg>
 		</span>
 		<span class="golden-circle">
@@ -331,58 +331,11 @@
 							<Accordion.Item value={category.id}>
 								<Accordion.Trigger id={category.id + '-level'}>
 									<div class="flex items-center gap-3 w-full text-left">
-										{#if category.id === 'connectivity'}
-											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<path d="M3 12h18" />
-												<path d="M3 18h18" />
-												<path d="M6 12v6" />
-												<path d="M18 12v6" />
-												<path d="M12 12v6" />
-												<path d="M3 12c3-4 6-4 9-4s6 0 9 4" />
-											</svg>
-										{:else if category.id === 'cafe-club'}
-											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<path d="M12 22C17.5228 22 22 17.5228 22 12C22 9.5 20 8.5 20 6.5C20 4.5 18 3 15 3C10.5 3 4 6.5 4 12C4 17.5228 7.47715 22 12 22Z" />
-												<circle cx="7.5" cy="10.5" r="1.5" fill="currentColor" />
-												<circle cx="11.5" cy="7.5" r="1.5" fill="currentColor" />
-												<circle cx="16.5" cy="9.5" r="1.5" fill="currentColor" />
-											</svg>
-										{:else if category.id === 'commercial'}
-											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-												<line x1="9" y1="22" x2="9" y2="16" />
-												<line x1="15" y1="22" x2="15" y2="16" />
-												<line x1="9" y1="16" x2="15" y2="16" />
-												<path d="M8 6h2v2H8V6zm6 0h2v2h-2V6zm-6 5h2v2H8v-2zm6 0h2v2h-2v-2z" />
-											</svg>
-										{:else if category.id === 'hospital'}
-											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-												<line x1="12" y1="9" x2="12" y2="15" />
-												<line x1="9" y1="12" x2="15" y2="12" />
-											</svg>
-										{:else if category.id === 'education'}
-											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-												<path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
-											</svg>
-										{:else if category.id === 'faith-heritage'}
-											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<path d="M4 22h16" />
-												<path d="M20 18H4v-2h16v2z" />
-												<path d="M12 2L2 7v3h20V7L12 2z" />
-												<line x1="6" y1="10" x2="6" y2="16" />
-												<line x1="10" y1="10" x2="10" y2="16" />
-												<line x1="14" y1="10" x2="14" y2="16" />
-												<line x1="18" y1="10" x2="18" y2="16" />
-											</svg>
-										{:else if category.id === 'retail-lifestyle'}
-											<svg class="category-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-												<line x1="3" y1="6" x2="21" y2="6" />
-												<path d="M16 10a4 4 0 0 1-8 0" />
-											</svg>
-										{/if}
+										<img 
+											src={`/${category.id === 'cafe-club' ? 'cafe' : category.id === 'retail-lifestyle' ? 'retail' : category.id === 'faith-heritage' ? 'faith' : category.id === 'connectivity' ? 'connectivity1' : category.id === 'hospital' ? 'hospital1' : category.id}.png`} 
+											alt={category.name} 
+											class="category-icon w-5 h-5 object-contain" 
+										/>
 										<span class="category-name">{category.name === 'Cafes & Clubs' ? 'Cafe & Clubs' : category.name}</span>
 									</div>
 								</Accordion.Trigger>
@@ -473,7 +426,7 @@
 <!-- Right-side gallery card (preview with dots) -->
 {#if activeFolder && activeCategoryFolder}
 	{@const activePreviewUrl = `https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${cardSlideIndex}.png`}
-	<div class="fixed right-6 top-1/2 -translate-y-1/2 z-[1000] w-[345px] bg-[#0c1c28]/70 backdrop-blur-2xl border border-white/10 rounded-[28px] shadow-2xl p-5 select-none animate-fade-in text-left">
+	<div class="right-gallery-card p-5 select-none animate-fade-in text-left">
 		<!-- Header with Title & Distance & Close Button -->
 		<div class="flex justify-between items-start mb-4">
 			<div class="flex flex-col pr-4">
@@ -553,13 +506,13 @@
 
 		<!-- Main Image Container -->
 		<div 
-			class="lightbox-card-glass relative max-w-5xl w-[85vw] h-[65vh] rounded-[28px] overflow-hidden shadow-2xl flex items-center justify-center p-3"
+			class="lightbox-card-glass relative max-w-6xl w-[90vw] h-[78vh] rounded-[16px] overflow-hidden shadow-2xl flex items-center justify-center p-2.5"
 			on:click|stopPropagation
 		>
 			<img
 				src={`https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${lightboxIndex}.png`}
 				alt={`${activeLabel} Gallery`}
-				class="w-full h-full object-cover rounded-[20px] select-none"
+				class="w-full h-full object-cover rounded-[10px] select-none"
 			/>
 		</div>
 
@@ -661,43 +614,123 @@
 
 	/* Lightbox Glassmorphism Overlay styling */
 	.lightbox-overlay-glass {
-		background: rgba(10, 22, 34, 0.5) !important;
-		backdrop-filter: blur(35px) saturate(210%) !important;
-		-webkit-backdrop-filter: blur(35px) saturate(210%) !important;
+		background: rgba(10, 10, 10, 0.45) !important;
+		backdrop-filter: blur(40px) !important;
+		-webkit-backdrop-filter: blur(40px) !important;
 	}
 
 	/* Glass Close Button */
 	.lightbox-close-glass {
-		background: rgba(255, 255, 255, 0.06) !important;
-		backdrop-filter: blur(10px) !important;
-		-webkit-backdrop-filter: blur(10px) !important;
-		border: 1px solid rgba(255, 255, 255, 0.15) !important;
+		position: relative;
+		background: rgba(12, 12, 12, 0.55) !important;
+		backdrop-filter: blur(40px) !important;
+		-webkit-backdrop-filter: blur(40px) !important;
+		border: 0.65px solid transparent !important;
+		background-clip: padding-box !important;
 		color: rgba(255, 255, 255, 0.6) !important;
 		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25) !important;
 	}
 
+	.lightbox-close-glass::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 50% !important;
+		padding: 0.65px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(153, 153, 153, 0) 100%);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		z-index: -1;
+	}
+
 	.lightbox-close-glass:hover {
 		color: #ffffff !important;
-		background: rgba(255, 255, 255, 0.12) !important;
-		border-color: rgba(255, 255, 255, 0.25) !important;
 		transform: scale(1.05);
 	}
 
 	/* Glass Card containing the image */
 	.lightbox-card-glass {
-		background: rgba(255, 255, 255, 0.05) !important;
-		backdrop-filter: blur(25px) saturate(180%) !important;
-		-webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-		border: 1px solid rgba(255, 255, 255, 0.12) !important;
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 255, 255, 0.05) !important;
+		position: relative;
+		background: rgba(12, 12, 12, 0.55) !important;
+		backdrop-filter: blur(40px) !important;
+		-webkit-backdrop-filter: blur(40px) !important;
+		border: 0.65px solid transparent !important;
+		background-clip: padding-box !important;
+		border-radius: 16px !important;
+		box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
+	}
+
+	.lightbox-card-glass::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 16px !important;
+		padding: 0.65px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(153, 153, 153, 0) 100%);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		z-index: -1;
 	}
 
 	/* Glass Navigation Pill */
 	.lightbox-nav-glass {
-		background: rgba(255, 255, 255, 0.07) !important;
-		backdrop-filter: blur(20px) !important;
-		-webkit-backdrop-filter: blur(20px) !important;
-		border: 1px solid rgba(255, 255, 255, 0.15) !important;
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+		position: relative;
+		background: rgba(12, 12, 12, 0.55) !important;
+		backdrop-filter: blur(40px) !important;
+		-webkit-backdrop-filter: blur(40px) !important;
+		border: 0.65px solid transparent !important;
+		background-clip: padding-box !important;
+		border-radius: 9999px !important;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+	}
+
+	.lightbox-nav-glass::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 9999px !important;
+		padding: 0.65px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(153, 153, 153, 0) 100%);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		z-index: -1;
+	}
+
+	/* Right Gallery Card */
+	.right-gallery-card {
+		position: fixed;
+		right: 1.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 1000;
+		width: 345px;
+		background: rgba(12, 12, 12, 0.55) !important;
+		backdrop-filter: blur(40px) !important;
+		-webkit-backdrop-filter: blur(40px) !important;
+		border: 0.65px solid transparent !important;
+		background-clip: padding-box !important;
+		border-radius: 12px !important;
+		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
+		transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+	}
+
+	.right-gallery-card::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 12px !important;
+		padding: 0.65px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(153, 153, 153, 0) 100%);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		z-index: -1;
 	}
 </style>
