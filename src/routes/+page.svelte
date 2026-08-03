@@ -105,7 +105,7 @@
 		if (hasScrolled) {
 			setTimeout(() => {
 				goto('/menu');
-			}, 3600);
+			}, 2000);
 		}
 	});
 	let touchStartY = 0;
@@ -904,8 +904,8 @@
 		backdrop-filter: blur(0px);
 		-webkit-backdrop-filter: blur(0px);
 		pointer-events: none;
-		transition: background-color 1.2s ease-in-out, backdrop-filter 1.2s ease-in-out;
-		transition-delay: 2.3s;
+		transition: background-color 0.7s ease-in-out, backdrop-filter 0.7s ease-in-out;
+		transition-delay: 1.5s;
 	}
 
 	.scroll-transition-overlay.active {

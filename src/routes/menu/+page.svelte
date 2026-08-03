@@ -280,6 +280,9 @@
 		preloadCode('/views');
 		preloadCode('/vicinities');
 
+		const cloudPreload = new Image();
+		cloudPreload.src = '/clouds.png';
+
 		window.addEventListener('resize', handleResize);
 
 		setTimeout(() => {
@@ -319,11 +322,11 @@
 				};
 				goto('/vicinities');
 			}
-		}, 100);
+		}, 500);
 
 		setTimeout(() => {
 			cloudTransition.set(false);
-		}, 1500);
+		}, 1800);
 	}
 
 	function spawnRipple(x, y, type) {
@@ -843,7 +846,7 @@
 		backdrop-filter: blur(25px);
 		-webkit-backdrop-filter: blur(25px);
 		pointer-events: none;
-		transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+		transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 		opacity: 1;
 	}
 

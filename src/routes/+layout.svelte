@@ -442,7 +442,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		animation: fog-fade 1.5s ease-in-out forwards;
+		animation: fog-fade 1.8s ease-in-out forwards;
+		will-change: background-color, backdrop-filter;
 	}
 
 	.cloud-img {
@@ -452,7 +453,11 @@
 		object-fit: contain;
 		position: absolute;
 		transform-origin: center center;
-		animation: clouds-slide-up 1.5s ease-in-out forwards;
+		animation: clouds-slide-up 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+		will-change: transform, opacity, filter;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+		transform: translateZ(0);
 	}
 
 	@keyframes fog-fade {
@@ -461,15 +466,15 @@
 			backdrop-filter: blur(0px) saturate(100%);
 			-webkit-backdrop-filter: blur(0px) saturate(100%);
 		}
-		20% {
-			background-color: rgba(255, 255, 255, 0.08);
-			backdrop-filter: blur(35px) saturate(150%);
-			-webkit-backdrop-filter: blur(35px) saturate(150%);
+		30% {
+			background-color: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(40px) saturate(150%);
+			-webkit-backdrop-filter: blur(40px) saturate(150%);
 		}
-		65% {
-			background-color: rgba(255, 255, 255, 0.08);
-			backdrop-filter: blur(35px) saturate(150%);
-			-webkit-backdrop-filter: blur(35px) saturate(150%);
+		70% {
+			background-color: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(40px) saturate(150%);
+			-webkit-backdrop-filter: blur(40px) saturate(150%);
 		}
 		100% {
 			background-color: rgba(255, 255, 255, 0);
@@ -480,18 +485,22 @@
 
 	@keyframes clouds-slide-up {
 		0% {
-			transform: translateY(90%) scale(1.2) rotate(-3deg);
+			transform: translateY(90%) scale(1.2) rotate(-3deg) translateZ(0);
 			opacity: 0;
+			filter: blur(40px);
 		}
-		25% {
+		30% {
 			opacity: 1;
+			filter: blur(20px);
 		}
-		75% {
+		70% {
 			opacity: 1;
+			filter: blur(10px);
 		}
 		100% {
-			transform: translateY(-90%) scale(1.2) rotate(3deg);
+			transform: translateY(-90%) scale(1.2) rotate(3deg) translateZ(0);
 			opacity: 0;
+			filter: blur(40px);
 		}
 	}
 </style>

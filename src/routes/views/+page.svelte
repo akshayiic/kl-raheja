@@ -539,7 +539,7 @@
 		<!-- Center text labels for Time Dial -->
 		<div class="dial-center-label right-dial-label">
 			<span class="text-[8px] tracking-widest text-white/40 uppercase">Sun Angle</span>
-			<span class="text-[19px] font-semibold text-white mt-1 uppercase" style="font-family: 'The Seasons', serif;">
+			<span class="text-[19px] font-semibold text-white mt-1 capitalize" style="font-family: 'Imprima', serif;">
 				{$selectedTime}
 			</span>
 		</div>
@@ -844,10 +844,10 @@
 	}
 
 	.right-dial-label { 
-		left: 70px !important;
+		left: 80px !important;
 		right: auto !important;
 		align-items: flex-start !important;
-		text-align: left !important;
+		text-align: center !important;
 	}
 
 	/* Dial buttons wrapper and absolute layout */
