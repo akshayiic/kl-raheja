@@ -528,7 +528,7 @@
 			<!-- Background building image (z-index: 1) -->
 			<div
 				class="fixed inset-0 pointer-events-none flex items-center justify-center parallax-bg-container"
-				style="transition: transform {hasScrolled ? '4.0s ease-in-out' : foliageSettled ? '0.8s cubic-bezier(0.25, 1, 0.5, 1)' : '2.0s ease-out'}; transform: scale({hasScrolled ? 1.1 : activeHover === 'center' ? 1.03 : 1.0}) translateX({hasScrolled ? '0px' : activeHover === 'left' ? '25px' : activeHover === 'right' ? '-25px' : '0px'}); z-index: 1;"
+				style="transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}; transform: scale({hasScrolled ? 1.1 : 1.0}) translateY({hasScrolled ? '-40px' : '0px'}); z-index: 1;"
 			>
 				<img class="w-full h-full object-cover" src="/building.png" alt="Building background" />
 			</div>
@@ -590,6 +590,8 @@
 			</button>
 
 
+			<!-- Fullscreen Transition Blur Overlay -->
+			<div class="scroll-transition-overlay" class:active={hasScrolled}></div>
 		</div>
 	</div>
 {/if}
@@ -892,5 +894,23 @@
 		border-bottom-left-radius: 2.5rem;
 		border-top-right-radius: 2.5rem;
 		overflow: hidden;
+	}
+
+	.scroll-transition-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 2000000050;
+		background: rgba(10, 10, 10, 0.0);
+		backdrop-filter: blur(0px);
+		-webkit-backdrop-filter: blur(0px);
+		pointer-events: none;
+		transition: background-color 1.2s ease-in-out, backdrop-filter 1.2s ease-in-out;
+		transition-delay: 2.3s;
+	}
+
+	.scroll-transition-overlay.active {
+		background: rgba(10, 10, 10, 0.45);
+		backdrop-filter: blur(25px);
+		-webkit-backdrop-filter: blur(25px);
 	}
 </style>

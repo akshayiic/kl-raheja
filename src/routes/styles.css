@@ -1032,9 +1032,9 @@ button {
 	position: relative;
 		border-radius: 12px !important;
 	z-index: 999;
-	background: rgba(12, 12, 12, 0.55) !important;
-		backdrop-filter: blur(40px) !important;
-		-webkit-backdrop-filter: blur(40px) !important;
+	background: rgba(18, 18, 18, 0.38) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
 		border: 0.65px solid transparent !important;
 		background-clip: padding-box !important;
 	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
@@ -1074,11 +1074,11 @@ button {
 	justify-content: space-between;
 	height: 48px;
 	width: 60px;
-	background: rgba(12, 28, 40, 0.75);
-	backdrop-filter: blur(12px) saturate(160%);
-	-webkit-backdrop-filter: blur(12px) saturate(160%);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	border-left: none;
+	background: rgba(18, 18, 18, 0.38) !important;
+	backdrop-filter: blur(20px) !important;
+	-webkit-backdrop-filter: blur(20px) !important;
+	border: 1px solid rgba(255, 255, 255, 0.12) !important;
+	border-left: none !important;
 	border-radius: 0 24px 24px 0;
 	padding: 0 0 0 4px;
 	cursor: pointer;
@@ -1089,7 +1089,7 @@ button {
 }
 
 .minimized-sidebar-tab:hover {
-	background: rgba(12, 28, 40, 0.9);
+	background: rgba(18, 18, 18, 0.5) !important;
 	box-shadow: 0 8px 32px rgba(222, 173, 102, 0.15), 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
@@ -1246,6 +1246,7 @@ button {
 .category-name {
 	font-size: 16px;
 	font-weight: 500;
+		opacity: 0.65;
 }
 
 /* Accordion triggers active styling */
@@ -1502,5 +1503,33 @@ button {
 	.left-panel .panel-divider {
 		display: none !important;
 		/* Hide divider line too to save space */
+	}
+}
+
+/* Laptop screen size optimizations (vicinity panel height and scroll) */
+@media (max-width: 1440px) and (min-width: 769px), (max-height: 850px) and (min-width: 769px) {
+	.left-panel {
+		max-height: 80vh !important;
+		display: flex !important;
+		flex-direction: column !important;
+	}
+	.left-panel .inner-btn-group {
+		overflow-y: auto !important;
+		max-height: 38vh !important;
+		padding-right: 6px !important;
+	}
+	/* Custom scrollbar styling for the inner-btn-group */
+	.left-panel .inner-btn-group::-webkit-scrollbar {
+		width: 4px;
+	}
+	.left-panel .inner-btn-group::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.left-panel .inner-btn-group::-webkit-scrollbar-thumb {
+		background: rgba(222, 173, 102, 0.4);
+		border-radius: 2px;
+	}
+	.left-panel .inner-btn-group::-webkit-scrollbar-thumb:hover {
+		background: rgba(222, 173, 102, 0.7);
 	}
 }

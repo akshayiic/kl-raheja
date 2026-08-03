@@ -1,11 +1,12 @@
 <script>
-	import { goto } from '$app/navigation';
+	import { goto, preloadCode } from '$app/navigation';
 	import { getContext, onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 
 	const currentUI = getContext('currentUI');
 	const UIPanel = getContext('UIPanel');
+	const cloudTransition = getContext('cloudTransition');
 
 	let currentSlide = $state(1);
 	let card1W = $state(420);
@@ -23,6 +24,7 @@
 	let texture;
 	let ripples = $state([]);
 	let rippleId = 0;
+	let introActive = $state(true);
 	let lastMouseX = 0;
 	let lastMouseY = 0;
 	const SPAWN_DISTANCE = 30;
@@ -275,8 +277,14 @@
 		};
 
 		initWebGL();
+		preloadCode('/views');
+		preloadCode('/vicinities');
 
 		window.addEventListener('resize', handleResize);
+
+		setTimeout(() => {
+			introActive = false;
+		}, 50);
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
@@ -285,29 +293,37 @@
 	});
 
 	function handleExploreClick() {
-		if (currentSlide === 1) {
-			$currentUI = {
-				overview: false,
-				views: true,
-				Exterior: false,
-				interiors: false,
-				amenities: false,
-				highlights: false,
-				vicinity: false
-			};
-			goto('/views');
-		} else {
-			$currentUI = {
-				overview: false,
-				views: false,
-				Exterior: false,
-				interiors: false,
-				amenities: false,
-				highlights: false,
-				vicinity: true
-			};
-			goto('/vicinities');
-		}
+		cloudTransition.set(true);
+
+		setTimeout(() => {
+			if (currentSlide === 1) {
+				$currentUI = {
+					overview: false,
+					views: true,
+					Exterior: false,
+					interiors: false,
+					amenities: false,
+					highlights: false,
+					vicinity: false
+				};
+				goto('/views');
+			} else {
+				$currentUI = {
+					overview: false,
+					views: false,
+					Exterior: false,
+					interiors: false,
+					amenities: false,
+					highlights: false,
+					vicinity: true
+				};
+				goto('/vicinities');
+			}
+		}, 100);
+
+		setTimeout(() => {
+			cloudTransition.set(false);
+		}, 1500);
 	}
 
 	function spawnRipple(x, y, type) {
@@ -349,6 +365,9 @@
 </script>
 
 <div class="menu-container fixed inset-0 w-screen h-screen bg-black overflow-hidden select-none" on:click={handlePageClick} on:mousemove={handleMouseMove}>
+	<!-- Focus Transition Blur Overlay -->
+	<div class="menu-intro-overlay" class:fade-out={!introActive}></div>
+
 	<!-- Settled Parallax Background Building -->
 	<div class="fixed inset-0 pointer-events-none flex items-center justify-center" style="z-index: 1;">
 		{#if !imageLoaded}
@@ -375,14 +394,14 @@
 	<div class="fixed bottom-0 left-0 w-full h-[20rem] bg-gradient-to-t z-10 from-black/75 via-black/35 to-transparent pointer-events-none"></div>
 
 	<!-- Navigation UI Description Overlay -->
-	<div class="menu-desc-container fixed bottom-6 left-0 max-w-[720px] z-[25] flex flex-col gap-2 pointer-events-auto text-left animate-fade-in">
-		<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case pl-16" style="font-family: 'Imprima', sans-serif;">
+	<div class="menu-desc-container fixed bottom-6 left-0 z-[25] flex flex-col gap-2 pointer-events-auto text-left animate-fade-in">
+		<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
 			In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
 		</p>
 	</div>
 
 	<!-- Bottom Right Navigation Card & Controls -->
-	<div class="slider-menu fixed bottom-12 right-6 z-[25] flex items-end gap-10 pointer-events-auto animate-fade-in">
+	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto animate-fade-in">
 		<div class="relative w-[420px] h-[255px]">
 			<!-- Toggle/Next circular button -->
 			<button
@@ -390,7 +409,7 @@
 				class="toggle-slide-btn absolute -left-12 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 transition-all duration-300 flex items-center justify-center text-[#DEAD66] cursor-pointer z-30 !p-0"
 				aria-label="Next slide"
 			>
-				<svg width="8" height="8" viewBox="0 0 10 10" fill="#DEAD66">
+				<svg width="8" height="8" viewBox="0 0 10 10" fill="#DEAD66" style="transform: rotate(-40deg);">
 					<circle cx="5" cy="2" r="1.1" />
 					<circle cx="2" cy="6.8" r="1.1" />
 					<circle cx="8" cy="6.8" r="1.1" />
@@ -417,7 +436,7 @@
 					<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
 						VICINITY
 					</h2>
-					<p class="text-white/70 text-[13px] mb-5 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
+					<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
 						Discover South Mumbai's finest landmarks, cultural destinations, and lifestyle experiences close to your home.
 					</p>
 					<!-- Explore button -->
@@ -426,7 +445,7 @@
 						class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
 						style="font-family: 'Imprima', sans-serif;"
 					>
-						<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor">
+						<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
 							<circle cx="5" cy="2" r="1" />
 							<circle cx="2" cy="7" r="1" />
 							<circle cx="8" cy="7" r="1" />
@@ -468,7 +487,7 @@
 					<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
 						VIEWS
 					</h2>
-					<p class="text-white/70 text-[13px] mb-5 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
+					<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
 						Explore The Building From Multiple Viewpoints And Discover Every Angle Of Its Architecture And Surroundings.
 					</p>
 					<!-- Explore button -->
@@ -477,7 +496,7 @@
 						class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
 						style="font-family: 'Imprima', sans-serif;"
 					>
-						<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor">
+						<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
 							<circle cx="5" cy="2" r="1" />
 							<circle cx="2" cy="7" r="1" />
 							<circle cx="8" cy="7" r="1" />
@@ -570,6 +589,7 @@
 		justify-content: center !important;
 		height: auto !important;
 		width: auto !important;
+		margin-bottom: 12px !important;
 	}
 
 	.explore-card-btn:hover {
@@ -583,9 +603,8 @@
 .nav-card{
     position:absolute;
     inset:0;
-
     padding:24px 24px;
-    border-radius:28px;
+    border-radius:40px;
 
     overflow:hidden;
  
@@ -617,6 +636,9 @@
     opacity: 1 !important;
     transform: translate(0,0) scale(1) !important;
     pointer-events: auto;
+    left: 0% !important;
+    right: 0% !important;
+    width: 100% !important;
   }
 
 	.nav-card.back {
@@ -625,20 +647,23 @@
     transform: translate(0, -28px) scale(0.93) !important;
     pointer-events: none;
     filter: blur(1.5px) !important;
+    left: 15% !important;
+    right: 20% !important;
+    width: 80% !important;
 	}
 
 	/* Concentric Cutout Mask for Thumbnail on Right Side */
 	.thumbnail-cutout {
 		position: absolute;
-		top: 14px;
-		bottom: 14px;
+		top: 30px;
+		bottom: 30px;
 		right: 14px;
 		width: 48%;
 		background: transparent;
 		border-radius: 2.2rem;
 		overflow: hidden;
-		-webkit-mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 14px), transparent 48px, black 49px);
-		mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 14px), transparent 48px, black 49px);
+		-webkit-mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
+		mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
 	}
 
 	.thumbnail-cutout img {
@@ -649,7 +674,7 @@
 	.custom-indicator {
 		display: flex;
 		align-items: baseline;
-		gap: 1.5rem;
+		gap: 0.75rem;
 		transform: translateY(10px);
 		background: transparent !important;
 		border: 0 !important;
@@ -671,24 +696,24 @@
 	}
 
 	.indicator-num.large {
-		font-size: 60px;
-		width: 60px;
+		font-size: 32px;
+		width: 32px;
 		text-align: left;
 	}
 
 	.indicator-num.small {
-		font-size: 24px;
+		font-size: 16px;
 		opacity: 1;
-		width: 40px;
+		width: 20px;
 		text-align: left; 
 	}
 
 	.indicator-line {
-		width: 40px;
-		height: 1.5px;
+		width: 20px;
+		height: 1px;
 		background: rgba(255, 255, 255, 0.45);
 		align-self: center;
-		transform: translateY(18px);
+		transform: translateY(8px);
 	}
 
 	.toggle-slide-btn {
@@ -697,25 +722,36 @@
 
 	.slider-menu {
 		transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		right: 4% !important;
+		width: 420px !important;
 	}
 
 	.menu-desc-container {
 		transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		left: 4% !important;
+		width: 35% !important;
+		max-width: 35% !important;
+	}
+	.menu-desc-container p {
+		padding-left: 0 !important;
 	}
 
 	@media (max-width: 1024px) {
 		.menu-desc-container {
-			max-w: 50% !important;
-			padding-left: 2rem !important;
+			left: 2rem !important;
+			width: 45% !important;
+			max-width: 45% !important;
 		}
 		.menu-desc-container p {
 			font-size: 13px !important;
 			line-height: 1.5 !important;
+			padding-left: 0 !important;
 		}
 		.slider-menu {
 			gap: 1.5rem !important;
 			right: 1.5rem !important;
 			bottom: 2rem !important;
+			width: 380px !important;
 		}
 	}
 
@@ -731,6 +767,7 @@
 			transform-origin: bottom right !important;
 			right: 16px !important;
 			bottom: 16px !important;
+			width: 420px !important;
 		}
 	}
 
@@ -743,6 +780,7 @@
 			transform-origin: bottom right !important;
 			right: 12px !important;
 			bottom: 12px !important;
+			width: 420px !important;
 		}
 	}
 
@@ -764,6 +802,7 @@
 			transform-origin: bottom right !important;
 			right: 16px !important;
 			bottom: 12px !important;
+			width: 420px !important;
 		}
 	}
 
@@ -779,4 +818,21 @@
 		pointer-events: none;
 	}
 
+	.menu-intro-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 99999;
+		background: rgba(10, 10, 10, 0.45);
+		backdrop-filter: blur(25px);
+		-webkit-backdrop-filter: blur(25px);
+		pointer-events: none;
+		transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+		opacity: 1;
+	}
+
+	.menu-intro-overlay.fade-out {
+		opacity: 0;
+		backdrop-filter: blur(0px);
+		-webkit-backdrop-filter: blur(0px);
+	}
 </style>

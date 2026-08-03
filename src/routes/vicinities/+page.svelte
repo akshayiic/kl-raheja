@@ -39,6 +39,7 @@
 	$: isAmenitiesMinimized.set(isSafariMobile ? true : false);
 
 	let vicinityImg = getContext('vicinityImg');
+	let galleryCollapsed = false;
 	let isLoaded = true;
 	let activeSrc = '';
 	let prevSrc = '';
@@ -61,6 +62,10 @@
 	}
 	$: if (imgEl && imgEl.complete && imgEl.naturalWidth > 0) {
 		isLoaded = true;
+	}
+
+	$: if ($vicinityImg !== '-') {
+		galleryCollapsed = false;
 	}
 
 
@@ -424,7 +429,7 @@
 </div>
 
 <!-- Right-side gallery card (preview with dots) -->
-{#if activeFolder && activeCategoryFolder}
+{#if activeFolder && activeCategoryFolder && !galleryCollapsed}
 	{@const activePreviewUrl = `https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${cardSlideIndex}.png`}
 	<div class="right-gallery-card p-5 select-none animate-fade-in text-left">
 		<!-- Header with Title & Distance & Close Button -->
@@ -451,7 +456,7 @@
 			<!-- Close button -->
 			<button
 				class="text-white/60 hover:text-white cursor-pointer transition-colors p-1.5 rounded-full hover:bg-white/10 border border-white/10 flex items-center justify-center w-8 h-8"
-				on:click={() => vicinityImg.set('-')}
+				on:click={() => galleryCollapsed = true}
 				type="button"
 			>
 				<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -551,6 +556,31 @@
 	</div>
 {/if}
 
+{#if activeFolder && activeCategoryFolder && galleryCollapsed}
+	<button
+		class="minimized-sidebar-tab-right"
+		style="position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 1001; margin-top: 0;"
+		on:click={() => (galleryCollapsed = false)}
+		type="button"
+		id="minimize-toggle-gallery"
+	>
+		<span class="chevron-group">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path class="chevron-arrow-1" d="M17 18L11 12L17 6" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+				<path class="chevron-arrow-2" d="M10 18L4 12L10 6" stroke="rgba(255, 255, 255, 0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
+		</span>
+		<span class="golden-circle">
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+				<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+				<circle cx="8.5" cy="8.5" r="1.5"></circle>
+				<polyline points="21 15 16 10 5 21"></polyline>
+			</svg>
+		</span>
+		<span class="tab-label-text">GALLERY</span>
+	</button>
+{/if}
+
 <svelte:window on:keydown={handleKeyDown} />
 
 <!-- Go Back Button at bottom-left corner -->
@@ -608,23 +638,23 @@
 	}
 	@media (min-width: 1020px) {
 		:global(.left-panel-wrapper) {
-			bottom: 8.5rem !important;
+			bottom: 6rem !important;
 		}
 	}
 
 	/* Lightbox Glassmorphism Overlay styling */
 	.lightbox-overlay-glass {
-		background: rgba(10, 10, 10, 0.45) !important;
-		backdrop-filter: blur(40px) !important;
-		-webkit-backdrop-filter: blur(40px) !important;
+		background: rgba(10, 10, 10, 0.35) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
 	}
 
 	/* Glass Close Button */
 	.lightbox-close-glass {
 		position: relative;
-		background: rgba(12, 12, 12, 0.55) !important;
-		backdrop-filter: blur(40px) !important;
-		-webkit-backdrop-filter: blur(40px) !important;
+		background: rgba(18, 18, 18, 0.38) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
 		border: 0.65px solid transparent !important;
 		background-clip: padding-box !important;
 		color: rgba(255, 255, 255, 0.6) !important;
@@ -653,9 +683,9 @@
 	/* Glass Card containing the image */
 	.lightbox-card-glass {
 		position: relative;
-		background: rgba(12, 12, 12, 0.55) !important;
-		backdrop-filter: blur(40px) !important;
-		-webkit-backdrop-filter: blur(40px) !important;
+		background: rgba(18, 18, 18, 0.38) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
 		border: 0.65px solid transparent !important;
 		background-clip: padding-box !important;
 		border-radius: 16px !important;
@@ -679,9 +709,9 @@
 	/* Glass Navigation Pill */
 	.lightbox-nav-glass {
 		position: relative;
-		background: rgba(12, 12, 12, 0.55) !important;
-		backdrop-filter: blur(40px) !important;
-		-webkit-backdrop-filter: blur(40px) !important;
+		background: rgba(18, 18, 18, 0.38) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
 		border: 0.65px solid transparent !important;
 		background-clip: padding-box !important;
 		border-radius: 9999px !important;
@@ -710,9 +740,9 @@
 		transform: translateY(-50%);
 		z-index: 1000;
 		width: 345px;
-		background: rgba(12, 12, 12, 0.55) !important;
-		backdrop-filter: blur(40px) !important;
-		-webkit-backdrop-filter: blur(40px) !important;
+		background: rgba(18, 18, 18, 0.38) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
 		border: 0.65px solid transparent !important;
 		background-clip: padding-box !important;
 		border-radius: 12px !important;
@@ -749,6 +779,42 @@
 			transform: translateY(-50%) scale(0.68) !important;
 			transform-origin: right center !important;
 			right: 12px !important;
+		}
+		:global(.minimized-sidebar-tab-right) {
+			transform: translateY(-50%) scale(0.68) !important;
+			transform-origin: right center !important;
+		}
+	}
+
+	:global(.minimized-sidebar-tab-right) {
+		background: rgba(18, 18, 18, 0.38) !important;
+		backdrop-filter: blur(20px) !important;
+		-webkit-backdrop-filter: blur(20px) !important;
+		border: none !important;
+		position: fixed;
+	}
+
+	:global(.minimized-sidebar-tab-right)::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 24px 0 0 24px !important;
+		padding: 0.65px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(153, 153, 153, 0) 100%);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		z-index: -1;
+	}
+
+	:global(.minimized-sidebar-tab-right .tab-label-text) {
+		display: none;
+	}
+
+	@media (max-width: 768px), (max-width: 950px) and (orientation: landscape) {
+		:global(.minimized-sidebar-tab-right .tab-label-text) {
+			display: block !important;
 		}
 	}
 </style>

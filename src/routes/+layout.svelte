@@ -50,16 +50,7 @@
 	const cloudTransition = writable(false);
 	setContext('cloudTransition', cloudTransition);
 
-	$: if ($navigating) {
-		const fromPath = $navigating.from?.url.pathname;
-		const toPath = $navigating.to?.url.pathname;
-		if (fromPath === '/menu' && (toPath === '/views' || toPath === '/vicinities')) {
-			cloudTransition.set(true);
-			setTimeout(() => {
-				cloudTransition.set(false);
-			}, 2800);
-		}
-	}
+
 
 	// check for the iframe window
 	function inIframe() {
@@ -451,20 +442,45 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: transparent;
+		animation: fog-fade 1.5s ease-in-out forwards;
 	}
 
 	.cloud-img {
-		width: 130vw;
+		width: 150vw;
 		max-width: none;
-		height: 100vh;
-		object-fit: cover;
-		animation: clouds-slide-up 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+		height: 150vh;
+		object-fit: contain;
+		position: absolute;
+		transform-origin: center center;
+		animation: clouds-slide-up 1.5s ease-in-out forwards;
+	}
+
+	@keyframes fog-fade {
+		0% {
+			background-color: rgba(255, 255, 255, 0);
+			backdrop-filter: blur(0px) saturate(100%);
+			-webkit-backdrop-filter: blur(0px) saturate(100%);
+		}
+		20% {
+			background-color: rgba(255, 255, 255, 0.08);
+			backdrop-filter: blur(35px) saturate(150%);
+			-webkit-backdrop-filter: blur(35px) saturate(150%);
+		}
+		65% {
+			background-color: rgba(255, 255, 255, 0.08);
+			backdrop-filter: blur(35px) saturate(150%);
+			-webkit-backdrop-filter: blur(35px) saturate(150%);
+		}
+		100% {
+			background-color: rgba(255, 255, 255, 0);
+			backdrop-filter: blur(0px) saturate(100%);
+			-webkit-backdrop-filter: blur(0px) saturate(100%);
+		}
 	}
 
 	@keyframes clouds-slide-up {
 		0% {
-			transform: translateY(100%);
+			transform: translateY(90%) scale(1.2) rotate(-3deg);
 			opacity: 0;
 		}
 		25% {
@@ -474,7 +490,7 @@
 			opacity: 1;
 		}
 		100% {
-			transform: translateY(-100%);
+			transform: translateY(-90%) scale(1.2) rotate(3deg);
 			opacity: 0;
 		}
 	}

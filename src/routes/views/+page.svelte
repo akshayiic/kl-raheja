@@ -539,7 +539,7 @@
 		<!-- Center text labels for Time Dial -->
 		<div class="dial-center-label right-dial-label">
 			<span class="text-[8px] tracking-widest text-white/40 uppercase">Sun Angle</span>
-			<span class="text-[22px] font-semibold text-white mt-1 uppercase" style="font-family: 'The Seasons', serif;">
+			<span class="text-[19px] font-semibold text-white mt-1 uppercase" style="font-family: 'The Seasons', serif;">
 				{$selectedTime}
 			</span>
 		</div>
@@ -774,7 +774,7 @@
 		right: -40px;
 		top: 50%;
 		transform: translateY(-50%);
-		width: 220px;
+		width: 230px;
 		height: 440px;
 		border-radius: 220px 0 0 220px;
 		background: rgba(18, 18, 18, 0.55);
@@ -788,7 +788,7 @@
 	}
 
 	.time-dial.collapsed {
-		transform: translate(175px, -50%);
+		transform: translate(215px, -50%);
 	}
 
 	/* Toggle buttons styling */
@@ -816,7 +816,7 @@
 	}
 
 	.right-dial-toggle {
-		right: 200px;
+		right: 210px;
 		top: 50%;
 		transform: translateY(-50%);
 	}
@@ -844,9 +844,10 @@
 	}
 
 	.right-dial-label { 
-		right: 24px !important;
-		align-items: flex-end !important;
-		text-align: right !important;
+		left: 70px !important;
+		right: auto !important;
+		align-items: flex-start !important;
+		text-align: left !important;
 	}
 
 	/* Dial buttons wrapper and absolute layout */
@@ -900,6 +901,7 @@
 		width: 48px;
 		height: 35px;
 		font-size: 20px;
+		border-radius: 9999px !important;
 		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
 	}
 
@@ -1072,13 +1074,17 @@
 		}
 
 		.time-dial {
-			width: 220px !important;
+			width: 250px !important;
+			right: -10px !important;
 			transform: translateY(-50%) scale(0.65) !important;
 			transform-origin: right center;
 		}
 		.time-dial.collapsed {
 			transform: translate(225px, -50%) scale(0.65) !important;
 			transform-origin: right center;
+		}
+		.right-dial-toggle {
+			right: 230px !important;
 		}
 
 		.dial-center-label:not(.right-dial-label) span:nth-child(2) {
@@ -1087,7 +1093,7 @@
 
 		.right-dial-label {
 			right: auto !important;
-			left: 70px !important;
+			left: 110px !important;
 			align-items: flex-start !important;
 			text-align: left !important;
 		}
@@ -1142,12 +1148,20 @@
 		}
 
 		.time-dial {
+			right: 0px !important;
 			transform: translateY(-50%) scale(0.52) !important;
 			transform-origin: right center;
 		}
 		.time-dial.collapsed {
-			transform: translate(185px, -50%) scale(0.52) !important;
+			transform: translate(220px, -50%) scale(0.52) !important;
 			transform-origin: right center;
+		}
+		.right-dial-toggle {
+			right: 230px !important;
+		}
+		.right-dial-label {
+			left: 100px !important;
+			right: auto !important;
 		}
 
 		:global(.minimized-sidebar-tab) {
