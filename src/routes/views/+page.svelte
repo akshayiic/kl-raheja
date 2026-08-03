@@ -1239,7 +1239,6 @@
 		/* White capsule background */
 		background: #ffffff !important;
 		border: 1.2px solid rgba(0, 0, 0, 0.08) !important;
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
 		text-shadow: none !important;
 
 		/* Flex layout */
@@ -1302,7 +1301,7 @@
 
 	/* Alignment-specific styles */
 	:global(.overview-hotspot.hotspot-right .overview-hotspot-label) {
-		left: 10px !important;
+		left: -15px !important;
 		right: auto !important;
 		transform: translateX(-15px) scale(0.95) !important;
 		opacity: 0 !important;
@@ -1322,7 +1321,7 @@
 	}
 
 	:global(.overview-hotspot.hotspot-left .overview-hotspot-label) {
-		right: 10px !important;
+		right: -15px !important;
 		left: auto !important;
 		transform: translateX(15px) scale(0.95) !important;
 		opacity: 0 !important;

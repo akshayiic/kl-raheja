@@ -402,7 +402,7 @@
 
 	<!-- Bottom Right Navigation Card & Controls -->
 	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto animate-fade-in">
-		<div class="relative w-[420px] h-[255px]">
+		<div class="relative card-slider-wrapper w-[420px] h-[255px]">
 			<!-- Toggle/Next circular button -->
 			<button
 				on:click={() => currentSlide = currentSlide === 1 ? 2 : 1}
@@ -722,18 +722,39 @@
 
 	.slider-menu {
 		transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-		right: 4% !important;
-		width: 420px !important;
+		right: 1.5rem !important;
 	}
 
 	.menu-desc-container {
 		transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-		left: 4% !important;
-		width: 35% !important;
-		max-width: 35% !important;
+		left: 0 !important;
+		width: 720px !important;
+		max-width: 720px !important;
 	}
 	.menu-desc-container p {
-		padding-left: 0 !important;
+		padding-left: 4rem !important;
+	}
+
+	@media (max-width: 1440px) and (min-width: 769px) {
+		.card-slider-wrapper {
+			width: 470px !important;
+		}
+	}
+
+	@media (max-width: 1500px) {
+		.slider-menu {
+			right: 4% !important;
+			transform: scale(0.85) !important;
+			transform-origin: bottom right !important;
+		}
+		.menu-desc-container {
+			left: 4% !important;
+			width: 35% !important;
+			max-width: 35% !important;
+		}
+		.menu-desc-container p {
+			padding-left: 0 !important;
+		}
 	}
 
 	@media (max-width: 1024px) {
@@ -751,7 +772,6 @@
 			gap: 1.5rem !important;
 			right: 1.5rem !important;
 			bottom: 2rem !important;
-			width: 380px !important;
 		}
 	}
 
@@ -767,7 +787,6 @@
 			transform-origin: bottom right !important;
 			right: 16px !important;
 			bottom: 16px !important;
-			width: 420px !important;
 		}
 	}
 
@@ -780,7 +799,6 @@
 			transform-origin: bottom right !important;
 			right: 12px !important;
 			bottom: 12px !important;
-			width: 420px !important;
 		}
 	}
 
@@ -802,7 +820,6 @@
 			transform-origin: bottom right !important;
 			right: 16px !important;
 			bottom: 12px !important;
-			width: 420px !important;
 		}
 	}
 

@@ -52,6 +52,20 @@
 		}
 	}
 
+	$: {
+		if (videoLoading) {
+			if (transitionTimeout) {
+				clearTimeout(transitionTimeout);
+				transitionTimeout = null;
+			}
+		} else {
+			if (transitionTimeout) clearTimeout(transitionTimeout);
+			transitionTimeout = setTimeout(() => {
+				prevVideo = '';
+			}, 600);
+		}
+	}
+
 	$: displaySrc = $vicinityImg != '-' ? 'https://assets.vestate.io/webtool/kraheja/kraheja/vicinities/' + $vicinityImg : '';
 	$: {
 		if (displaySrc && displaySrc !== activeSrc) {
@@ -80,8 +94,10 @@
 	let activeLabel = '';
 	let activeDistance = '';
 	let activeVideo = '';
+	let prevVideo = '';
 	let cardSlideIndex = 1;
 	let galleryInterval;
+	let transitionTimeout;
 
 	function startGalleryTimer() {
 		stopGalleryTimer();
@@ -116,15 +132,17 @@
 
 	onDestroy(() => {
 		stopGalleryTimer();
+		if (transitionTimeout) clearTimeout(transitionTimeout);
 	});
 
 	$: {
+		const oldVideo = activeVideo;
 		activeFolder = '';
 		activeCategoryFolder = '';
 		activeLabel = '';
 		activeDistance = '';
-		activeVideo = '';
-
+		
+		let nextVideo = '';
 		for (const cat of vicinityCategories) {
 			const found = cat.items.find((item) => item.id === $vicinityImg);
 			if (found) {
@@ -133,15 +151,20 @@
 				activeLabel = found.label || '';
 				activeDistance = found.distance || '';
 				if (found.video) {
-					activeVideo = found.video;
+					nextVideo = found.video;
 				} else if (found.folder && cat.folder) {
 					// Encode folder names for URL safety
 					const encodedCat = cat.folder;
 					const encodedSub = encodeURIComponent(found.videoName || found.folder);
-					activeVideo = `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}.mp4`;
+					nextVideo = `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}.mp4`;
 				}
 				break;
 			}
+		}
+		
+		if (nextVideo !== oldVideo) {
+			prevVideo = oldVideo;
+			activeVideo = nextVideo;
 		}
 	}
 
@@ -380,19 +403,14 @@
 	{#if $vicinityImg != '-'}
 		<div class="absolute top-0 left-0 w-full h-full z-50 bg-black overflow-hidden">
 			{#if activeVideo}
-				{#if videoLoading}
-					<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300">
-						<!-- Premium custom luxury gold spinner -->
-						<div class="relative w-16 h-16 mb-4 animate-fade-in">
-							<!-- Spinner track -->
-							<div class="absolute inset-0 rounded-full border-4 border-white/10"></div>
-							<!-- Spinner active line -->
-							<div class="absolute inset-0 rounded-full border-4 border-t-[#DEAD66] border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-						</div>
-						<span class="text-white/85 text-[10px] uppercase tracking-[0.2em] font-light font-mono animate-pulse">
-							LOADING VIDEO...
-						</span>
-					</div>
+				{#if prevVideo}
+					<video
+						src={prevVideo}
+						autoplay
+						muted
+						playsinline
+						class="absolute top-0 left-0 h-full w-full object-cover z-10"
+					></video>
 				{/if}
 
 				<video
@@ -400,12 +418,17 @@
 					autoplay
 					muted
 					playsinline
-					class="absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 {videoLoading ? 'opacity-0' : 'opacity-100'}"
+					class="absolute top-0 left-0 h-full w-full object-cover transition-all duration-500 z-20 {videoLoading ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'}"
 					on:playing={() => videoLoading = false}
 					on:canplay={() => videoLoading = false}
 					on:loadstart={() => videoLoading = true}
 					on:waiting={() => videoLoading = true}
 				></video>
+
+				<!-- Backdrop blur overlay that fades out when video is loaded -->
+				<div 
+					class="absolute inset-0 bg-black/20 backdrop-blur-md transition-opacity duration-500 pointer-events-none z-30 {videoLoading ? 'opacity-100' : 'opacity-0'}"
+				></div>
 			{:else}
 				{#if !isLoaded && prevSrc}
 					<img
