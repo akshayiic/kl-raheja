@@ -746,6 +746,27 @@
 		}
 	}
 
+	@media (max-width: 950px) and (orientation: landscape) {
+		.menu-desc-container {
+			display: flex !important;
+			left: 16px !important;
+			bottom: 12px !important;
+			padding-left: 0 !important;
+			transform: scale(0.52) !important;
+			transform-origin: left bottom !important;
+			max-width: 50% !important;
+		}
+		.slider-menu {
+			flex-direction: column !important;
+			align-items: flex-end !important;
+			gap: 0.75rem !important;
+			transform: scale(0.58) !important;
+			transform-origin: bottom right !important;
+			right: 16px !important;
+			bottom: 12px !important;
+		}
+	}
+
 	.glass-blur-bg {
 		position: absolute;
 		inset: -60px;

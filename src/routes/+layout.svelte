@@ -149,6 +149,39 @@
 		if (savedUIPanel && $page.url.pathname !== '/') {
 			UIPanel.set(savedUIPanel);
 		}
+
+		// 2-finger swipe up global listener for fullscreen mode
+		let touchStartY = 0;
+		const handleTouchStartGlobal = (e) => {
+			if (e.touches.length >= 2) {
+				touchStartY = e.touches[0].clientY;
+			}
+		};
+		const handleTouchMoveGlobal = (e) => {
+			if (e.touches.length >= 2 && touchStartY) {
+				const currentY = e.touches[0].clientY;
+				const diffY = touchStartY - currentY; // positive = swipe up
+				if (diffY > 40) {
+					const docEl = document.documentElement;
+					if (docEl.requestFullscreen) {
+						docEl.requestFullscreen().catch(() => {});
+					} else if (docEl.webkitRequestFullscreen) {
+						docEl.webkitRequestFullscreen();
+					} else if (docEl.msRequestFullscreen) {
+						docEl.msRequestFullscreen();
+					}
+					touchStartY = 0; // reset
+				}
+			}
+		};
+
+		window.addEventListener('touchstart', handleTouchStartGlobal, { passive: true });
+		window.addEventListener('touchmove', handleTouchMoveGlobal, { passive: true });
+
+		return () => {
+			window.removeEventListener('touchstart', handleTouchStartGlobal);
+			window.removeEventListener('touchmove', handleTouchMoveGlobal);
+		};
 	});
 </script>
 

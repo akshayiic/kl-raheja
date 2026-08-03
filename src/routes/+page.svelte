@@ -320,36 +320,37 @@
 					</svg>
 				{/if}
 			</button>
-			<div
-				class="intro center absolute bottom-12 z-[2000000003] flex w-full flex-col items-center justify-center text-center text-white px-6"
-			>
-				<div class="mb-6 flex flex-col items-center">
+			<div class="intro-container fixed inset-0 z-[2000000003] pointer-events-none select-none">
+				<!-- Left Bottom Text Section -->
+				<div class="intro-text-container absolute left-6 md:left-16 bottom-6 md:bottom-16 flex flex-col items-start text-left text-white max-w-[55%] md:max-w-[480px]">
 					<!-- STEP › INTO -->
-					<div class="flex items-center justify-center gap-3 text-xs md:text-4xl font-light tracking-[0.3em] uppercase text-white/90">
+					<div class="flex items-center gap-2 text-[10px] md:text-sm font-light tracking-[0.3em] uppercase text-white/90">
 						<span style="font-family: 'Viaoda Libre', serif !important;">STEP</span>
-						<span class="text-[#c5a880] text-4xl font-normal leading-none" style="transform: translateY(-2px); font-family: 'Viaoda Libre', serif !important;">›</span>
+						<span class="text-[#c5a880] text-sm md:text-lg font-normal leading-none" style="transform: translateY(-1px); font-family: 'Viaoda Libre', serif !important;">›</span>
 						<span style="font-family: 'Viaoda Libre', serif !important;">INTO</span>
 					</div>
 
 					<!-- K RAHEJA -->
-					<h1 class="text-4xl md:text-6xl tracking-[0.15em] uppercase text-white my-3 font-normal" style="font-family: 'Viaoda Libre', serif;">
+					<h1 class="text-2xl md:text-5xl tracking-[0.12em] uppercase text-white my-1 md:my-3 font-normal font-serif leading-none" style="font-family: 'Viaoda Libre', serif;">
 						K RAHEJA
 					</h1>
 
 					<!-- Description -->
-					<p class="max-w-[580px] text-xs md:text-sm font-light text-white/80 leading-relaxed tracking-wider normal-case" style="font-family: 'Imprima', sans-serif;">
+					<p class="text-[9px] md:text-xs font-light text-white/70 leading-relaxed tracking-wider normal-case" style="font-family: 'Imprima', sans-serif;">
 						Discover a location surrounded by South Mumbai's finest landmarks, cultural destinations, and lifestyle experiences, all thoughtfully connected to your everyday life.
 					</p>
 				</div>
 
-				<!-- Get Started Button -->
-				<button
-					id="v-start-btn"
-					on:click={startExperience}
-					class="get-started-btn cursor-pointer"
-				>
-					Get Started
-				</button>
+				<!-- Right Bottom Button Container -->
+				<div class="intro-btn-container absolute right-6 md:right-16 bottom-6 md:bottom-16 pointer-events-auto">
+					<button
+						id="v-start-btn"
+						on:click={startExperience}
+						class="get-started-btn cursor-pointer"
+					>
+						DISCOVER
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -632,6 +633,14 @@
 		border-color: #DEAD66 !important;
 		transform: scale(1.03) !important;
 		animation: none !important;
+	}
+
+	@media (max-width: 768px), (max-width: 950px) and (orientation: landscape) {
+		.get-started-btn {
+			padding: 0.5rem 1.75rem !important;
+			font-size: 0.8rem !important;
+			min-width: 120px !important;
+		}
 	}
 
 	.centered-panel {

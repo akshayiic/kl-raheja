@@ -1371,3 +1371,136 @@ button {
 	transform: translateY(-50%) scale(1.05);
 	box-shadow: 0 4px 20px rgba(222, 173, 102, 0.6);
 }
+/* Phone overrides for Minimized Tabs and Vicinity Sidebar */
+@media (max-width: 768px),
+(max-width: 950px) and (orientation: landscape) {
+
+	/* Time & Floor Selector Minimized Tabs in /views page */
+	.minimized-sidebar-tab {
+		height: 50px !important;
+		width: 42px !important;
+		display: flex !important;
+		flex-direction: column !important;
+		align-items: center !important;
+		justify-content: space-between !important;
+		padding: 10px 4px !important;
+		border-radius: 0 20px 20px 0 !important;
+		transform: translateY(-50%) !important;
+		transform-origin: left center !important;
+		margin-top: 0 !important;
+	}
+
+	.minimized-sidebar-tab-right {
+		height: 50px !important;
+		width: 42px !important;
+		display: flex !important;
+		flex-direction: column-reverse !important;
+		align-items: center !important;
+		justify-content: space-between !important;
+		padding: 10px 4px !important;
+		border-radius: 20px 0 0 20px !important;
+		transform: translateY(-50%) !important;
+		transform-origin: right center !important;
+	}
+
+	.minimized-sidebar-tab .tab-label-text,
+	.minimized-sidebar-tab-right .tab-label-text {
+		font-size: 10px !important;
+		line-height: 1.2 !important;
+		margin: auto 0 !important;
+		white-space: nowrap !important;
+		text-align: center !important;
+	}
+
+	.minimized-sidebar-tab .golden-circle,
+	.minimized-sidebar-tab-right .golden-circle {
+		width: 28px !important;
+		height: 28px !important;
+		position: static !important;
+		transform: none !important;
+		margin: 0 !important;
+		box-shadow: 0 2px 8px rgba(222, 173, 102, 0.3) !important;
+	}
+
+	.minimized-sidebar-tab .chevron-group,
+	.minimized-sidebar-tab-right .chevron-group {
+		display: none !important;
+		/* Hide chevron loop on phone to maximize label space */
+	}
+
+	/* Prevent overscrolling/pulling showing white bar on phone */
+	html,
+	body {
+		overflow: hidden !important;
+		position: fixed !important;
+		width: 100vw !important;
+		height: 100vh !important;
+		height: 100dvh !important;
+	}
+
+	/* Vicinity Page Sidebar Panels */
+	.left-panel {
+		max-height: 85vh !important;
+		padding: 12px 14px !important;
+		gap: 8px !important;
+		width: 290px !important;
+		overflow: hidden !important;
+	}
+
+	.left-panel .left-panel--header {
+		margin-bottom: 4px !important;
+	}
+
+	.left-panel .left-title .text-\[25px\] {
+		font-size: 18px !important;
+	}
+
+	.left-panel .left-title span {
+		font-size: 10px !important;
+	}
+
+	.left-panel .category-name {
+		font-size: 12px !important;
+	}
+
+	.left-panel .category-icon {
+		width: 16px !important;
+		height: 16px !important;
+	}
+
+	.left-panel button {
+		font-size: 11px !important;
+	}
+
+	.left-panel .inner-modal-btn {
+		padding: 6px 10px !important;
+		font-size: 11px !important;
+	}
+
+	.left-panel .mt-auto {
+		margin-top: auto !important;
+		padding-top: 6px !important;
+	}
+
+	.left-panel .mt-auto button {
+		padding: 6px 12px !important;
+		font-size: 11px !important;
+	}
+
+	/* Accordion scrollable inside panel on phone */
+	.left-panel .inner-btn-group {
+		overflow-y: auto !important;
+		max-height: 250px !important;
+		padding-right: 4px !important;
+	}
+
+	/* Remove infrastructure title on mobile phone */
+	.left-panel .infrastructure-heading {
+		display: none !important;
+	}
+
+	.left-panel .panel-divider {
+		display: none !important;
+		/* Hide divider line too to save space */
+	}
+}

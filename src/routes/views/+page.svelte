@@ -438,6 +438,49 @@
 		}
 	}
 
+	let floorTouchStartY = 0;
+	let timeTouchStartY = 0;
+	const TOUCH_SWIPE_THRESHOLD = 30;
+
+	function handleFloorTouchStart(e) {
+		floorTouchStartY = e.touches[0].clientY;
+	}
+
+	function handleFloorTouchMove(e) {
+		e.preventDefault();
+		const currentY = e.touches[0].clientY;
+		const diffY = floorTouchStartY - currentY; // positive = swipe up
+
+		if (Math.abs(diffY) >= TOUCH_SWIPE_THRESHOLD) {
+			const direction = diffY > 0 ? 1 : -1;
+			const nextIndex = $selectedFloorIndex + direction;
+			if (nextIndex >= 0 && nextIndex < floors.length) {
+				selectFloor(nextIndex);
+			}
+			floorTouchStartY = currentY;
+		}
+	}
+
+	function handleTimeTouchStart(e) {
+		timeTouchStartY = e.touches[0].clientY;
+	}
+
+	function handleTimeTouchMove(e) {
+		e.preventDefault();
+		const currentY = e.touches[0].clientY;
+		const diffY = timeTouchStartY - currentY; // positive = swipe up
+
+		if (Math.abs(diffY) >= TOUCH_SWIPE_THRESHOLD) {
+			const direction = diffY > 0 ? 1 : -1;
+			const activeTimeIdx = availableTimes.indexOf($selectedTime);
+			const nextIndex = activeTimeIdx + direction;
+			if (nextIndex >= 0 && nextIndex < availableTimes.length) {
+				selectTimeOfDay(availableTimes[nextIndex]);
+			}
+			timeTouchStartY = currentY;
+		}
+	}
+
 	onDestroy(() => {
 		if (viewer) {
 			viewer = null;
@@ -466,7 +509,12 @@
 	{/if}
 
 	<!-- Time of Day Selector (Semi-circular dial on right edge) -->
-	<div class="time-dial {timeCollapsed ? 'collapsed' : ''}" on:wheel|preventDefault|stopPropagation|nonpassive={handleTimeWheel}>
+	<div 
+		class="time-dial {timeCollapsed ? 'collapsed' : ''}" 
+		on:wheel|preventDefault|stopPropagation|nonpassive={handleTimeWheel}
+		on:touchstart|nonpassive={handleTimeTouchStart}
+		on:touchmove|preventDefault|stopPropagation|nonpassive={handleTimeTouchMove}
+	>
 		<!-- Collapse/Expand Arrow -->
 		{#if !timeCollapsed}
 			<button
@@ -574,7 +622,12 @@
 	{/if}
 
 	<!-- Floor Selector (Semi-circular dial on left edge) -->
-	<div class="floor-dial {floorCollapsed ? 'collapsed' : ''}" on:wheel|preventDefault|stopPropagation|nonpassive={handleFloorWheel}>
+	<div 
+		class="floor-dial {floorCollapsed ? 'collapsed' : ''}" 
+		on:wheel|preventDefault|stopPropagation|nonpassive={handleFloorWheel}
+		on:touchstart|nonpassive={handleFloorTouchStart}
+		on:touchmove|preventDefault|stopPropagation|nonpassive={handleFloorTouchMove}
+	>
 		<!-- Collapse/Expand Arrow -->
 		{#if !floorCollapsed}
 			<button
@@ -1007,23 +1060,43 @@
 	}
 
 	/* Responsive styling for semi-circular dials and controls */
-	@media (max-width: 768px) {
+	@media (max-width: 768px), (max-width: 950px) and (orientation: landscape) {
 		.floor-dial {
+			width: 220px !important;
 			transform: translateY(-50%) scale(0.65) !important;
 			transform-origin: left center;
 		}
 		.floor-dial.collapsed {
-			transform: translate(-180px, -50%) scale(0.65) !important;
+			transform: translate(-225px, -50%) scale(0.65) !important;
 			transform-origin: left center;
 		}
 
 		.time-dial {
+			width: 220px !important;
 			transform: translateY(-50%) scale(0.65) !important;
 			transform-origin: right center;
 		}
 		.time-dial.collapsed {
-			transform: translate(180px, -50%) scale(0.65) !important;
+			transform: translate(225px, -50%) scale(0.65) !important;
 			transform-origin: right center;
+		}
+
+		.dial-center-label:not(.right-dial-label) span:nth-child(2) {
+			font-size: 14px !important;
+		}
+
+		.right-dial-label {
+			right: auto !important;
+			left: 70px !important;
+			align-items: flex-start !important;
+			text-align: left !important;
+		}
+		.right-dial-label span:nth-child(1) {
+			font-size: 7px !important;
+		}
+		.right-dial-label span:nth-child(2) {
+			font-size: 12px !important;
+			letter-spacing: 0.05em !important;
 		}
 
 		:global(.minimized-sidebar-tab) {

@@ -733,4 +733,22 @@
 		pointer-events: none;
 		z-index: -1;
 	}
+
+	@media (max-width: 950px) and (orientation: landscape) {
+		:global(.left-panel-wrapper) {
+			left: 12px !important;
+			bottom: 70px !important;
+			transform: scale(0.68) !important;
+			transform-origin: left bottom !important;
+		}
+		:global(.minimized-sidebar-tab) {
+			transform: translateY(-50%) scale(0.68) !important;
+			transform-origin: left center !important;
+		}
+		.right-gallery-card {
+			transform: translateY(-50%) scale(0.68) !important;
+			transform-origin: right center !important;
+			right: 12px !important;
+		}
+	}
 </style>
