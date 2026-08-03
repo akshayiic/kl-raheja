@@ -511,7 +511,6 @@
 	<!-- Time of Day Selector (Semi-circular dial on right edge) -->
 	<div 
 		class="time-dial {timeCollapsed ? 'collapsed' : ''}" 
-		on:wheel|preventDefault|stopPropagation|nonpassive={handleTimeWheel}
 		on:touchstart|nonpassive={handleTimeTouchStart}
 		on:touchmove|preventDefault|stopPropagation|nonpassive={handleTimeTouchMove}
 	>
@@ -548,7 +547,7 @@
 		{#each Array(20) as _, i}
 			{@const tickAngle = -60 + (i * 120) / 19}
 			{@const tickRad = (tickAngle * Math.PI) / 180}
-			{@const tx = Math.cos(tickRad) * 175}
+			{@const tx = Math.cos(tickRad) * 185}
 			{@const ty = Math.sin(tickRad) * 175}
 			<div 
 				class="dial-tick" 
@@ -624,7 +623,7 @@
 	<!-- Floor Selector (Semi-circular dial on left edge) -->
 	<div 
 		class="floor-dial {floorCollapsed ? 'collapsed' : ''}" 
-		on:wheel|preventDefault|stopPropagation|nonpassive={handleFloorWheel}
+	 
 		on:touchstart|nonpassive={handleFloorTouchStart}
 		on:touchmove|preventDefault|stopPropagation|nonpassive={handleFloorTouchMove}
 	>
@@ -1101,7 +1100,7 @@
 			font-size: 7px !important;
 		}
 		.right-dial-label span:nth-child(2) {
-			font-size: 12px !important;
+			font-size: 18px !important;
 			letter-spacing: 0.05em !important;
 		}
 

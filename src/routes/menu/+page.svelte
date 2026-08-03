@@ -25,6 +25,7 @@
 	let ripples = $state([]);
 	let rippleId = 0;
 	let introActive = $state(true);
+	let menuReady = $state(false);
 	let lastMouseX = 0;
 	let lastMouseY = 0;
 	const SPAWN_DISTANCE = 30;
@@ -280,13 +281,12 @@
 		preloadCode('/views');
 		preloadCode('/vicinities');
 
-		const cloudPreload = new Image();
-		cloudPreload.src = '/clouds.png';
-
 		window.addEventListener('resize', handleResize);
 
+		// Reveal everything quickly
 		setTimeout(() => {
 			introActive = false;
+			menuReady = true;
 		}, 50);
 
 		return () => {
@@ -322,11 +322,11 @@
 				};
 				goto('/vicinities');
 			}
-		}, 500);
+		}, 100);
 
 		setTimeout(() => {
 			cloudTransition.set(false);
-		}, 1800);
+		}, 1500);
 	}
 
 	function spawnRipple(x, y, type) {
@@ -397,14 +397,14 @@
 	<div class="fixed bottom-0 left-0 w-full h-[20rem] bg-gradient-to-t z-10 from-black/75 via-black/35 to-transparent pointer-events-none"></div>
 
 	<!-- Navigation UI Description Overlay -->
-	<div class="menu-desc-container fixed bottom-6 left-0 z-[25] flex flex-col gap-2 pointer-events-auto text-left animate-fade-in">
+	<div class="menu-desc-container fixed bottom-6 left-0 z-[25] flex flex-col gap-2 pointer-events-auto text-left" class:animate-fade-in={menuReady}>
 		<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
 			In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
 		</p>
 	</div>
 
 	<!-- Bottom Right Navigation Card & Controls -->
-	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto animate-fade-in">
+	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto" class:animate-fade-in={menuReady}>
 		<div class="relative card-slider-wrapper w-[420px] h-[255px]">
 			<!-- Toggle/Next circular button -->
 			<button
@@ -551,8 +551,15 @@
 </div>
 
 <style>
+	/* UI starts hidden, becomes visible when menuReady triggers this class */
+	.menu-desc-container,
+	.slider-menu {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
 	.animate-fade-in {
-		animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		animation: fadeIn 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 	}
 
 	@keyframes fadeIn {
@@ -842,17 +849,18 @@
 		position: fixed;
 		inset: 0;
 		z-index: 99999;
-		background: rgba(10, 10, 10, 0.45);
-		backdrop-filter: blur(25px);
-		-webkit-backdrop-filter: blur(25px);
+		background: rgba(10, 10, 10, 0.65);
+		backdrop-filter: blur(30px);
+		-webkit-backdrop-filter: blur(30px);
 		pointer-events: none;
-		transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), backdrop-filter 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+		/* Only animate opacity — NOT blur. Animating blur causes the zoom-out artifact. */
+		transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 		opacity: 1;
 	}
 
 	.menu-intro-overlay.fade-out {
 		opacity: 0;
-		backdrop-filter: blur(0px);
-		-webkit-backdrop-filter: blur(0px);
+		/* Blur stays at 30px — it vanishes with the element when opacity hits 0. 
+		   This avoids the visual "zoom out" caused by animating blur from 30→0. */
 	}
 </style>

@@ -463,23 +463,23 @@
 	@keyframes fog-fade {
 		0% {
 			background-color: rgba(255, 255, 255, 0);
-			backdrop-filter: blur(0px) saturate(100%);
-			-webkit-backdrop-filter: blur(0px) saturate(100%);
+			backdrop-filter: blur(0px);
+			-webkit-backdrop-filter: blur(0px);
 		}
-		30% {
-			background-color: rgba(255, 255, 255, 0.1);
-			backdrop-filter: blur(40px) saturate(150%);
-			-webkit-backdrop-filter: blur(40px) saturate(150%);
+		22% {
+			background-color: rgba(255, 255, 255, 0.22);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
 		}
-		70% {
-			background-color: rgba(255, 255, 255, 0.1);
-			backdrop-filter: blur(40px) saturate(150%);
-			-webkit-backdrop-filter: blur(40px) saturate(150%);
+		78% {
+			background-color: rgba(255, 255, 255, 0.22);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
 		}
 		100% {
 			background-color: rgba(255, 255, 255, 0);
-			backdrop-filter: blur(0px) saturate(100%);
-			-webkit-backdrop-filter: blur(0px) saturate(100%);
+			backdrop-filter: blur(0px);
+			-webkit-backdrop-filter: blur(0px);
 		}
 	}
 
@@ -489,11 +489,11 @@
 			opacity: 0;
 			filter: blur(40px);
 		}
-		30% {
+		22% {
 			opacity: 1;
 			filter: blur(20px);
 		}
-		70% {
+		78% {
 			opacity: 1;
 			filter: blur(10px);
 		}
