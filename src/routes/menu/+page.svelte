@@ -1,18 +1,32 @@
 <script>
 	import { goto, preloadCode } from '$app/navigation';
-	import { getContext, onMount } from 'svelte';
+	import { getContext, onMount, onDestroy, tick } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
+	import { gsap } from 'gsap';
 
 	const currentUI = getContext('currentUI');
 	const UIPanel = getContext('UIPanel');
-	const cloudTransition = getContext('cloudTransition');
+	const introVideoLastFrame = getContext('introVideoLastFrame');
+
+	let menuBgUrl = $derived($introVideoLastFrame || '/rahejanew1.png');
 
 	let currentSlide = $state(1);
 	let card1W = $state(420);
 	let card1H = $state(231);
 	let card2W = $state(420);
 	let card2H = $state(231);
+
+	// Pre-navigation transition: fade the menu UI out and sweep a single big,
+	// faded cloud up from the bottom, same as before, while the destination
+	// page loads underneath. Animated with GSAP for a single smooth tween
+	// instead of a CSS keyframe animation.
+	let menuUIHidden = $state(false);
+	let showClouds = $state(false);
+	let cloudOverlayEl;
+	let cloudImgEl;
+	let cloudTimeline;
+	const introTimers = [];
 
 	import views1Video from '$lib/videos/views1.mp4';
 	import vicinityVideo from '$lib/videos/vicinity.mp4';
@@ -24,7 +38,8 @@
 	let texture;
 	let ripples = $state([]);
 	let rippleId = 0;
-	let introActive = $state(true);
+	let introOverlayEl;
+	let introOverlayTween;
 	let menuReady = $state(false);
 	let lastMouseX = 0;
 	let lastMouseY = 0;
@@ -145,7 +160,7 @@
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 		const img = new Image();
-		img.src = '/building.png';
+		img.src = menuBgUrl;
 		img.onload = () => {
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
@@ -283,11 +298,24 @@
 
 		window.addEventListener('resize', handleResize);
 
-		// Reveal everything quickly
+		// Same fog technique as the /menu → /views|/vicinities cloud
+		// transition: picks up right where the outgoing "/" page's veil left
+		// off, holds briefly, then clears to reveal the menu — so the whole
+		// video → menu handoff reads as one continuous blur-hold-reveal.
+		if (introOverlayEl) {
+			gsap.set(introOverlayEl, { backgroundColor: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(14px)' });
+			introOverlayTween = gsap.to(introOverlayEl, {
+				backgroundColor: 'rgba(255,255,255,0)',
+				backdropFilter: 'blur(0px)',
+				duration: 0.9,
+				ease: 'power2.inOut',
+				delay: 0.4
+			});
+		}
+
 		setTimeout(() => {
-			introActive = false;
 			menuReady = true;
-		}, 50);
+		}, 400);
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
@@ -295,11 +323,43 @@
 		};
 	});
 
-	function handleExploreClick() {
-		cloudTransition.set(true);
+	function after(ms, fn) {
+		introTimers.push(setTimeout(fn, ms));
+	}
 
-		setTimeout(() => {
-			if (currentSlide === 1) {
+	async function handleExploreClick() {
+		const destination = currentSlide === 1 ? 'views' : 'vicinity';
+
+		menuUIHidden = true;
+		showClouds = true;
+		await tick(); // wait for the cloud elements to mount before animating them
+
+		if (cloudImgEl && cloudOverlayEl) {
+			gsap.set(cloudImgEl, { yPercent: 95, opacity: 0, filter: 'blur(28px)' });
+			gsap.set(cloudOverlayEl, { backgroundColor: 'rgba(255,255,255,0)', backdropFilter: 'blur(0px)' });
+
+			cloudTimeline = gsap.timeline();
+
+			// Cloud: one continuous sweep from off-screen bottom to fully past
+			// the top, fading/sharpening in as it rises and fading/softening
+			// back out as it exits — a single one-way pass, not there-and-back.
+			cloudTimeline
+				.to(cloudImgEl, { yPercent: -120, duration: 2.2, ease: 'power1.inOut' }, 0)
+				.to(cloudImgEl, { opacity: 0.5, filter: 'blur(0px)', duration: 0.7, ease: 'power2.out' }, 0)
+				.to(cloudImgEl, { opacity: 0, filter: 'blur(22px)', duration: 0.6, ease: 'power2.in' }, 1.6);
+
+			// Fog: builds with the cloud, then lingers on its own as a brief
+			// blur screen after the cloud has fully vanished, before clearing
+			// to reveal the destination page underneath.
+			cloudTimeline
+				.to(cloudOverlayEl, { backgroundColor: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(14px)', duration: 0.8, ease: 'power2.out' }, 0)
+				.to(cloudOverlayEl, { backgroundColor: 'rgba(255,255,255,0)', backdropFilter: 'blur(0px)', duration: 0.8, ease: 'power2.inOut' }, 2.4);
+		}
+
+		// Navigate while the cloud has already vanished but the fog is still
+		// fully held — the page swap happens hidden inside that blur beat.
+		after(1900, () => {
+			if (destination === 'views') {
 				$currentUI = {
 					overview: false,
 					views: true,
@@ -322,12 +382,18 @@
 				};
 				goto('/vicinities');
 			}
-		}, 100);
+		});
 
-		setTimeout(() => {
-			cloudTransition.set(false);
-		}, 1500);
+		after(3300, () => {
+			showClouds = false;
+		});
 	}
+
+	onDestroy(() => {
+		introTimers.forEach(clearTimeout);
+		cloudTimeline?.kill();
+		introOverlayTween?.kill();
+	});
 
 	function spawnRipple(x, y, type) {
 		const id = rippleId++;
@@ -367,18 +433,23 @@
 	}
 </script>
 
-<div class="menu-container fixed inset-0 w-screen h-screen bg-black overflow-hidden select-none" on:click={handlePageClick} on:mousemove={handleMouseMove}>
+<div
+	class="menu-container fixed inset-0 w-screen h-screen bg-black overflow-hidden select-none"
+	style="--menu-bg-image: url('{menuBgUrl}');"
+	on:click={handlePageClick}
+	on:mousemove={handleMouseMove}
+>
 	<!-- Focus Transition Blur Overlay -->
-	<div class="menu-intro-overlay" class:fade-out={!introActive}></div>
+	<div class="menu-intro-overlay" bind:this={introOverlayEl}></div>
 
-	<!-- Settled Parallax Background Building -->
-	<div class="fixed inset-0 pointer-events-none flex items-center justify-center" style="z-index: 1;">
+	<!-- Background building, held at its natural cover-fit size -->
+	<div class="menu-bg-layer fixed inset-0 pointer-events-none flex items-center justify-center" style="z-index: 1;">
 		{#if !imageLoaded}
-			<img class="w-full h-full object-cover scale-110 -translate-y-10" src="/building.png" alt="Building background" />
+			<img class="w-full h-full object-cover" src={menuBgUrl} alt="Building background" />
 		{/if}
 		<canvas
 			bind:this={canvas}
-			class="w-full h-full scale-110 -translate-y-10"
+			class="w-full h-full"
 			class:hidden={!imageLoaded}
 		></canvas>
 	</div>
@@ -397,14 +468,14 @@
 	<div class="fixed bottom-0 left-0 w-full h-[20rem] bg-gradient-to-t z-10 from-black/75 via-black/35 to-transparent pointer-events-none"></div>
 
 	<!-- Navigation UI Description Overlay -->
-	<div class="menu-desc-container fixed bottom-6 left-0 z-[25] flex flex-col gap-2 pointer-events-auto text-left" class:animate-fade-in={menuReady}>
+	<div class="menu-desc-container fixed bottom-6 left-0 z-[25] flex flex-col gap-2 pointer-events-auto text-left" class:animate-fade-in={menuReady} class:menu-fading-out={menuUIHidden}>
 		<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
 			In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
 		</p>
 	</div>
 
 	<!-- Bottom Right Navigation Card & Controls -->
-	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto" class:animate-fade-in={menuReady}>
+	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto" class:animate-fade-in={menuReady} class:menu-fading-out={menuUIHidden}>
 		<div class="relative card-slider-wrapper w-[420px] h-[255px]">
 			<!-- Toggle/Next circular button -->
 			<button
@@ -548,6 +619,13 @@
 			</div>
 		</button>
 	</div>
+
+	<!-- Cloud sweeps across the screen, covering the switch to the destination page -->
+	{#if showClouds}
+		<div class="explore-cloud-overlay" bind:this={cloudOverlayEl}>
+			<img src="/clouds.png" alt="" class="explore-cloud-img" bind:this={cloudImgEl} />
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -555,21 +633,28 @@
 	.menu-desc-container,
 	.slider-menu {
 		opacity: 0;
-		transform: translateY(20px);
+		transform: translateY(20px) scale(0.96);
 	}
 
 	.animate-fade-in {
 		animation: fadeIn 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 	}
 
+	.menu-fading-out {
+		opacity: 0 !important;
+		pointer-events: none !important;
+		transform: translateY(12px);
+		transition: opacity 500ms ease, transform 500ms ease;
+	}
+
 	@keyframes fadeIn {
 		from {
 			opacity: 0;
-			transform: translateY(20px);
+			transform: translateY(20px) scale(0.96);
 		}
 		to {
 			opacity: 1;
-			transform: translateY(0);
+			transform: translateY(0) scale(1);
 		}
 	}
 
@@ -837,7 +922,7 @@
 		position: absolute;
 		inset: -60px;
 		z-index: -2;
-		background: url('/building.png') no-repeat center center;
+		background: var(--menu-bg-image) no-repeat center center;
 		background-size: cover;
 		background-attachment: fixed;
 		filter: blur(45px) brightness(0.9);
@@ -845,22 +930,63 @@
 		pointer-events: none;
 	}
 
+	/* Subtle zoom-in + fade entrance — settles at scale(1) (true natural
+	   size) so nothing stays oversized once the animation finishes. */
+	.menu-bg-layer {
+		opacity: 0;
+		transform: scale(1.05);
+		animation: menu-bg-fade-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	}
+
+	@keyframes menu-bg-fade-in {
+		from {
+			opacity: 0;
+			transform: scale(1.05);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	/* Same fog values as the outgoing "/" page and the cloud transition —
+	   GSAP picks this up on mount (see onMount) and clears it after a brief
+	   hold, so the handoff from the video reads as one continuous veil. */
 	.menu-intro-overlay {
 		position: fixed;
 		inset: 0;
 		z-index: 99999;
-		background: rgba(10, 10, 10, 0.65);
-		backdrop-filter: blur(30px);
-		-webkit-backdrop-filter: blur(30px);
+		background-color: rgba(255, 255, 255, 0.22);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
 		pointer-events: none;
-		/* Only animate opacity — NOT blur. Animating blur causes the zoom-out artifact. */
-		transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-		opacity: 1;
 	}
 
-	.menu-intro-overlay.fade-out {
-		opacity: 0;
-		/* Blur stays at 30px — it vanishes with the element when opacity hits 0. 
-		   This avoids the visual "zoom out" caused by animating blur from 30→0. */
+	/* Pre-navigation transition: a single big, faded cloud sweeps up from the
+	   bottom while a synced fog darkens behind it, covering the switch to
+	   the destination page. GSAP drives the actual motion (see
+	   handleExploreClick) for one continuous smooth tween; these rules just
+	   set the static size/position/starting look. */
+	.explore-cloud-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: none;
+		will-change: background-color, backdrop-filter;
+	}
+
+	.explore-cloud-img {
+		width: 180vw;
+		max-width: none;
+		height: 170vh;
+		object-fit: contain;
+		position: absolute;
+		transform-origin: center center;
+		will-change: transform, opacity, filter;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
 	}
 </style>

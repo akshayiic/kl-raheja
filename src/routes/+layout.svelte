@@ -47,10 +47,10 @@
 	};
 	const vicinityImg = writable('-');
 	setContext('vicinityImg', vicinityImg);
-	const cloudTransition = writable(false);
-	setContext('cloudTransition', cloudTransition);
 
-
+	// Last frame captured from the intro (/) video, reused as the /menu background
+	const introVideoLastFrame = writable(null);
+	setContext('introVideoLastFrame', introVideoLastFrame);
 
 	// check for the iframe window
 	function inIframe() {
@@ -205,11 +205,6 @@
 
 	<slot />
 
-	{#if $cloudTransition}
-		<div class="cloud-transition-overlay">
-			<img src="/clouds.png" class="cloud-img" alt="Transitioning Clouds" />
-		</div>
-	{/if}
 
 	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')} class:hidden={$UIPanel == 'loading' || $page.url.pathname == '/views' || $page.url.pathname == '/menu' || $page.url.pathname == '/vicinities'}>
 		<nav class="z-[999]">
@@ -434,73 +429,4 @@
 </div>
 
 <style>
-	.cloud-transition-overlay {
-		position: fixed;
-		inset: 0;
-		z-index: 3000000000;
-		pointer-events: none;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		animation: fog-fade 1.8s ease-in-out forwards;
-		will-change: background-color, backdrop-filter;
-	}
-
-	.cloud-img {
-		width: 150vw;
-		max-width: none;
-		height: 150vh;
-		object-fit: contain;
-		position: absolute;
-		transform-origin: center center;
-		animation: clouds-slide-up 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-		will-change: transform, opacity, filter;
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
-		transform: translateZ(0);
-	}
-
-	@keyframes fog-fade {
-		0% {
-			background-color: rgba(255, 255, 255, 0);
-			backdrop-filter: blur(0px);
-			-webkit-backdrop-filter: blur(0px);
-		}
-		22% {
-			background-color: rgba(255, 255, 255, 0.22);
-			backdrop-filter: blur(12px);
-			-webkit-backdrop-filter: blur(12px);
-		}
-		78% {
-			background-color: rgba(255, 255, 255, 0.22);
-			backdrop-filter: blur(12px);
-			-webkit-backdrop-filter: blur(12px);
-		}
-		100% {
-			background-color: rgba(255, 255, 255, 0);
-			backdrop-filter: blur(0px);
-			-webkit-backdrop-filter: blur(0px);
-		}
-	}
-
-	@keyframes clouds-slide-up {
-		0% {
-			transform: translateY(90%) scale(1.2) rotate(-3deg) translateZ(0);
-			opacity: 0;
-			filter: blur(40px);
-		}
-		22% {
-			opacity: 1;
-			filter: blur(0px);
-		}
-		78% {
-			opacity: 1;
-			filter: blur(10px);
-		}
-		100% {
-			transform: translateY(-90%) scale(1.2) rotate(3deg) translateZ(0);
-			opacity: 0;
-			filter: blur(40px);
-		}
-	}
 </style>

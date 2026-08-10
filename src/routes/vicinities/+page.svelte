@@ -40,30 +40,37 @@
 
 	let vicinityImg = getContext('vicinityImg');
 	let galleryCollapsed = false;
+	let openAccordionItems = []; // persists which sidebar categories are expanded across minimize/reopen
 	let isLoaded = true;
 	let activeSrc = '';
 	let prevSrc = '';
 	let imgEl;
-	let videoLoading = true;
+	let videoLoading = false;
+	let videoLoadSafetyTimer;
 
 	$: {
 		if (activeVideo) {
 			videoLoading = true;
+			// Safety: auto-clear loading after 5s so UI never feels stuck
+			if (videoLoadSafetyTimer) clearTimeout(videoLoadSafetyTimer);
+			videoLoadSafetyTimer = setTimeout(() => {
+				videoLoading = false;
+			}, 5000);
 		}
 	}
 
-	$: {
-		if (videoLoading) {
-			if (transitionTimeout) {
-				clearTimeout(transitionTimeout);
-				transitionTimeout = null;
-			}
-		} else {
-			if (transitionTimeout) clearTimeout(transitionTimeout);
-			transitionTimeout = setTimeout(() => {
-				prevVideo = '';
-			}, 600);
+	function onNewVideoReady() {
+		if (!videoLoading) return; // already handled this swap, avoid re-triggering the fade
+		videoLoading = false;
+		if (videoLoadSafetyTimer) {
+			clearTimeout(videoLoadSafetyTimer);
+			videoLoadSafetyTimer = null;
 		}
+		// Clear prevVideo once the blur crossfade finishes (match CSS transition duration)
+		if (transitionTimeout) clearTimeout(transitionTimeout);
+		transitionTimeout = setTimeout(() => {
+			prevVideo = '';
+		}, 750);
 	}
 
 	$: displaySrc = $vicinityImg != '-' ? 'https://assets.vestate.io/webtool/kraheja/kraheja/vicinities/' + $vicinityImg : '';
@@ -133,6 +140,7 @@
 	onDestroy(() => {
 		stopGalleryTimer();
 		if (transitionTimeout) clearTimeout(transitionTimeout);
+		if (videoLoadSafetyTimer) clearTimeout(videoLoadSafetyTimer);
 	});
 
 	$: {
@@ -350,7 +358,7 @@
 
 			<div class="no-hovers">
 				<div class="inner-btn-group">
-					<Accordion.Root class="w-full sm:max-w-full" multiple={true}>
+					<Accordion.Root class="w-full sm:max-w-full" multiple={true} bind:value={openAccordionItems}>
 						<Accordion.Item class="hidden" value="item-1wqweqweqweqwe">
 							<Accordion.Trigger id="station-level-ss" class="hidden">asdasdasd</Accordion.Trigger>
 						</Accordion.Item>
@@ -374,7 +382,7 @@
 												? 'active inner-modal-btn'
 												: 'inner-modal-btn'}
 											id={'x-' + item.id.replaceAll(/[\s./]+/g, '-') + '-am'}
-											on:click={() => vicinityImg.set(item.id)}
+											on:click={() => { vicinityImg.set(item.id); $isAmenitiesMinimized = true; }}
 										>
 											{item.label}
 										</button>
@@ -403,32 +411,28 @@
 	{#if $vicinityImg != '-'}
 		<div class="absolute top-0 left-0 w-full h-full z-50 bg-black overflow-hidden">
 			{#if activeVideo}
-				{#if prevVideo}
+						{#if prevVideo}
 					<video
 						src={prevVideo}
 						autoplay
 						muted
 						playsinline
-						class="absolute top-0 left-0 h-full w-full object-cover z-10"
+						class="absolute top-0 left-0 h-full w-full object-cover z-10 vicinity-prev-fade {videoLoading ? '' : 'is-fading'}"
 					></video>
 				{/if}
 
+				<!-- Layer 2: New active video (blurs in on top only once it can actually play) -->
 				<video
 					src={activeVideo}
 					autoplay
 					muted
 					playsinline
-					class="absolute top-0 left-0 h-full w-full object-cover transition-all duration-500 z-20 {videoLoading ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'}"
+					class="vicinity-active-video absolute top-0 left-0 h-full w-full object-cover z-20 vicinity-video-fade {videoLoading ? 'is-loading' : 'is-ready'}"
 					on:playing={() => videoLoading = false}
 					on:canplay={() => videoLoading = false}
 					on:loadstart={() => videoLoading = true}
 					on:waiting={() => videoLoading = true}
 				></video>
-
-				<!-- Backdrop blur overlay that fades out when video is loaded -->
-				<div 
-					class="absolute inset-0 bg-black/20 backdrop-blur-md transition-opacity duration-500 pointer-events-none z-30 {videoLoading ? 'opacity-100' : 'opacity-0'}"
-				></div>
 			{:else}
 				{#if !isLoaded && prevSrc}
 					<img
@@ -623,6 +627,32 @@
 </button>
 
 <style>
+	/* Video Crossfade – incoming video blurs in as it fades in on top */
+	.vicinity-video-fade {
+		transition: opacity 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms cubic-bezier(0.4, 0, 0.2, 1);
+		will-change: opacity, filter;
+	}
+	.vicinity-video-fade.is-loading {
+		opacity: 0;
+		filter: blur(20px);
+	}
+	.vicinity-video-fade.is-ready {
+		opacity: 1;
+		filter: blur(0);
+	}
+
+	/* Outgoing video mirrors the blur as it fades out underneath, so the swap reads as one motion */
+	.vicinity-prev-fade {
+		opacity: 1;
+		filter: blur(0);
+		transition: opacity 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms cubic-bezier(0.4, 0, 0.2, 1);
+		will-change: opacity, filter;
+	}
+	.vicinity-prev-fade.is-fading {
+		opacity: 0;
+		filter: blur(20px);
+	}
+
 	/* Go Back Button */
 	.go-back-btn {
 		position: fixed;

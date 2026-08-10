@@ -2,18 +2,21 @@
 	import Home from './Home.svelte';
 	import { setContext, getContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { goto } from '$app/navigation';
+	import { goto, preloadCode } from '$app/navigation';
 	import 'iconify-icon';
 	import poweredByVretail from '$lib/images/powered-vretail.png';
 	import instructionIcon from '$lib/images/instruction-icon.svg';
 	import instructionPanoIcon from '$lib/images/instruction-pano.svg';
-	import { onMount } from 'svelte';
+	import newRahejaVid from '$lib/videos/new-raheja.mp4';
+	import { onMount, onDestroy } from 'svelte';
+	import { gsap } from 'gsap';
 	// Create a store and update it when necessary...
 	const hotspotName = getContext('hotspotName');
 	const currentUI = getContext('currentUI');
 	const walkthroughDisabled = getContext('walkthroughDisabled');
 
 	const UIPanel = getContext('UIPanel');
+	const introVideoLastFrame = getContext('introVideoLastFrame');
 
 	const instructionPano = writable();
 	$effect(() => {
@@ -29,40 +32,79 @@
 	}
 	let isIframe = $state(inIframe());
 	let introVideoMuted = $state(true);
-	let isTransitioning = $state(false);
-	let showParallax = $state(false);
-	let hasScrolled = $state(false);
-	let foliageSlidOut = $state(false);
-	let foliageSettled = $state(false);
-	let hasScrolledOnce = $state(false);
-	let parallaxImagesLoaded = $state(false);
-	let activeHover = $state(null);
+	let showVideoIntro = $state(false);
+	let introTransitioning = $state(false);
+	let typedSubheading = $state('');
+	let introPlaybackEl = $state(null);
+	let exitFogEl = $state(null);
 
-	function preloadParallaxImages() {
-		const images = [
-			'/building.png',
-			'/bg1.png',
-			'/leftfull1.png',
-			'/rightfull1.png',
-			'/mousewheel.png'
-		];
-		let loadedCount = 0;
-		images.forEach(src => {
-			const img = new Image();
-			img.onload = () => {
-				loadedCount++;
-				if (loadedCount === images.length) {
-					parallaxImagesLoaded = true;
+	const INTRO_SUBHEADING = 'Leading Real Estate Developer in India';
+	let typingTimer;
+	let exitFogTween;
+
+	// Grabs the video's final rendered frame so /menu can use it as its background.
+	function captureIntroLastFrame() {
+		if (!introPlaybackEl) return;
+		try {
+			const canvas = document.createElement('canvas');
+			canvas.width = introPlaybackEl.videoWidth;
+			canvas.height = introPlaybackEl.videoHeight;
+			canvas.getContext('2d').drawImage(introPlaybackEl, 0, 0);
+			introVideoLastFrame.set(canvas.toDataURL('image/jpeg', 0.9));
+		} catch (e) {
+			// capture failed — /menu just falls back to its default background
+		}
+	}
+
+	function handleIntroVideoEnded() {
+		captureIntroLastFrame();
+		introTransitioning = true; // fades the heading/subheading out
+
+		// Same fog technique as the /menu → /views|/vicinities cloud
+		// transition: a translucent, blurred veil builds smoothly over the
+		// held last frame and then just holds — /menu's own matching veil
+		// picks up from here and clears to reveal its content, so the two
+		// pages read as one continuous blur-hold-reveal motion.
+		if (exitFogEl) {
+			exitFogTween = gsap.to(exitFogEl, {
+				backgroundColor: 'rgba(255,255,255,0.22)',
+				backdropFilter: 'blur(14px)',
+				duration: 0.9,
+				ease: 'power2.out'
+			});
+		}
+
+		goto('/menu');
+	}
+
+	function typeSubheadingLoop() {
+		let i = 0;
+		let deleting = false;
+
+		function tick() {
+			if (!deleting) {
+				i++;
+				typedSubheading = INTRO_SUBHEADING.slice(0, i);
+				if (i === INTRO_SUBHEADING.length) {
+					typingTimer = setTimeout(() => {
+						deleting = true;
+						tick();
+					}, 1800);
+					return;
 				}
-			};
-			img.onerror = () => {
-				loadedCount++;
-				if (loadedCount === images.length) {
-					parallaxImagesLoaded = true;
+			} else {
+				i--;
+				typedSubheading = INTRO_SUBHEADING.slice(0, i);
+				if (i === 0) {
+					deleting = false;
+					typingTimer = setTimeout(tick, 500);
+					return;
 				}
-			};
-			img.src = src;
-		});
+			}
+			typingTimer = setTimeout(tick, deleting ? 35 : 60);
+		}
+
+		tick();
 	}
 
 	function startExperience() {
@@ -75,72 +117,21 @@
 			} else if (document.body.msRequestFullscreen) {
 				document.body.msRequestFullscreen();
 			}
-		} 
-
-		isTransitioning = true;
-		const startTime = Date.now();
-		const minLoaderTime = 2000;
-
-		function checkReady() {
-			const elapsed = Date.now() - startTime;
-			if (parallaxImagesLoaded && elapsed >= minLoaderTime) {
-				isTransitioning = false;
-				$UIPanel = 'loaded';
-				showParallax = true;
-				setTimeout(() => {
-					foliageSlidOut = true;
-					setTimeout(() => {
-						foliageSettled = true;
-					}, 3000);
-				}, 50);
-			} else {
-				setTimeout(checkReady, 100);
-			}
 		}
 
-		checkReady();
+		$UIPanel = 'loaded';
+		showVideoIntro = true;
+		typeSubheadingLoop();
+
+		// Fetch /menu's route chunk now, while the video plays, so slow
+		// connections don't stall once the video actually ends.
+		preloadCode('/menu');
 	}
 
-	$effect(() => {
-		if (hasScrolled) {
-			setTimeout(() => {
-				goto('/menu');
-			}, 2000);
-		}
+	onDestroy(() => {
+		if (typingTimer) clearTimeout(typingTimer);
+		exitFogTween?.kill();
 	});
-	let touchStartY = 0;
-	let accumulatedDelta = 0;
-	const SCROLL_THRESHOLD = 40;
-
-	function handleWheel(e) {
-		accumulatedDelta += e.deltaY;
-		if (accumulatedDelta > SCROLL_THRESHOLD) {
-			hasScrolled = true;
-			hasScrolledOnce = true;
-			accumulatedDelta = SCROLL_THRESHOLD; // Cap it
-		} else if (accumulatedDelta < -SCROLL_THRESHOLD) {
-			hasScrolled = false;
-			accumulatedDelta = -SCROLL_THRESHOLD; // Cap it
-		}
-	}
-
-	function handleTouchStart(e) {
-		touchStartY = e.touches[0].clientY;
-	}
-
-	function handleTouchMove(e) {
-		const touchEndY = e.touches[0].clientY;
-		const diffY = touchStartY - touchEndY; // positive = swipe up, negative = swipe down
-		if (Math.abs(diffY) > SCROLL_THRESHOLD) {
-			if (diffY > 0) {
-				hasScrolled = true;
-				hasScrolledOnce = true;
-			} else {
-				hasScrolled = false;
-			}
-			touchStartY = touchEndY; // reset anchor to prevent continuous triggering on a single swipe
-		}
-	}
 
 	function handleExploreClick() {
 		if (currentSlide === 1) {
@@ -209,8 +200,6 @@
 		}
 
 		localStorage.getItem('instructions-view-count') == 4 && instructionPano.set(false);
-
-		preloadParallaxImages();
 
 		const video = document.querySelector('.intro-video');
 		if (video) {
@@ -484,115 +473,25 @@
 	</div>
 {/if}
 
-{#if isTransitioning}
-	<div
-		class="secondary-loading-screen fixed left-0 top-0 z-[2000000010] h-screen w-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat"
-		style="background-image: url('/blurbg.png');"
-	>
-		<img class="loading-building-img mb-6 max-h-[150px] w-auto" src="Vector.png" alt="" />
-		<div class="loading-text text-xl md:text-2xl font-light tracking-[0.25em] text-[#e5d5be]" style="font-family: 'The Seasons', serif;">
-			LOADING<span class="dot-anim"></span>
+{#if showVideoIntro}
+	<div class="video-intro-screen fixed left-0 top-0 z-[2000000010] h-screen w-screen bg-black overflow-hidden">
+		<video
+			bind:this={introPlaybackEl}
+			class="video-intro-bg absolute left-0 top-0 h-full w-full object-cover"
+			src={newRahejaVid}
+			autoplay
+			muted
+			playsinline
+			on:ended={handleIntroVideoEnded}
+		></video>
+		<div class="video-intro-overlay absolute inset-0"></div>
+		<div class="video-intro-text absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none" class:transitioning={introTransitioning}>
+			<h1 class="video-intro-heading">K RAHEJA</h1>
+			<p class="video-intro-subheading">
+				{typedSubheading}<span class="typing-caret">|</span>
+			</p>
 		</div>
-	</div>
-{/if}
-
-{#if showParallax}
-	<div
-		on:wheel={handleWheel}
-		on:touchstart={handleTouchStart}
-		on:touchmove={handleTouchMove}
-		class="parallax-scroll-container fixed left-0 top-0 z-[2000000020] h-screen w-screen bg-black overflow-hidden select-none"
-		class:has-scrolled-once={hasScrolledOnce}
-	>
-		<div class="h-full w-full relative">
-			{#if foliageSettled && !hasScrolled}
-				<div class="absolute inset-0 z-[5] flex pointer-events-auto">
-					<div
-						class="w-[33vw] h-full cursor-default"
-						on:mouseenter={() => activeHover = 'left'}
-						on:mouseleave={() => activeHover = null}
-					></div>
-					<div
-						class="w-[34vw] h-full cursor-default"
-						on:mouseenter={() => activeHover = 'center'}
-						on:mouseleave={() => activeHover = null}
-					></div>
-					<div
-						class="w-[33vw] h-full cursor-default"
-						on:mouseenter={() => activeHover = 'right'}
-						on:mouseleave={() => activeHover = null}
-					></div>
-				</div>
-			{/if}
-
-			<!-- Background building image (z-index: 1) -->
-			<div
-				class="fixed inset-0 pointer-events-none flex items-center justify-center parallax-bg-container"
-				style="transition: transform {hasScrolled ? '4.0s ease-in-out' : '2.0s ease-out'}; transform: scale({hasScrolled ? 1.1 : 1.0}) translateY({hasScrolled ? '-40px' : '0px'}); z-index: 1;"
-			>
-				<img class="w-full h-full object-cover" src="/building.png" alt="Building background" />
-			</div>
-
-			<!-- Middle aperture mask image (z-index: 2) -->
-			<div
-				class="fixed inset-0 pointer-events-none flex items-center justify-center parallax-mask-container"
-				style="
-					transition: transform {hasScrolled ? '4.0s ease-in-out' : foliageSettled ? '0.8s cubic-bezier(0.25, 1, 0.5, 1)' : '2.0s ease-out'}, opacity {hasScrolled ? '3.5s ease-in-out' : '1.8s ease-out'};
-					transform: scale({hasScrolled ? 7.0 : activeHover === 'center' ? 0.72 : 0.7}) translateX({hasScrolled ? '0px' : activeHover === 'left' ? '30px' : activeHover === 'right' ? '-30px' : '0px'});
-					opacity: {hasScrolled ? 0 : 1};
-					z-index: 2;
-				"
-			>
-				<img
-					class="w-full h-full object-cover transition-transform duration-500 scale-150"
-					src="/bg1.png"
-					alt="Aperture mask layer"
-				/>
-			</div>
-
-			<!-- Left side floral PNG (z-index: 3) -->
-			<div
-				class="foliage-container left-foliage {foliageSettled ? 'settled' : ''}"
-				class:scrolled={hasScrolled}
-				class:slid-out={foliageSlidOut && !hasScrolled}
-				style="left: 0; {foliageSettled && !hasScrolled ? `transform: translateX(${activeHover === 'left' ? '-32%' : activeHover === 'center' || activeHover === 'right' ? '-38%' : '-35%'}) scale(${activeHover === 'left' ? 1.02 : activeHover === 'center' || activeHover === 'right' ? 0.98 : 1.0}); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);` : ''}"
-			>
-				<img class="w-full h-full object-cover object-right" src="/leftfull1.png" alt="Floral frame left" />
-			</div>
-
-			<!-- Right side floral PNG (z-index: 3) -->
-			<div
-				class="foliage-container right-foliage {foliageSettled ? 'settled' : ''}"
-				class:scrolled={hasScrolled}
-				class:slid-out={foliageSlidOut && !hasScrolled}
-				style="right: 0; {foliageSettled && !hasScrolled ? `transform: translateX(${activeHover === 'right' ? '32%' : activeHover === 'center' || activeHover === 'left' ? '38%' : '35%'}) scale(${activeHover === 'right' ? 1.02 : activeHover === 'center' || activeHover === 'left' ? 0.98 : 1.0}); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);` : ''}"
-			>
-				<img class="w-full h-full object-cover object-left" src="/rightfull1.png" alt="Floral frame right" />
-			</div>
-
-			<!-- Bottom Dark Overlay Gradient for Scroll Badge -->
-			<div
-				class="fixed bottom-0 left-0 w-full h-[15rem]  bg-gradient-to-t z-10 from-black/85 via-black/40 to-transparent pointer-events-none transition-opacity duration-500"
-				style="opacity: {hasScrolled ? 0 : 1};"
-			></div>
-
-			<!-- Scroll Indicator Badge -->
-			<button
-				on:click={() => hasScrolled = true}
-				class="fixed bottom-4 left-1/2 -translate-x-1/2 brightness-150 cursor-pointer flex flex-col items-center z-10 transition-opacity duration-500 bg-transparent border-0 p-0 outline-none"
-				style="opacity: {hasScrolled ? 0 : 1}; pointer-events: {hasScrolled ? 'none' : 'auto'};"
-			>
-				<img 
-					class="w-[80%] h-[80%] object-cover " 
-					src="/mousewheel.png"
-					alt="Scroll to experience"
-				/>
-			</button>
-
-
-			<!-- Fullscreen Transition Blur Overlay -->
-			<div class="scroll-transition-overlay" class:active={hasScrolled}></div>
-		</div>
+		<div class="video-exit-fog absolute inset-0" bind:this={exitFogEl}></div>
 	</div>
 {/if}
 
@@ -706,128 +605,69 @@
 		}
 	}
 
-	.dot-anim {
-		display: inline-block;
-		width: 1.5em;
-		text-align: left;
+	/* Video Intro Screen (post-Discover) */
+	.video-intro-bg {
+		z-index: 1;
 	}
 
-	.dot-anim::after {
-		content: '';
-		animation: dots 1.5s steps(4, end) infinite !important;
+	.video-intro-overlay {
+		z-index: 2;
+		background: rgba(10, 10, 10, 0.35);
 	}
 
-	@keyframes dots {
-		0%, 20% { content: ''; }
-		40% { content: '.'; }
-		60% { content: '..'; }
-		80%, 100% { content: '...'; }
-	}
-
-	@keyframes mouse-wheel {
-		0% {
-			transform: translateY(-2px);
-			opacity: 0;
-		}
-		50% {
-			opacity: 1;
-		}
-		100% {
-			transform: translateY(4px);
-			opacity: 0;
-		}
-	}
-	
-	.mouse-wheel-anim {
-		animation: mouse-wheel 1.6s infinite ease-in-out;
-		transform-origin: center;
-	}
-
-	.parallax-bg-container {
-		will-change: transform;
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
-	}
-
-	.parallax-mask-container {
-		will-change: transform, opacity;
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
-	}
-
-	.foliage-container {
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		width: 55vw;
+	.video-intro-text {
 		z-index: 3;
+		transition: opacity 450ms ease;
+	}
+
+	.video-intro-text.transitioning {
+		opacity: 0;
+	}
+
+	/* Same fog technique as the /menu cloud transition — builds smoothly via
+	   GSAP (see handleIntroVideoEnded) and hands off to /menu's matching
+	   veil, so the two pages read as one continuous blur-hold-reveal. */
+	.video-exit-fog {
+		z-index: 4;
+		background-color: rgba(255, 255, 255, 0);
+		backdrop-filter: blur(0px);
+		-webkit-backdrop-filter: blur(0px);
 		pointer-events: none;
-		transform: translateX(0%);
-		will-change: transform;
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
+		will-change: background-color, backdrop-filter;
 	}
 
-	/* Left Foliage States */
-	.left-foliage.slid-out {
-		transform: translateX(-35%);
-		transition: transform 3.0s cubic-bezier(0.16, 1, 0.3, 1);
-		transition-delay: 0s;
+	.video-intro-heading {
+		font-family: 'Viaoda Libre', serif;
+		font-weight: 400;
+		font-size: clamp(2.5rem, 7vw, 5.5rem);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.92);
+		text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+		margin: 0;
 	}
 
-	.has-scrolled-once .left-foliage.slid-out {
-		transition-delay: 0.8s; /* Wait for mask to return first */
+	.video-intro-subheading {
+		margin-top: 0.75rem;
+		font-family: 'Imprima', sans-serif;
+		font-weight: 300;
+		font-size: clamp(0.8rem, 1.6vw, 1.1rem);
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.75);
+		min-height: 1.4em;
 	}
 
-	.left-foliage.scrolled {
-		transform: translateX(-105%);
-		transition: transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
-		transition-delay: 0s;
+	.typing-caret {
+		display: inline-block;
+		margin-left: 2px;
+		color: rgba(255, 255, 255, 0.75);
+		animation: caret-blink 0.8s step-end infinite;
 	}
 
-	/* Right Foliage States */
-	.right-foliage.slid-out {
-		transform: translateX(35%);
-		transition: transform 3.0s cubic-bezier(0.16, 1, 0.3, 1);
-		transition-delay: 0s;
-	}
-
-	.has-scrolled-once .right-foliage.slid-out {
-		transition-delay: 0.8s; /* Wait for mask to return first */
-	}
-
-	.right-foliage.scrolled {
-		transform: translateX(105%);
-		transition: transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
-		transition-delay: 0s;
-	}
-
-	/* Initial load state (before slided out) */
-	.foliage-container:not(.slid-out):not(.scrolled) {
-		transform: translateX(0%);
-		transition: transform 3.0s cubic-bezier(0.16, 1, 0.3, 1);
-		transition-delay: 0s;
-	}
-
-	/* Hover States (Settle Phase) */
-	.foliage-container.settled {
-		pointer-events: auto !important;
-	}
-
-	/* .left-foliage.settled:hover {
-		transform: translateX(-31%) scale(1.02) !important;
-		transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
-		transition-delay: 0s !important;
-	}
-
-	.right-foliage.settled:hover {
-		transform: translateX(31%) scale(1.02) !important;
-		transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
-		transition-delay: 0s !important;
-	} */
-
-	.foliage-container img {
-		transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+	@keyframes caret-blink {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0; }
 	}
 
 	/* Navigation Cards Stack & Design */
@@ -894,24 +734,6 @@
 		border-bottom-left-radius: 2.5rem;
 		border-top-right-radius: 2.5rem;
 		overflow: hidden;
-	}
-
-	.scroll-transition-overlay {
-		position: fixed;
-		inset: 0;
-		z-index: 2000000050;
-		background: rgba(10, 10, 10, 0.0);
-		backdrop-filter: blur(0px);
-		-webkit-backdrop-filter: blur(0px);
-		pointer-events: none;
-		transition: background-color 0.7s ease-in-out, backdrop-filter 0.7s ease-in-out;
-		transition-delay: 1.5s;
-	}
-
-	.scroll-transition-overlay.active {
-		background: rgba(10, 10, 10, 0.45);
-		backdrop-filter: blur(25px);
-		-webkit-backdrop-filter: blur(25px);
 	}
 
 	/* Intro Mute/Unmute Button – Circular Glassmorphism */
