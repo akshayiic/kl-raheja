@@ -715,7 +715,7 @@
 		class="go-back-btn animate-fade-in"
 		on:click={() => {
 			$currentUI.views = false;
-			goto('/menu');
+			goto('/?menu=true');
 		}}
 		type="button"
 	>

@@ -108,7 +108,11 @@
 		switchChecker();
 		if ($page.url.pathname === '/') {
 			show('overview');
-			UIPanel.set('loading');
+			if ($UIPanel !== 'menu' && $page.url.searchParams.get('menu') !== 'true') {
+				UIPanel.set('loading');
+			} else if ($page.url.searchParams.get('menu') === 'true') {
+				UIPanel.set('menu');
+			}
 		} else if ($page.url.pathname === '/menu') {
 			show('overview');
 			UIPanel.set('loaded');
@@ -206,7 +210,7 @@
 	<slot />
 
 
-	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')} class:hidden={$UIPanel == 'loading' || $page.url.pathname == '/views' || $page.url.pathname == '/menu' || $page.url.pathname == '/vicinities'}>
+	<div class={'nav-wrapper ' + ($navSlide ? 'active-drop-wrapper' : '')} class:hidden={$UIPanel == 'loading' || $UIPanel == 'menu' || $page.url.pathname == '/views' || $page.url.pathname == '/menu' || $page.url.pathname == '/vicinities'}>
 		<nav class="z-[999]">
 			{#if $UIPanel == 'instructions-nav'}
 				<div class="tooltip-text relative">

@@ -3,12 +3,17 @@
 	import { setContext, getContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { goto, preloadCode } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { fade } from 'svelte/transition';
 	import 'iconify-icon';
+	import rahejaLogo from '$lib/images/rahejanew.png';
 	import poweredByVretail from '$lib/images/powered-vretail.png';
 	import instructionIcon from '$lib/images/instruction-icon.svg';
 	import instructionPanoIcon from '$lib/images/instruction-pano.svg';
 	import newRahejaVid from '$lib/videos/new-raheja.mp4';
-	import { onMount, onDestroy } from 'svelte';
+	import views1Video from '$lib/videos/views1.mp4';
+	import vicinityVideo from '$lib/videos/vicinity.mp4';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { gsap } from 'gsap';
 	// Create a store and update it when necessary...
 	const hotspotName = getContext('hotspotName');
@@ -35,14 +40,122 @@
 	let showVideoIntro = $state(false);
 	let introTransitioning = $state(false);
 	let typedSubheading = $state('');
-	let introPlaybackEl = $state(null);
-	let exitFogEl = $state(null);
+	let introPlaybackEl = null;
+	let exitFogEl = null;
 
 	const INTRO_SUBHEADING = 'Leading Real Estate Developer in India';
 	let typingTimer;
 	let exitFogTween;
 
-	// Grabs the video's final rendered frame so /menu can use it as its background.
+	// Svelte 5 state variables for menu content
+	let showMenuContent = $state(false);
+	let shouldAnimateMenu = $state(false);
+	let transitionTriggered = false;
+	let activeCategoryTitle = $state('');
+	let activeCategoryDesc = $state('');
+	let menuBgUrl = $derived(introVideoLastFrame ? ($introVideoLastFrame || '/rahejanew1.png') : '/rahejanew1.png');
+
+	function after(ms, fn) {
+		return setTimeout(fn, ms);
+	}
+
+	let currentSlide = $state(1);
+	let card1W = $state(420);
+	let card1H = $state(231);
+	let card2W = $state(420);
+	let card2H = $state(231);
+
+	let menuUIHidden = $state(false);
+	let showClouds = $state(false);
+	let cloudOverlayEl = null;
+	let cloudImgEl = null;
+	let cloudTimeline;
+	const introTimers = [];
+
+	let canvas = null;
+	let gl = null;
+	let program = null;
+	let positionBuffer = null;
+	let texture = null;
+	let ripples = $state([]);
+	let rippleId = 0;
+	let lastMouseX = 0;
+	let lastMouseY = 0;
+	const SPAWN_DISTANCE = 30;
+	let imageLoaded = $state(false);
+	let imageWidth = 0;
+	let imageHeight = 0;
+	let uScale = 1.0;
+	let vScale = 1.0;
+	let uOffset = 0.0;
+	let vOffset = 0.0;
+	let animationFrameId = null;
+
+	// DOM element references for GSAP animations
+	let menuDescEl = null;
+	let sliderMenuEl = null;
+	let videoIntroScreenEl = null;
+	let introOverlayEl = null;
+	let introOverlayTween;
+
+	// Debug logs to trace state transitions
+	$effect(() => {
+		console.log('[DEBUG] showMenuContent state changed:', showMenuContent);
+	});
+	$effect(() => {
+		console.log('[DEBUG] UIPanel state changed:', $UIPanel);
+	});
+
+	// Automatically listen to URL query param menu=true (for navigating back from views/vicinities)
+	$effect(() => {
+		if ($page.url.searchParams.get('menu') === 'true') {
+			shouldAnimateMenu = false; // Do NOT animate when returning from subpages
+			showMenuContent = true;
+			UIPanel?.set('menu');
+			showVideoIntro = false;
+		}
+	});
+
+	// Reset menu content state when going back to loading screen
+	$effect(() => {
+		if ($UIPanel === 'loading') {
+			showMenuContent = false;
+		}
+	});
+
+	// Initialize WebGL when the canvas is mounted
+	$effect(() => {
+		if (showMenuContent && canvas) {
+			// If we are playing the intro transition, delay WebGL initialization to keep animations smooth.
+			// Otherwise (e.g. returning to menu), initialize instantly.
+			const delay = shouldAnimateMenu ? 2000 : 0;
+
+			const timer = setTimeout(() => {
+				initWebGL();
+				window.addEventListener('resize', handleResize);
+			}, delay);
+
+			return () => {
+				clearTimeout(timer);
+				window.removeEventListener('resize', handleResize);
+				if (animationFrameId) cancelAnimationFrame(animationFrameId);
+			};
+		}
+	});
+
+	// Automatically run the menu transition when showMenuContent becomes true
+	$effect(() => {
+		if (showMenuContent && !shouldAnimateMenu) {
+			// Instantly set them to their fully visible states with no transition
+			gsap.set('.menu-desc-container, .slider-menu', {
+				opacity: 1,
+				scale: 1,
+				z: 0
+			});
+		}
+	});
+
+	// Grabs the video's final rendered frame so WebGL canvas can use it as its background.
 	function captureIntroLastFrame() {
 		if (!introPlaybackEl) return;
 		try {
@@ -52,63 +165,93 @@
 			canvas.getContext('2d').drawImage(introPlaybackEl, 0, 0);
 			introVideoLastFrame.set(canvas.toDataURL('image/jpeg', 0.9));
 		} catch (e) {
-			// capture failed — /menu just falls back to its default background
+			// capture failed
+		}
+	}
+
+	function handleVideoTimeUpdate() {
+		if (!introPlaybackEl) return;
+		if (introPlaybackEl.duration && introPlaybackEl.currentTime >= introPlaybackEl.duration - 2.0) {
+			if (!transitionTriggered) {
+				transitionTriggered = true;
+				triggerMenuTransition();
+			}
 		}
 	}
 
 	function handleIntroVideoEnded() {
-		captureIntroLastFrame();
-		introTransitioning = true; // fades the heading/subheading out
-
-		// Same fog technique as the /menu → /views|/vicinities cloud
-		// transition: a translucent, blurred veil builds smoothly over the
-		// held last frame and then just holds — /menu's own matching veil
-		// picks up from here and clears to reveal its content, so the two
-		// pages read as one continuous blur-hold-reveal motion.
-		if (exitFogEl) {
-			exitFogTween = gsap.to(exitFogEl, {
-				backgroundColor: 'rgba(255,255,255,0.22)',
-				backdropFilter: 'blur(14px)',
-				duration: 0.9,
-				ease: 'power2.out'
-			});
+		if (!transitionTriggered) {
+			transitionTriggered = true;
+			triggerMenuTransition();
 		}
+	}
 
-		goto('/menu');
+	async function triggerMenuTransition() {
+		captureIntroLastFrame();
+
+		// Mount menu content immediately behind the video intro screen
+		shouldAnimateMenu = true;
+		showMenuContent = true;
+		UIPanel?.set('menu');
+
+		// Wait for Svelte to mount the menu elements in the DOM
+		await tick();
+
+		// Fade out the center text slowly and naturally
+		gsap.to('.video-intro-text', {
+			opacity: 0,
+			duration: 1.8,
+			ease: 'sine.inOut'
+		});
+
+		// Fade out the video intro screen container to reveal the menu container behind it
+		gsap.to('.video-intro-screen', {
+			opacity: 0,
+			duration: 1.8,
+			ease: 'power2.out',
+			onComplete: () => {
+				try {
+					console.log('[DEBUG] video intro screen fade completed');
+					showVideoIntro = false;
+				} catch (err) {
+					console.error(err);
+				}
+			}
+		});
+
+		// Scale up and fade in the menu items (coming from back to front slowly, without delay or stagger)
+		gsap.fromTo('.menu-desc-container, .slider-menu', 
+			{
+				opacity: 0,
+				scale: 0.1,
+				z: -500,
+				transformPerspective: 1000
+			},
+			{
+				opacity: 1,
+				scale: 1,
+				z: 0,
+				duration: 1.8, // matched duration
+				ease: 'power2.out'
+			}
+		);
 	}
 
 	function typeSubheadingLoop() {
 		let i = 0;
-		let deleting = false;
 
-		function tick() {
-			if (!deleting) {
-				i++;
-				typedSubheading = INTRO_SUBHEADING.slice(0, i);
-				if (i === INTRO_SUBHEADING.length) {
-					typingTimer = setTimeout(() => {
-						deleting = true;
-						tick();
-					}, 1800);
-					return;
-				}
-			} else {
-				i--;
-				typedSubheading = INTRO_SUBHEADING.slice(0, i);
-				if (i === 0) {
-					deleting = false;
-					typingTimer = setTimeout(tick, 500);
-					return;
-				}
+		function tickLoop() {
+			i++;
+			typedSubheading = INTRO_SUBHEADING.slice(0, i);
+			if (i < INTRO_SUBHEADING.length) {
+				typingTimer = setTimeout(tickLoop, 60);
 			}
-			typingTimer = setTimeout(tick, deleting ? 35 : 60);
 		}
 
-		tick();
+		tickLoop();
 	}
 
 	function startExperience() {
-		// Request fullscreen immediately under direct user gesture
 		if (!(window.self !== window.top) && window.innerWidth < 1200) {
 			if (document.body.requestFullscreen) {
 				document.body.requestFullscreen();
@@ -119,45 +262,425 @@
 			}
 		}
 
-		$UIPanel = 'loaded';
+		transitionTriggered = false;
+		UIPanel?.set('loaded');
 		showVideoIntro = true;
 		typeSubheadingLoop();
+	}
 
-		// Fetch /menu's route chunk now, while the video plays, so slow
-		// connections don't stall once the video actually ends.
-		preloadCode('/menu');
+	// WebGL ripple background logic
+	const vertexShaderSource = `
+		attribute vec2 a_position;
+		varying vec2 v_texCoord;
+		uniform vec2 u_uvScale;
+		uniform vec2 u_uvOffset;
+		void main() {
+			gl_Position = vec4(a_position, 0.0, 1.0);
+			vec2 uv = a_position * 0.5 + 0.5;
+			uv.y = 1.0 - uv.y;
+			v_texCoord = uv * u_uvScale + u_uvOffset;
+		}
+	`;
+
+	const fragmentShaderSource = `
+		precision mediump float;
+		varying vec2 v_texCoord;
+		uniform sampler2D u_image;
+		uniform float u_aspectRatio;
+
+		uniform vec4 u_ripples[30];
+		uniform int u_rippleCount;
+
+		void main() {
+			vec2 tc = v_texCoord;
+			vec2 displacement = vec2(0.0);
+
+			for (int i = 0; i < 30; i++) {
+				if (i >= u_rippleCount) break;
+				
+				vec4 ripple = u_ripples[i];
+				vec2 ripplePos = ripple.xy;
+				float progress = ripple.z;
+				float intensity = ripple.w;
+
+				vec2 diff = tc - ripplePos;
+				diff.y /= u_aspectRatio;
+
+				float dist = length(diff);
+				
+				float waveRadius = progress * 0.5;
+				float waveWidth = 0.07;
+				
+				if (dist > 0.0 && dist < waveRadius + waveWidth && dist > waveRadius - waveWidth) {
+					float d = dist - waveRadius;
+					float x = d / waveWidth;
+					float wave = sin(x * 3.14159) * (1.0 - progress);
+					displacement += normalize(diff) * wave * 0.012 * intensity;
+				}
+			}
+
+			displacement.y *= u_aspectRatio;
+			gl_FragColor = texture2D(u_image, tc - displacement);
+		}
+	`;
+
+	function createShader(gl, type, source) {
+		const shader = gl.createShader(type);
+		gl.shaderSource(shader, source);
+		gl.compileShader(shader);
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+			gl.deleteShader(shader);
+			return null;
+		}
+		return shader;
+	}
+
+	function initWebGL() {
+		try {
+			if (!canvas) return;
+			gl = canvas.getContext('webgl');
+			if (!gl) {
+				console.error('WebGL not supported');
+				return;
+			}
+
+			const vs = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+			const fs = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+			if (!vs || !fs) {
+				console.error('Failed to compile shaders');
+				return;
+			}
+			program = gl.createProgram();
+			gl.attachShader(program, vs);
+			gl.attachShader(program, fs);
+			gl.linkProgram(program);
+
+			if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+				console.error('Program link error:', gl.getProgramInfoLog(program));
+				return;
+			}
+
+			positionBuffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+				-1.0, -1.0,
+				 1.0, -1.0,
+				-1.0,  1.0,
+				-1.0,  1.0,
+				 1.0, -1.0,
+				 1.0,  1.0,
+			]), gl.STATIC_DRAW);
+
+			texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+			const img = new Image();
+			img.onload = () => {
+				try {
+					if (!gl) return;
+					gl.bindTexture(gl.TEXTURE_2D, texture);
+					gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+					imageWidth = img.naturalWidth;
+					imageHeight = img.naturalHeight;
+					imageLoaded = true;
+					resizeCanvas();
+					updateUVScale(imageWidth, imageHeight);
+					requestRender();
+				} catch (err) {
+					console.error('Error loading WebGL texture image:', err);
+				}
+			};
+			img.src = menuBgUrl;
+		} catch (err) {
+			console.error('WebGL initialization crashed:', err);
+		}
+	}
+
+	function updateUVScale(imgWidth, imgHeight) {
+		if (!canvas) return;
+		const canvasWidth = canvas.width;
+		const canvasHeight = canvas.height;
+
+		const imageRatio = imgWidth / imgHeight;
+		const canvasRatio = canvasWidth / canvasHeight;
+
+		if (canvasRatio > imageRatio) {
+			uScale = 1.0;
+			vScale = imageRatio / canvasRatio;
+			uOffset = 0.0;
+			vOffset = (1.0 - vScale) * 0.5;
+		} else {
+			uScale = canvasRatio / imageRatio;
+			vScale = 1.0;
+			uOffset = (1.0 - uScale) * 0.5;
+			vOffset = 0.0;
+		}
+	}
+
+	function resizeCanvas() {
+		if (!canvas || !gl) return;
+		const displayWidth = window.innerWidth;
+		const displayHeight = window.innerHeight;
+		if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+			canvas.width = displayWidth;
+			canvas.height = displayHeight;
+			gl.viewport(0, 0, canvas.width, canvas.height);
+		}
+	}
+
+	function requestRender() {
+		if (animationFrameId) cancelAnimationFrame(animationFrameId);
+		animationFrameId = requestAnimationFrame(render);
+	}
+
+	function render() {
+		if (!gl || !imageLoaded) return;
+
+		resizeCanvas();
+
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+
+		gl.useProgram(program);
+
+		const positionLoc = gl.getAttribLocation(program, 'a_position');
+		gl.enableVertexAttribArray(positionLoc);
+		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+		gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+		const uvScaleLoc = gl.getUniformLocation(program, 'u_uvScale');
+		gl.uniform2f(uvScaleLoc, uScale, vScale);
+
+		const uvOffsetLoc = gl.getUniformLocation(program, 'u_uvOffset');
+		gl.uniform2f(uvOffsetLoc, uOffset, vOffset);
+
+		const aspectLoc = gl.getUniformLocation(program, 'u_aspectRatio');
+		gl.uniform1f(aspectLoc, canvas.width / canvas.height);
+
+		const maxRipples = 30;
+		const ripplesData = new Float32Array(maxRipples * 4);
+		const count = Math.min(ripples.length, maxRipples);
+
+		for (let i = 0; i < count; i++) {
+			const r = ripples[i];
+			const idx = i * 4;
+			ripplesData[idx] = r.x / canvas.width;
+			ripplesData[idx + 1] = 1.0 - (r.y / canvas.height);
+			ripplesData[idx + 2] = r.progress;
+			ripplesData[idx + 3] = r.intensity;
+		}
+
+		const ripplesLoc = gl.getUniformLocation(program, 'u_ripples');
+		gl.uniform4fv(ripplesLoc, ripplesData);
+
+		const countLoc = gl.getUniformLocation(program, 'u_rippleCount');
+		gl.uniform1i(countLoc, count);
+
+		gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+		if (ripples.length > 0) {
+			const now = Date.now();
+			ripples = ripples.map(r => {
+				const elapsed = now - r.startTime;
+				const duration = r.type === 'click' ? 1200 : 800;
+				return {
+					...r,
+					progress: elapsed / duration
+				};
+			}).filter(r => r.progress < 1.0);
+
+			animationFrameId = requestAnimationFrame(render);
+		} else {
+			animationFrameId = null;
+		}
+	}
+
+	function handleResize() {
+		resizeCanvas();
+		if (imageWidth && imageHeight) {
+			updateUVScale(imageWidth, imageHeight);
+		}
+		requestRender();
+	}
+
+	function spawnRipple(x, y, type) {
+		const id = rippleId++;
+		const intensity = type === 'click' ? 0.5 : 0.15;
+		ripples = [...ripples, {
+			id,
+			x,
+			y,
+			type,
+			startTime: Date.now(),
+			progress: 0.0,
+			intensity
+		}];
+
+		if (!animationFrameId) {
+			requestRender();
+		}
+	}
+
+	function handlePageClick(e) {
+		if (e.target.closest('.slider-menu')) {
+			return;
+		}
+		spawnRipple(e.clientX, e.clientY, 'click');
+	}
+
+	function handleMouseMove(e) {
+		if (e.target.closest('.slider-menu')) {
+			return;
+		}
+		const distance = Math.hypot(e.clientX - lastMouseX, e.clientY - lastMouseY);
+		if (distance > SPAWN_DISTANCE) {
+			lastMouseX = e.clientX;
+			lastMouseY = e.clientY;
+			spawnRipple(e.clientX, e.clientY, 'hover');
+		}
+	}
+
+	async function handleExploreClick() {
+		const destination = currentSlide === 1 ? 'views' : 'vicinity';
+		const targetPath = destination === 'views' ? '/views' : '/vicinities';
+
+		activeCategoryTitle = destination === 'views' ? 'VIEWS' : 'VICINITY';
+		activeCategoryDesc = destination === 'views' 
+			? 'Discover South Mumbai Through Immersive Aerial Perspectives, Revealing The Landmarks That Define This Exceptional Address.'
+			: 'Navigate Through The Landmarks And Prime Conveniences Surrounding Sobo Residences, Connecting You To The Finest Of South Mumbai.';
+
+		menuUIHidden = true;
+		showClouds = true;
+		await tick();
+
+		// Fade out the menu background layer so the blur on the overlay stands out
+		gsap.to('.menu-bg-layer', { opacity: 0.1, duration: 1.5, ease: 'power2.out' });
+
+		if (cloudOverlayEl && cloudImgEl) {
+			// Set initial states
+			gsap.set(cloudImgEl, { yPercent: 100, opacity: 0, scale: 1.8, filter: 'blur(15px)' });
+			gsap.set('.transition-cloud-left', { yPercent: 100, xPercent: -50, scale: 1.8, opacity: 0 });
+			gsap.set('.transition-cloud-right', { yPercent: 100, xPercent: 50, scale: 1.8, opacity: 0 });
+			gsap.set('.transition-title', { y: 250, opacity: 0, scale: 0.95 });
+			gsap.set('.transition-subheading', { y: 150, opacity: 0 });
+			gsap.set('.transition-logo-wrapper', { opacity: 0, y: -20 });
+
+			// Blur transition background overlay (pure blur, no background overlay color/whites tint)
+			gsap.fromTo(cloudOverlayEl, 
+				{ backdropFilter: 'blur(0px)' },
+				{ backdropFilter: 'blur(16px)', duration: 1.5, ease: 'power2.out' }
+			);
+
+			// 1. Big cloud moves first from bottom to top
+			gsap.to(cloudImgEl, {
+				yPercent: -150,
+				opacity: 0.75,
+				filter: 'blur(0px)',
+				duration: 2.2,
+				ease: 'power2.inOut'
+			});
+
+			// 2. The center text and the two corner clouds follow it up (after a 0.4s delay)
+			const followDelay = 0.4;
+
+			// Top logo fade in
+			gsap.to('.transition-logo-wrapper', {
+				opacity: 1,
+				y: 0,
+				duration: 1.2,
+				ease: 'power2.out',
+				delay: followDelay + 0.2
+			});
+
+			// Center Title comes up and settles
+			gsap.to('.transition-title', {
+				opacity: 1,
+				y: 0,
+				scale: 1,
+				duration: 1.6,
+				ease: 'power3.out',
+				delay: followDelay
+			});
+
+			// Subheading description follows title
+			gsap.to('.transition-subheading', {
+				opacity: 1,
+				y: 0,
+				duration: 1.6,
+				ease: 'power2.out',
+				delay: followDelay + 0.2
+			});
+
+			// Left cloud comes up and settles in the top-left corner
+			gsap.to('.transition-cloud-left', {
+				xPercent: 0,
+				yPercent: 0,
+				scale: 1.3,
+				opacity: 0.9,
+				duration: 1.8,
+				ease: 'power2.out',
+				delay: followDelay + 0.1
+			});
+
+			// Right cloud comes up and settles in the top-right corner
+			gsap.to('.transition-cloud-right', {
+				xPercent: 0,
+				yPercent: 0,
+				scale: 1.3,
+				opacity: 0.9,
+				duration: 1.8,
+				ease: 'power2.out',
+				delay: followDelay + 0.1
+			});
+		}
+
+		// Hold for 2 seconds (total time before navigation)
+		after(2000, () => {
+			if (destination === 'views') {
+				$currentUI = {
+					overview: false,
+					views: true,
+					Exterior: false,
+					interiors: false,
+					amenities: false,
+					highlights: false,
+					vicinity: false
+				};
+				goto('/views');
+			} else {
+				$currentUI = {
+					overview: false,
+					views: false,
+					Exterior: false,
+					interiors: false,
+					amenities: false,
+					highlights: false,
+					vicinity: true
+				};
+				goto('/vicinities');
+			}
+		});
+
+		// Clean up overlay state after transition page mounts
+		after(3300, () => {
+			showClouds = false;
+			menuUIHidden = false; // Reset menu UI visibility state
+		});
 	}
 
 	onDestroy(() => {
 		if (typingTimer) clearTimeout(typingTimer);
 		exitFogTween?.kill();
+		introTimers.forEach(clearTimeout);
+		cloudTimeline?.kill();
+		introOverlayTween?.kill();
 	});
-
-	function handleExploreClick() {
-		if (currentSlide === 1) {
-			$currentUI = {
-				overview: false,
-				views: true,
-				Exterior: false,
-				interiors: false,
-				amenities: false,
-				highlights: false,
-				vicinity: false
-			};
-			goto('/views');
-		} else {
-			$currentUI = {
-				overview: false,
-				views: false,
-				Exterior: false,
-				interiors: false,
-				amenities: false,
-				highlights: false,
-				vicinity: true
-			};
-			goto('/vicinities');
-		}
-	}
 
 	const toggleIntroAudio = (event) => {
 		if (event) event.stopPropagation();
@@ -474,7 +997,7 @@
 {/if}
 
 {#if showVideoIntro}
-	<div class="video-intro-screen fixed left-0 top-0 z-[2000000010] h-screen w-screen bg-black overflow-hidden">
+	<div bind:this={videoIntroScreenEl} class="video-intro-screen fixed left-0 top-0 z-[2000000010] h-screen w-screen bg-black overflow-hidden">
 		<video
 			bind:this={introPlaybackEl}
 			class="video-intro-bg absolute left-0 top-0 h-full w-full object-cover"
@@ -483,15 +1006,233 @@
 			muted
 			playsinline
 			on:ended={handleIntroVideoEnded}
+			on:timeupdate={handleVideoTimeUpdate}
 		></video>
-		<div class="video-intro-overlay absolute inset-0"></div>
 		<div class="video-intro-text absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none" class:transitioning={introTransitioning}>
 			<h1 class="video-intro-heading">K RAHEJA</h1>
 			<p class="video-intro-subheading">
 				{typedSubheading}<span class="typing-caret">|</span>
 			</p>
 		</div>
-		<div class="video-exit-fog absolute inset-0" bind:this={exitFogEl}></div>
+	</div>
+{/if}
+
+{#if showMenuContent}
+	<div
+		class="menu-container fixed inset-0 w-screen h-screen bg-black overflow-hidden select-none"
+		style="--menu-bg-image: url('{menuBgUrl}');"
+		on:click={handlePageClick}
+		on:mousemove={handleMouseMove}
+	>
+		<!-- Background building, held at its natural cover-fit size -->
+		<div class="menu-bg-layer fixed inset-0 pointer-events-none flex items-center justify-center" style="z-index: 1;">
+			{#if !imageLoaded}
+				<img class="w-full h-full object-cover" src={menuBgUrl} alt="Building background" />
+			{/if}
+			<canvas
+				bind:this={canvas}
+				class="w-full h-full"
+				class:hidden={!imageLoaded}
+			></canvas>
+		</div>
+
+		<!-- Subtle progressive gradient blur columns behind side items -->
+		<div 
+			class="fixed left-0 top-0 w-[40vw] h-screen backdrop-blur-[6px] bg-black/5 pointer-events-none"
+			style="z-index: 5; mask-image: linear-gradient(to right, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 60%, transparent 100%);"
+		></div>
+		<div 
+			class="fixed right-0 top-0 w-[40vw] h-screen backdrop-blur-[6px] bg-black/5 pointer-events-none"
+			style="z-index: 5; mask-image: linear-gradient(to left, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to left, black 60%, transparent 100%);"
+		></div>
+
+		<!-- Bottom Dark Overlay Gradient -->
+		<div class="fixed bottom-0 left-0 w-full h-[20rem] bg-gradient-to-t from-black/75 via-black/35 to-transparent pointer-events-none" style="z-index: 10;"></div>
+
+		<!-- Navigation UI Description Overlay -->
+		<div bind:this={menuDescEl} class="menu-desc-container fixed bottom-6 left-0 flex flex-col gap-2 pointer-events-auto text-left" class:menu-fading-out={menuUIHidden} style="z-index: 25;">
+			<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
+				In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
+			</p>
+		</div>
+
+		<!-- Bottom Right Navigation Card & Controls -->
+		<div bind:this={sliderMenuEl} class="slider-menu fixed bottom-12 flex items-end gap-4 pointer-events-auto" class:menu-fading-out={menuUIHidden} style="z-index: 25;">
+			<div class="relative card-slider-wrapper w-[420px] h-[255px]">
+				<!-- Toggle/Next circular button -->
+				<button
+					on:click={() => currentSlide = currentSlide === 1 ? 2 : 1}
+					class="toggle-slide-btn absolute -left-12 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 transition-all duration-300 flex items-center justify-center text-[#DEAD66] cursor-pointer z-30 !p-0"
+					aria-label="Next slide"
+				>
+					<svg width="8" height="8" viewBox="0 0 10 10" fill="#DEAD66" style="transform: rotate(-40deg);">
+						<circle cx="5" cy="2" r="1.1" />
+						<circle cx="2" cy="6.8" r="1.1" />
+						<circle cx="8" cy="6.8" r="1.1" />
+					</svg>
+				</button>
+
+				<!-- Card 2 (VICINITY) -->
+				<div 
+					bind:clientWidth={card2W} 
+					bind:clientHeight={card2H}
+					class="nav-card {currentSlide === 2 ? 'front' : 'back'} cursor-pointer"
+					on:click={() => currentSlide === 2 ? handleExploreClick() : (currentSlide = 2)}
+				>
+					<div class="glass-blur-bg"></div>
+					<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
+						<path d="M 40,0 L {card2W - 40},0 A 40,40 0 0 1 {card2W},40 L {card2W},{card2H - 40} A 40,40 0 0 1 {card2W - 40},{card2H} L 40,{card2H} A 40,40 0 0 1 0,{card2H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
+						      fill="rgba(255, 255, 255, 0.02)" 
+						      stroke="rgba(255, 255, 255, 0.12)" 
+						      stroke-width="1.2" />
+					</svg>
+					
+					<!-- Text section -->
+					<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
+						<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
+							VICINITY
+						</h2>
+						<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
+							Discover South Mumbai's finest landmarks, cultural destinations, and lifestyle experiences close to your home.
+						</p>
+						<!-- Explore button -->
+						<button
+							on:click={(e) => { e.stopPropagation(); handleExploreClick(); }}
+							class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
+							style="font-family: 'Imprima', sans-serif;"
+						>
+							<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
+								<circle cx="5" cy="2" r="1" />
+								<circle cx="2" cy="7" r="1" />
+								<circle cx="8" cy="7" r="1" />
+							</svg>
+							Explore
+						</button>
+					</div>
+					
+					<!-- Thumbnail Video -->
+					<div class="thumbnail-cutout z-10">
+						<video 
+							class="w-full h-full object-cover pointer-events-none" 
+							src={vicinityVideo} 
+							autoplay 
+							loop 
+							muted 
+							playsinline
+						></video>
+					</div>
+				</div>
+
+				<!-- Card 1 (VIEWS) -->
+				<div 
+					bind:clientWidth={card1W} 
+					bind:clientHeight={card1H}
+					class="nav-card {currentSlide === 1 ? 'front' : 'back'} cursor-pointer"
+					on:click={() => currentSlide === 1 ? handleExploreClick() : (currentSlide = 1)}
+				>
+					<div class="glass-blur-bg"></div>
+					<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
+						<path d="M 40,0 L {card1W - 40},0 A 40,40 0 0 1 {card1W},40 L {card1W},{card1H - 40} A 40,40 0 0 1 {card1W - 40},{card1H} L 40,{card1H} A 40,40 0 0 1 0,{card1H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
+						      fill="rgba(255, 255, 255, 0.02)" 
+						      stroke="rgba(255, 255, 255, 0.12)" 
+						      stroke-width="1.2" />
+					</svg>
+
+					<!-- Text section -->
+					<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
+						<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
+							VIEWS
+						</h2>
+						<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
+							Explore The Building From Multiple Viewpoints And Discover Every Angle Of Its Architecture And Surroundings.
+						</p>
+						<!-- Explore button -->
+						<button
+							on:click={(e) => { e.stopPropagation(); handleExploreClick(); }}
+							class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
+							style="font-family: 'Imprima', sans-serif;"
+						>
+							<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
+								<circle cx="5" cy="2" r="1" />
+								<circle cx="2" cy="7" r="1" />
+								<circle cx="8" cy="7" r="1" />
+							</svg>
+							Explore
+						</button>
+					</div>
+					
+					<!-- Thumbnail Video -->
+					<div class="thumbnail-cutout z-10">
+						<video 
+							class="w-full h-full object-cover pointer-events-none" 
+							src={views1Video} 
+							autoplay 
+							loop 
+							muted 
+							playsinline
+						></video>
+					</div>
+				</div>
+			</div>
+
+			<!-- Page Indicators -->
+			<button 
+				class="custom-indicator select-none cursor-pointer border-0 bg-transparent p-0 flex items-baseline outline-none" 
+				style="font-family: 'IvyPresto Text', serif;"
+				on:click={() => currentSlide = currentSlide === 1 ? 2 : 1}
+				aria-label="Toggle slide"
+			>
+				<div class="indicator-num large">
+					{#key currentSlide}
+						<span transition:fade={{ duration: 250 }}>
+							{currentSlide === 1 ? '01' : '02'}
+						</span>
+					{/key}
+				</div>
+				
+				<div class="indicator-line"></div>
+				
+				<div class="indicator-num small">
+					{#key currentSlide}
+						<span transition:fade={{ duration: 250 }}>
+							{currentSlide === 1 ? '02' : '01'}
+						</span>
+					{/key}
+				</div>
+			</button>
+		</div>
+
+		<!-- Transition loading screen showing early page branding & corner clouds -->
+		{#if showClouds}
+			<div class="explore-transition-overlay fixed inset-0 w-screen h-screen z-[2000000000] flex flex-col items-center justify-between py-16 pointer-events-none" bind:this={cloudOverlayEl}>
+				<!-- Top Logo -->
+				<div class="transition-logo-wrapper opacity-0 flex justify-center mt-6">
+					<img src={rahejaLogo} alt="Raheja Logo" class="h-16 w-auto object-contain" />
+				</div>
+
+				<!-- Center Text Content -->
+				<div class="transition-text-content flex flex-col items-center text-center px-4 max-w-4xl">
+					<!-- Page Title with Metallic Silver Reflection Gradient -->
+					<h2 class="transition-title select-none opacity-0">
+						{activeCategoryTitle}
+					</h2>
+					<!-- Subheading Description -->
+					<p class="transition-subheading select-none opacity-0 mt-6 max-w-2xl leading-relaxed text-white/80">
+						{activeCategoryDesc}
+					</p>
+				</div>
+
+				<!-- Placeholder to balance flex layout -->
+				<div class="h-16"></div>
+
+				<!-- Big sweeping cloud -->
+				<img src="/clouds.png" alt="" class="transition-big-cloud absolute pointer-events-none" bind:this={cloudImgEl} />
+
+				<!-- Two Corner Clouds -->
+				<img src="/clouds.png" alt="" class="transition-cloud-left absolute pointer-events-none" />
+				<img src="/clouds.png" alt="" class="transition-cloud-right absolute pointer-events-none" />
+			</div>
+		{/if}
 	</div>
 {/if}
 
@@ -671,69 +1412,381 @@
 	}
 
 	/* Navigation Cards Stack & Design */
-.nav-card {
-    position: absolute;
-    inset: 0;
-    border-radius: 28px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    color: #f3efe9;
- 
-     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(28px) saturate(1.3);
-    -webkit-backdrop-filter: blur(28px) saturate(1.3);
-    border: 1px solid rgba(255,255,255,.14);
-    box-shadow:
-      0 20px 60px rgba(0,0,0,.45),
-      inset 0 1px 0 rgba(255,255,255,.08);
- 
-    transition: transform .55s cubic-bezier(.19,1,.22,1),
-                opacity .55s ease,
-                filter .55s ease;
-    cursor: pointer;
-  }
- 
-  .nav-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-   background: rgba(255, 255, 255, 0.1);
 
-    pointer-events: none;
-  }
- 
-  /* stacking states */
-  .nav-card.front {
-    z-index: 20;
-    opacity: 1;
-    transform: translate(0,0) scale(1);
-    pointer-events: auto;
-    filter: blur(0);
-  }
-
-	.nav-card.back {
-   z-index: 12;
-    opacity: .55;
-    transform: translate(14px,-16px) scale(.95);
-    pointer-events: none;
-    filter: blur(1.5px);
+	.menu-fading-out {
+		opacity: 0 !important;
+		pointer-events: none !important;
+		transform: translateY(12px);
+		transition: opacity 500ms ease, transform 500ms ease;
 	}
 
+	.explore-card-btn {
+		background-color: rgba(30, 30, 30, 0.45) !important;
+		border: 1.5px solid #c5a880 !important;
+		border-radius: 9999px !important;
+		color: #e5d5be !important;
+		padding: 0.5rem 1.5rem !important;
+		font-size: 0.75rem !important;
+		letter-spacing: 0.12em !important;
+		text-transform: none !important;
+		font-weight: normal !important;
+		transition: all 0.4s ease-in-out !important;
+		cursor: pointer !important;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		height: auto !important;
+		width: auto !important;
+		margin-bottom: 12px !important;
+	}
+
+	.explore-card-btn:hover {
+		background-color: #c5a880 !important;
+		color: #1e1e1e !important;
+		box-shadow: 0 0 25px rgba(197, 168, 128, 0.65) !important;
+		border-color: #c5a880 !important;
+	}
+
+	/* Navigation Cards Stack & Design */
+	.nav-card{
+		position:absolute;
+		inset:0;
+		padding:24px 24px;
+		border-radius:40px;
+		overflow:hidden;
+		transition:.6s cubic-bezier(.19,1,.22,1);
+	}
+
+	.nav-card::before{
+		content:"";
+		position:absolute;
+		inset:0;
+		border-radius:inherit;
+		background:
+			radial-gradient(
+				ellipse at top,
+				rgba(255,255,255,.24),
+				transparent 55%
+			);
+		mix-blend-mode:screen;
+		pointer-events:none;
+	}
+	 
+	/* stacking states */
+	.nav-card.front {
+		z-index: 20;
+		opacity: 1 !important;
+		transform: translate(0,0) scale(1) !important;
+		pointer-events: auto;
+		left: 0% !important;
+		right: 0% !important;
+		width: 100% !important;
+	}
+
+	.nav-card.back {
+		z-index: 10;
+		opacity: 0.65 !important;
+		transform: translate(0, -28px) scale(0.93) !important;
+		pointer-events: none;
+		filter: blur(1.5px) !important;
+		left: 15% !important;
+		right: 20% !important;
+		width: 80% !important;
+	}
+
+	/* Concentric Cutout Mask for Thumbnail on Right Side */
 	.thumbnail-cutout {
 		position: absolute;
-		right: 0;
-		top: 0;
-		bottom: 0;
-		width: 45%;
-		mask: radial-gradient(circle at 100% 100%, transparent 48px, black 49px);
-		-webkit-mask: radial-gradient(circle at 100% 100%, transparent 48px, black 49px);
+		top: 30px;
+		bottom: 30px;
+		right: 14px;
+		width: 48%;
+		background: transparent;
+		border-radius: 2.2rem;
+		overflow: hidden;
+		-webkit-mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
+		mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
+	}
+
+	.thumbnail-cutout img {
 		border-top-left-radius: 2.5rem;
 		border-bottom-left-radius: 2.5rem;
-		border-top-right-radius: 2.5rem;
-		overflow: hidden;
+	}
+
+	.custom-indicator {
+		display: flex;
+		align-items: baseline;
+		gap: 0.75rem;
+		transform: translateY(10px);
+		background: transparent !important;
+		border: 0 !important;
+		padding: 0 !important;
+	}
+
+	.indicator-num {
+		display: grid;
+		grid-template-areas: "stack";
+		align-items: baseline;
+		color: #ffffff;
+		font-weight: 300;
+		font-family: 'IvyPresto Text', serif;
+		line-height: 0.85;
+	}
+
+	.indicator-num > span {
+		grid-area: stack;
+	}
+
+	.indicator-num.large {
+		font-size: 32px;
+		width: 32px;
+		text-align: left;
+	}
+
+	.indicator-num.small {
+		font-size: 16px;
+		opacity: 1;
+		width: 20px;
+		text-align: left; 
+	}
+
+	.indicator-line {
+		width: 20px;
+		height: 1px;
+		background: rgba(255, 255, 255, 0.45);
+		align-self: center;
+		transform: translateY(8px);
+	}
+
+	.toggle-slide-btn {
+		border: 1.8px solid #DEAD66 !important;
+	}
+
+	.slider-menu {
+		transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		right: 1.5rem !important;
+	}
+
+	.menu-desc-container {
+		transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		left: 0 !important;
+		width: 720px !important;
+		max-width: 720px !important;
+	}
+	.menu-desc-container p {
+		padding-left: 4rem !important;
+	}
+
+	@media (max-width: 1440px) and (min-width: 769px) {
+		.card-slider-wrapper {
+			width: 470px !important;
+		}
+	}
+
+	@media (max-width: 1500px) {
+		.slider-menu {
+			right: 4% !important;
+			transform: scale(0.85) !important;
+			transform-origin: bottom right !important;
+		}
+		.menu-desc-container {
+			left: 4% !important;
+			width: 35% !important;
+			max-width: 35% !important;
+		}
+		.menu-desc-container p {
+			padding-left: 0 !important;
+		}
+	}
+
+	@media (max-width: 1024px) {
+		.menu-desc-container {
+			left: 2rem !important;
+			width: 45% !important;
+			max-width: 45% !important;
+		}
+		.menu-desc-container p {
+			font-size: 13px !important;
+			line-height: 1.5 !important;
+			padding-left: 0 !important;
+		}
+		.slider-menu {
+			gap: 1.5rem !important;
+			right: 1.5rem !important;
+			bottom: 2rem !important;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.menu-desc-container {
+			display: block !important;
+			position: absolute !important;
+			bottom: auto !important;
+			top: 80px !important;
+			left: 16px !important;
+			right: 16px !important;
+			width: calc(100% - 32px) !important;
+			max-width: calc(100% - 32px) !important;
+		}
+		.menu-desc-container p {
+			font-size: 14.5px !important;
+			line-height: 1.6 !important;
+			padding-left: 0 !important;
+			text-align: center !important;
+		}
+		.slider-menu {
+			flex-direction: column !important;
+			align-items: flex-end !important;
+			gap: 1rem !important;
+			transform: scale(0.8) !important;
+			transform-origin: bottom right !important;
+			right: 16px !important;
+			bottom: 16px !important;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.slider-menu {
+			flex-direction: column !important;
+			align-items: flex-end !important;
+			gap: 0.75rem !important;
+			transform: scale(0.68) !important;
+			transform-origin: bottom right !important;
+			right: 12px !important;
+			bottom: 12px !important;
+		}
+	}
+
+	@media (max-width: 950px) and (orientation: landscape) {
+		.menu-desc-container {
+			display: flex !important;
+			left: 16px !important;
+			bottom: 12px !important;
+			padding-left: 0 !important;
+			transform: scale(0.72) !important;
+			transform-origin: left bottom !important;
+			max-width: 55% !important;
+		}
+		.menu-desc-container p {
+			font-size: 14.5px !important;
+			line-height: 1.6 !important;
+		}
+		.slider-menu {
+			flex-direction: column !important;
+			align-items: flex-end !important;
+			gap: 0.75rem !important;
+			transform: scale(0.58) !important;
+			transform-origin: bottom right !important;
+			right: 16px !important;
+			bottom: 12px !important;
+		}
+	}
+
+	.glass-blur-bg {
+		position: absolute;
+		inset: -60px;
+		z-index: -2;
+		background: var(--menu-bg-image) no-repeat center center;
+		background-size: cover;
+		background-attachment: fixed;
+		filter: blur(45px) brightness(0.9);
+		opacity: 0.95;
+		pointer-events: none;
+	}
+
+	.menu-bg-layer {
+		opacity: 0;
+		transform: scale(1.05);
+		animation: menu-bg-fade-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	}
+
+	@keyframes menu-bg-fade-in {
+		from {
+			opacity: 0;
+			transform: scale(1.05);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	.menu-intro-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 99999;
+		background-color: rgba(255, 255, 255, 0.22);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		pointer-events: none;
+	}
+
+	.explore-transition-overlay {
+		background-color: rgba(0,0,0,0);
+		backdrop-filter: blur(0px);
+		-webkit-backdrop-filter: blur(0px);
+		will-change: background-color, backdrop-filter;
+	}
+
+	.transition-title {
+		font-family: 'Viaoda Libre', serif;
+		font-size: clamp(3rem, 9vw, 6.5rem);
+		font-weight: 300;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		margin: 0;
+		padding: 0;
+		background: linear-gradient(180deg, #ffffff 20%, #e2e8f0 50%, #cbd5e1 80%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.45));
+		line-height: 1.1;
+		text-align: center;
+	}
+
+	.transition-subheading {
+		font-family: 'Imprima', sans-serif;
+		font-size: clamp(0.75rem, 1.4vw, 0.95rem);
+		font-weight: 300;
+		letter-spacing: 0.08em;
+		max-width: 620px;
+		text-transform: none;
+		line-height: 1.7;
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+	}
+
+	.transition-cloud-left {
+		top: -15%;
+		left: -15%;
+		width: 50vw;
+		max-width: 700px;
+		height: auto;
+		filter: blur(4px) brightness(1.15);
+		transform-origin: bottom left;
+		z-index: 20;
+	}
+
+	.transition-cloud-right {
+		top: -15%;
+		right: -15%;
+		width: 50vw;
+		max-width: 700px;
+		height: auto;
+		filter: blur(4px) brightness(1.15) scaleX(-1);
+		transform-origin: bottom right;
+		z-index: 20;
+	}
+
+	.transition-big-cloud {
+		bottom: -50%;
+		left: -40%;
+		width: 180vw;
+		height: auto;
+		z-index: 10;
+		filter: blur(15px);
+		will-change: transform, opacity;
 	}
 
 	/* Intro Mute/Unmute Button – Circular Glassmorphism */

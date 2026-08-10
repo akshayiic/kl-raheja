@@ -8,6 +8,7 @@
 	import { writable } from 'svelte/store';
 	import { slide } from 'svelte/transition';
 	import { browser } from '$app/environment';
+	import { gsap } from 'gsap';
 
 	// Video asset imports for Cafes & Clubs
 	import bastianVid from '$lib/videos/Bastian.mp4';
@@ -94,6 +95,20 @@
 	onMount(async () => {
 		vicinityImg.set('-');
 		console.log('vicinity mounted');
+
+		// Subtle zoom-in and fade-in transition for the background
+		gsap.fromTo('.vicinity-bg-wrapper', 
+			{
+				scale: 1.12,
+				opacity: 0
+			},
+			{
+				scale: 1.0,
+				opacity: 1,
+				duration: 2.0,
+				ease: 'power2.out'
+			}
+		);
 	});
 
 	let activeFolder = '';
@@ -397,7 +412,7 @@
 	</div>
 {/if}
 
-<div class="d-block visible absolute bottom-0 left-0 right-0 top-0">
+<div class="vicinity-bg-wrapper d-block visible absolute bottom-0 left-0 right-0 top-0 overflow-hidden bg-black">
 	{#if $vicinityImg === '-'}
 		<video
 			src={introVid}
@@ -615,7 +630,7 @@
 	class="go-back-btn"
 	on:click={() => {
 		$currentUI.vicinity = false;
-		goto('/menu');
+		goto('/?menu=true');
 	}}
 	type="button"
 >
@@ -821,8 +836,26 @@
 		:global(.left-panel-wrapper) {
 			left: 12px !important;
 			bottom: 70px !important;
-			transform: scale(0.68) !important;
+			transform: scale(0.85) !important;
 			transform-origin: left bottom !important;
+		}
+		
+		/* Direct font size increases inside vicinity left-panel for landscape phone screens */
+		:global(.left-panel-wrapper .category-name) {
+			font-size: 14.5px !important;
+		}
+		
+		:global(.left-panel-wrapper .inner-modal-btn) {
+			font-size: 13px !important;
+			padding: 7px 11px !important;
+		}
+
+		:global(.left-panel-wrapper .infrastructure-heading) {
+			font-size: 11.5px !important;
+		}
+		
+		:global(.left-panel-wrapper .explore-title) {
+			font-size: 16px !important;
 		}
 		:global(.minimized-sidebar-tab) {
 			transform: translateY(-50%) scale(0.68) !important;
