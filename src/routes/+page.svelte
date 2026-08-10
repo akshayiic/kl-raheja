@@ -72,7 +72,7 @@
 	let cloudTimeline;
 	const introTimers = [];
 
-	let canvas = null;
+	let canvas = $state(null);
 	let gl = null;
 	let program = null;
 	let positionBuffer = null;
