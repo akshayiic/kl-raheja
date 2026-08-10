@@ -302,19 +302,19 @@
 			></video>
 			<button
 				on:click={toggleIntroAudio}
-				class="fixed top-5 left-5 z-[2000000003] p-3 rounded-full px-6  text-white border border-white/20 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center"
+				class="intro-mute-btn fixed top-5 left-5 z-[2000000003] rounded-full text-white cursor-pointer flex items-center justify-center"
 				aria-label={introVideoMuted ? "Unmute audio" : "Mute audio"}
 			>
 				{#if introVideoMuted}
 					<!-- Muted Speaker Icon -->
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
 						<line x1="23" y1="9" x2="17" y2="15"></line>
 						<line x1="17" y1="9" x2="23" y2="15"></line>
 					</svg>
 				{:else}
 					<!-- Playing Speaker Icon -->
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
 						<path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
 					</svg>
@@ -912,5 +912,83 @@
 		background: rgba(10, 10, 10, 0.45);
 		backdrop-filter: blur(25px);
 		-webkit-backdrop-filter: blur(25px);
+	}
+
+	/* Intro Mute/Unmute Button – Circular Glassmorphism */
+	.intro-mute-btn {
+		width: 56px;
+		height: 56px;
+		background: rgba(255, 255, 255, 0.18);
+		backdrop-filter: blur(24px) saturate(1.4);
+		-webkit-backdrop-filter: blur(24px) saturate(1.4);
+		border: 1.2px solid rgba(255, 255, 255, 0.35);
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.25),
+			inset 0 1px 0 rgba(255, 255, 255, 0.15),
+			0 0 0 1px rgba(255, 255, 255, 0.06);
+		transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+		animation: mute-btn-pulse 2.5s ease-in-out infinite;
+		position: relative;
+	}
+
+	.intro-mute-btn::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 50%;
+		padding: 1.2px;
+		background: linear-gradient(
+			160deg,
+			rgba(255, 255, 255, 0.5) 0%,
+			rgba(255, 255, 255, 0.1) 50%,
+			rgba(255, 255, 255, 0.02) 100%
+		);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+	}
+
+	.intro-mute-btn:hover {
+		background: rgba(255, 255, 255, 0.28);
+		border-color: rgba(255, 255, 255, 0.5);
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.2),
+			0 0 20px rgba(255, 255, 255, 0.12);
+		transform: scale(1.08);
+		animation: none;
+	}
+
+	.intro-mute-btn:active {
+		transform: scale(0.95);
+		background: rgba(255, 255, 255, 0.32);
+	}
+
+	@keyframes mute-btn-pulse {
+		0%, 100% {
+			box-shadow:
+				0 8px 32px rgba(0, 0, 0, 0.25),
+				inset 0 1px 0 rgba(255, 255, 255, 0.15),
+				0 0 0 1px rgba(255, 255, 255, 0.06);
+		}
+		50% {
+			box-shadow:
+				0 8px 32px rgba(0, 0, 0, 0.25),
+				inset 0 1px 0 rgba(255, 255, 255, 0.15),
+				0 0 18px rgba(255, 255, 255, 0.15),
+				0 0 0 1px rgba(255, 255, 255, 0.12);
+		}
+	}
+
+	@media (max-width: 768px), (max-width: 950px) and (orientation: landscape) {
+		.intro-mute-btn {
+			width: 46px;
+			height: 46px;
+		}
+		.intro-mute-btn svg {
+			width: 18px;
+			height: 18px;
+		}
 	}
 </style>

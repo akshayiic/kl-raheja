@@ -209,9 +209,9 @@
 				{ id: 'Connectivity/BKCMetrostation.webp', label: 'BKC Metro Station', folder: 'BKC Metro station', videoName: 'BKC Metro Station', distance: '1.8 KM', subcategory: 'Metro' },
 				{ id: 'Connectivity/SantacruzMetroLine.webp', label: 'Santa Cruz Metro Line', folder: 'Santacruz Metro line 3', videoName: 'Santacruz Metro Line 3', distance: '2.1 KM', subcategory: 'Metro' },
 				{ id: 'Connectivity/CoastalRoad.webp', label: 'Coastal Road', folder: 'Coastal Road', distance: '4.2 KM', subcategory: 'Roadways' },
-				{ id: 'Connectivity/Versova Bandra Sea Link.webp', label: 'Versova Bandra Sea Link', folder: 'Versova-Bandra sea link', videoName: 'Versova', distance: '3.5 KM', subcategory: 'Roadways' },
+				{ id: 'Connectivity/Versova Bandra Sea Link.webp', label: 'Versova–Bandra Sea Link', folder: 'Versova-Bandra sea link', videoName: 'Versova', distance: '3.5 KM', subcategory: 'Roadways' },
 				{ id: 'Connectivity/WesternExpressHighway.webp', label: 'Western Express Highway', folder: 'Western Express Highway', distance: '1.0 KM', subcategory: 'Roadways' },
-				{ id: 'Connectivity/WorliSeaLink.webp', label: 'Worli Sea Link', folder: 'Bandra Worli Sea Link', distance: '3.8 KM', subcategory: 'Roadways' }
+				{ id: 'Connectivity/WorliSeaLink.webp', label: 'Bandra Worli Sea Link', folder: 'Bandra Worli Sea Link', distance: '3.8 KM', subcategory: 'Roadways' }
 			]
 		},
 		{
@@ -223,9 +223,9 @@
 				{ id: 'Cafe%20and%20Club/Khar Gymkhana.webp', label: 'Khar Gymkhana', video: kharVid, folder: 'Khar Gymkhana', distance: '0.8 KM' },
 				{ id: 'Cafe%20and%20Club/MIG.webp', label: 'MIG', video: migVid, folder: 'MIG', distance: '1.5 KM' },
 				{ id: 'Cafe%20and%20Club/NationalSportsClubofIndia.webp', label: 'National Sports Club of India', video: nsciVid, folder: 'National Sports Club of India', distance: '5.0 KM' },
-				{ id: 'Cafe%20and%20Club/Otters.webp', label: 'Otters', video: ottersVid, folder: 'Otter_s', distance: '1.1 KM' },
+				{ id: 'Cafe%20and%20Club/Otters.webp', label: 'Otters Club', video: ottersVid, folder: 'Otter_s', distance: '1.1 KM' },
 				{ id: 'Cafe%20and%20Club/PaliVillageCafé.webp', label: 'Pali Village Café', video: paliVid, folder: 'Pali Village Cafe', distance: '0.9 KM' },
-				{ id: 'Cafe%20and%20Club/Taj lounges .webp', label: 'Taj Lounges', video: tajVid, folder: 'Taj Lounges', distance: '4.5 KM' },
+				{ id: 'Cafe%20and%20Club/Taj lounges .webp', label: 'Taj Lands End', video: tajVid, folder: 'Taj Lounges', distance: '4.5 KM' },
 				{ id: 'Cafe%20and%20Club/Toto\'s.webp', label: 'Toto\'s', video: totosVid, folder: 'Toto_s', distance: '0.7 KM' },
 				{ id: 'Cafe%20and%20Club/Veronicas Pali Hill Cafes.webp', label: 'Veronicas Pali Hill Cafes', video: veronicasVid, folder: 'Veronica_s-Pali Hill Cafes', distance: '0.6 KM' },
 				{ id: 'Cafe%20and%20Club/WillingdonClub .webp', label: 'Willingdon Club', video: willingdonVid, folder: 'Willingdon club', distance: '6.2 KM' }
@@ -239,8 +239,8 @@
 				{ id: 'Commercial/BKC  .webp', label: 'BKC', folder: 'BKC', distance: '1.8 KM' },
 				{ id: 'Commercial/JioWorldCentre.webp', label: 'Jio World Centre', folder: 'Jio World Centre', distance: '2.0 KM' },
 				{ id: 'Commercial/LowerParel.webp', label: 'Lower Parel', folder: 'Lower Parel', distance: '8.5 KM' },
-				{ id: 'Commercial/NMAC .webp', label: 'NMAC', folder: 'NMAC', videoName: 'NMACC (1)', distance: '2.0 KM' },
-				{ id: 'Commercial/Worli.webp', label: 'Worli', folder: 'Worli', distance: '9.0 KM' }
+				{ id: 'Commercial/NMAC .webp', label: 'NMACC', folder: 'NMAC', videoName: 'NMACC (1)', distance: '2.0 KM' },
+				{ id: 'Commercial/Worli.webp', label: 'Worli Business District', folder: 'Worli', distance: '9.0 KM' }
 			]
 		},
 		{
@@ -259,7 +259,7 @@
 			folder: 'Education%20Institutes',
 			items: [
 				{ id: 'Education/AmericanSchoolofBombay.webp', label: 'American School of Bombay', folder: 'American School of Bombay', distance: '2.4 KM' },
-				{ id: 'Education/DhirubhaiAmbani.webp', label: 'Dhirubhai Ambani', folder: 'Dhirubhai Ambani International School', distance: '2.2 KM' },
+				{ id: 'Education/DhirubhaiAmbani.webp', label: 'Dhirubhai Ambani International School', folder: 'Dhirubhai Ambani International School', distance: '2.2 KM' },
 				{ id: 'Education/StAndrews .webp', label: 'St. Andrews', folder: 'St. Andrews College', videoName: 'St. Andrew_s College', distance: '1.1 KM' },
 				{ id: 'Education/StStanislaus.webp', label: 'St. Stanislaus', folder: 'St. Stanislaus International School', videoName: 'St. Stanislaus High School', distance: '0.8 KM' }
 			]
@@ -280,7 +280,7 @@
 				{ id: 'Retail%20And%20Lifestyle/Bandstand.webp', label: 'Bandstand', folder: 'Bandstand', distance: '1.4 KM' },
 				{ id: 'Retail%20And%20Lifestyle/CarterRoad.webp', label: 'Carter Road', folder: 'Carter Road', distance: '1.5 KM' },
 				{ id: 'Retail%20And%20Lifestyle/JioWorldDrive.webp', label: 'Jio World Drive', folder: 'Jio World Drive', distance: '2.3 KM' },
-				{ id: 'Retail%20And%20Lifestyle/LinkingHillRoad .webp', label: 'Linking Hill Road', folder: 'Linking-Hill Road', videoName: 'Linking Hill Road', distance: '0.5 KM' }
+				{ id: 'Retail%20And%20Lifestyle/LinkingHillRoad .webp', label: 'Pali Hill/Linking Road', folder: 'Linking-Hill Road', videoName: 'Linking Hill Road', distance: '0.5 KM' }
 			]
 		}
 	];
@@ -454,11 +454,11 @@
 <!-- Right-side gallery card (preview with dots) -->
 {#if activeFolder && activeCategoryFolder && !galleryCollapsed}
 	{@const activePreviewUrl = `https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${cardSlideIndex}.png`}
-	<div class="right-gallery-card p-5 select-none animate-fade-in text-left">
+	<div class="right-gallery-card p-4 select-none animate-fade-in text-left">
 		<!-- Header with Title & Distance & Close Button -->
 		<div class="flex justify-between items-start mb-4">
 			<div class="flex flex-col pr-4">
-				<h3 class="text-white text-[19px] font-semibold tracking-wide leading-tight uppercase font-serif" style="font-family: 'The Seasons', serif;">
+				<h3 class="text-white text-[16px] font-semibold tracking-wide leading-tight uppercase font-serif" style="font-family: 'The Seasons', serif;">
 					{activeLabel}
 				</h3>
 				{#if activeDistance}
@@ -490,7 +490,7 @@
 		</div>
 
 		<!-- Image Container with dots overlay -->
-		<div class="relative w-full h-[190px] rounded-[18px] overflow-hidden border border-white/10 group cursor-pointer shadow-lg">
+		<div class="relative w-full h-[150px] rounded-[14px] overflow-hidden border border-white/10 group cursor-pointer shadow-lg">
 			<!-- Image click opens lightbox -->
 			<div class="w-full h-full" on:click={() => openLightbox(cardSlideIndex)}>
 				<img
@@ -762,7 +762,7 @@
 		top: 50%;
 		transform: translateY(-50%);
 		z-index: 1000;
-		width: 345px;
+		width: 290px;
 		background: rgba(18, 18, 18, 0.38) !important;
 		backdrop-filter: blur(20px) !important;
 		-webkit-backdrop-filter: blur(20px) !important;

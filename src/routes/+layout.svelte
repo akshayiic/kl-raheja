@@ -491,7 +491,7 @@
 		}
 		22% {
 			opacity: 1;
-			filter: blur(20px);
+			filter: blur(0px);
 		}
 		78% {
 			opacity: 1;
