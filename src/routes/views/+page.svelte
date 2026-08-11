@@ -99,6 +99,8 @@
 	let activeViewListener = null;
 	const currentYaw = writable(initialView.yaw);
 	const COMPASS_YAW_OFFSET = -0.99; // Align E with sunrise in panorama (~ -15 degrees)
+	let rawYaw = initialView.yaw;
+	let unwrappedYaw = initialView.yaw;
 
 	// Track which hotspots have been shown
 	const shownHotspots = new Set();
@@ -227,11 +229,24 @@
 		}
 
 		// Register compass change listener
+		const sceneYaw = scene.view().yaw();
+		rawYaw = sceneYaw;
+		unwrappedYaw = sceneYaw;
+
 		activeViewListener = () => {
-			currentYaw.set(scene.view().yaw());
+			const newYaw = scene.view().yaw();
+			let diff = newYaw - rawYaw;
+			if (diff > Math.PI) {
+				diff -= 2 * Math.PI;
+			} else if (diff < -Math.PI) {
+				diff += 2 * Math.PI;
+			}
+			unwrappedYaw += diff;
+			rawYaw = newYaw;
+			currentYaw.set(unwrappedYaw);
 		};
 		scene.view().addEventListener('change', activeViewListener);
-		currentYaw.set(scene.view().yaw());
+		currentYaw.set(unwrappedYaw);
 
 		scene.switchTo();
 		currentScene = scene;
