@@ -13,6 +13,8 @@
 
 	let currentSlide = $state(1);
 	let cardsCollapsed = $state(true);
+	let activeCategoryTitle = $state('');
+	let activeCategoryDesc = $state('');
 	let card1W = $state(420);
 	let card1H = $state(231);
 	let card2W = $state(420);
@@ -31,6 +33,7 @@
 
 	import views1Video from '$lib/videos/views1.mp4';
 	import vicinityVideo from '$lib/videos/vicinity.mp4';
+	import subtractImg from '$lib/images/subtract.png';
 
 	let canvas;
 	let gl;
@@ -330,36 +333,90 @@
 
 	async function handleExploreClick() {
 		const destination = currentSlide === 1 ? 'views' : 'vicinity';
+		activeCategoryTitle = destination === 'views' ? 'VIEWS' : 'VICINITY';
+		activeCategoryDesc = destination === 'views' 
+			? 'Discover South Mumbai Through Immersive Aerial Perspectives, Revealing The Landmarks That Define This Exceptional Address.'
+			: 'Discover the neighbourhood from an aerial perspective. Explore key landmarks, local destinations, and the vibrant surroundings through an interactive experience.';
 
 		menuUIHidden = true;
 		showClouds = true;
 		await tick(); // wait for the cloud elements to mount before animating them
 
-		if (cloudImgEl && cloudOverlayEl) {
-			gsap.set(cloudImgEl, { yPercent: 95, opacity: 0, filter: 'blur(28px)' });
-			gsap.set(cloudOverlayEl, { backgroundColor: 'rgba(255,255,255,0)', backdropFilter: 'blur(0px)' });
+		if (cloudOverlayEl && cloudImgEl) {
+			// Set initial states
+			gsap.set(cloudImgEl, { yPercent: 100, opacity: 0, scale: 1.8, filter: 'blur(15px)' });
+			gsap.set('.transition-cloud-left', { yPercent: 100, xPercent: -50, scale: 1.8, opacity: 0 });
+			gsap.set('.transition-cloud-right', { yPercent: 100, xPercent: 50, scale: 1.8, opacity: 0 });
+			gsap.set('.transition-text-content', { y: 60, opacity: 0, scale: 0.95 });
+			gsap.set('.transition-title', { opacity: 0 });
+			gsap.set('.transition-subheading', { opacity: 0 });
 
-			cloudTimeline = gsap.timeline();
+			// Blur transition background overlay
+			gsap.fromTo(cloudOverlayEl, 
+				{ backdropFilter: 'blur(0px)' },
+				{ backdropFilter: 'blur(16px)', duration: 1.5, ease: 'power2.out' }
+			);
 
-			// Cloud: one continuous sweep from off-screen bottom to fully past
-			// the top, fading/sharpening in as it rises and fading/softening
-			// back out as it exits — a single one-way pass, not there-and-back.
-			cloudTimeline
-				.to(cloudImgEl, { yPercent: -120, duration: 2.2, ease: 'power1.inOut' }, 0)
-				.to(cloudImgEl, { opacity: 0.5, filter: 'blur(0px)', duration: 0.7, ease: 'power2.out' }, 0)
-				.to(cloudImgEl, { opacity: 0, filter: 'blur(22px)', duration: 0.6, ease: 'power2.in' }, 1.6);
+			// 1. Big cloud moves first from bottom to top
+			gsap.to(cloudImgEl, {
+				yPercent: -150,
+				opacity: 0.75,
+				filter: 'blur(0px)',
+				duration: 2.2,
+				ease: 'power2.inOut'
+			});
 
-			// Fog: builds with the cloud, then lingers on its own as a brief
-			// blur screen after the cloud has fully vanished, before clearing
-			// to reveal the destination page underneath.
-			cloudTimeline
-				.to(cloudOverlayEl, { backgroundColor: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(14px)', duration: 0.8, ease: 'power2.out' }, 0)
-				.to(cloudOverlayEl, { backgroundColor: 'rgba(255,255,255,0)', backdropFilter: 'blur(0px)', duration: 0.8, ease: 'power2.inOut' }, 2.4);
+			const followDelay = 0.4;
+
+			// Center Card comes up and settles
+			gsap.to('.transition-text-content', {
+				opacity: 1,
+				y: 0,
+				scale: 1,
+				duration: 1.6,
+				ease: 'power3.out',
+				delay: followDelay
+			});
+
+			// Staggered text fade in inside the card
+			gsap.to('.transition-title', {
+				opacity: 1,
+				duration: 1.2,
+				ease: 'power2.out',
+				delay: followDelay + 0.3
+			});
+
+			gsap.to('.transition-subheading', {
+				opacity: 1,
+				duration: 1.2,
+				ease: 'power2.out',
+				delay: followDelay + 0.5
+			});
+
+			// Left cloud comes up and settles in the top-left corner
+			gsap.to('.transition-cloud-left', {
+				xPercent: 0,
+				yPercent: 0,
+				scale: 1.3,
+				opacity: 0.9,
+				duration: 1.8,
+				ease: 'power2.out',
+				delay: followDelay + 0.1
+			});
+
+			// Right cloud comes up and settles in the top-right corner
+			gsap.to('.transition-cloud-right', {
+				xPercent: 0,
+				yPercent: 0,
+				scale: 1.3,
+				opacity: 0.9,
+				duration: 1.8,
+				ease: 'power2.out',
+				delay: followDelay + 0.1
+			});
 		}
 
-		// Navigate while the cloud has already vanished but the fog is still
-		// fully held — the page swap happens hidden inside that blur beat.
-		after(1900, () => {
+		after(2000, () => {
 			if (destination === 'views') {
 				$currentUI = {
 					overview: false,
@@ -525,14 +582,14 @@
 				<div class="glass-blur-bg"></div>
 				<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
 					<path d="M 40,0 L {card2W - 40},0 A 40,40 0 0 1 {card2W},40 L {card2W},{card2H - 40} A 40,40 0 0 1 {card2W - 40},{card2H} L 40,{card2H} A 40,40 0 0 1 0,{card2H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
-					      fill="rgba(255, 255, 255, 0.02)" 
+					      fill="rgba(18, 18, 18, 0.45)" 
 					      stroke="rgba(255, 255, 255, 0.12)" 
 					      stroke-width="1.2" />
 				</svg>
 				
 				<!-- Text section -->
 				<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
-					<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
+					<h2 class="text-3xl tracking-[0.03em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
 						VICINITY
 					</h2>
 					<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
@@ -544,7 +601,7 @@
 						class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
 						style="font-family: 'Imprima', sans-serif;"
 					>
-						<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
+						<svg width="18" height="18" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
 							<circle cx="5" cy="2" r="1" />
 							<circle cx="2" cy="7" r="1" />
 							<circle cx="8" cy="7" r="1" />
@@ -554,7 +611,7 @@
 				</div>
 				
 				<!-- Thumbnail Video -->
-				<div class="thumbnail-cutout z-10">
+				<div class="thumbnail-cutout z-10" style="--subtract-mask: url({subtractImg});">
 					<video 
 						class="w-full h-full object-cover pointer-events-none" 
 						src={vicinityVideo} 
@@ -576,14 +633,14 @@
 				<div class="glass-blur-bg"></div>
 				<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
 					<path d="M 40,0 L {card1W - 40},0 A 40,40 0 0 1 {card1W},40 L {card1W},{card1H - 40} A 40,40 0 0 1 {card1W - 40},{card1H} L 40,{card1H} A 40,40 0 0 1 0,{card1H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
-					      fill="rgba(255, 255, 255, 0.02)" 
+					      fill="rgba(18, 18, 18, 0.45)" 
 					      stroke="rgba(255, 255, 255, 0.12)" 
 					      stroke-width="1.2" />
 				</svg>
 
 				<!-- Text section -->
 				<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
-					<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
+					<h2 class="text-3xl tracking-[0.03em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
 						VIEWS
 					</h2>
 					<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
@@ -595,7 +652,7 @@
 						class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
 						style="font-family: 'Imprima', sans-serif;"
 					>
-						<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
+						<svg width="18" height="18" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
 							<circle cx="5" cy="2" r="1" />
 							<circle cx="2" cy="7" r="1" />
 							<circle cx="8" cy="7" r="1" />
@@ -605,7 +662,7 @@
 				</div>
 				
 				<!-- Thumbnail Video -->
-				<div class="thumbnail-cutout z-10">
+				<div class="thumbnail-cutout z-10" style="--subtract-mask: url({subtractImg});">
 					<video 
 						class="w-full h-full object-cover pointer-events-none" 
 						src={views1Video} 
@@ -645,10 +702,27 @@
 		</button>
 	</div>
 
-	<!-- Cloud sweeps across the screen, covering the switch to the destination page -->
+	<!-- Transition loading screen showing early page branding & corner clouds -->
 	{#if showClouds}
-		<div class="explore-cloud-overlay" bind:this={cloudOverlayEl}>
-			<img src="/clouds.png" alt="" class="explore-cloud-img" bind:this={cloudImgEl} />
+		<div class="explore-transition-overlay fixed inset-0 w-screen h-screen z-[2000000000] flex flex-col items-center justify-center py-16 pointer-events-none" bind:this={cloudOverlayEl}>
+			<!-- Center Text Content -->
+			<div class="transition-text-content flex flex-col items-center text-center px-4 max-w-4xl">
+				<!-- Page Title with Metallic Silver Reflection Gradient -->
+				<h2 class="transition-title select-none opacity-0">
+					{activeCategoryTitle}
+				</h2>
+				<!-- Subheading Description -->
+				<p class="transition-subheading select-none opacity-0 mt-6 max-w-2xl leading-relaxed text-white/80">
+					{activeCategoryDesc}
+				</p>
+			</div>
+
+			<!-- Big sweeping cloud -->
+			<img src="/clouds.png" alt="" class="transition-big-cloud absolute pointer-events-none" bind:this={cloudImgEl} />
+
+			<!-- Two Corner Clouds -->
+			<img src="/clouds.png" alt="" class="transition-cloud-left absolute pointer-events-none" />
+			<img src="/clouds.png" alt="" class="transition-cloud-right absolute pointer-events-none" />
 		</div>
 	{/if}
 </div>
@@ -696,7 +770,7 @@
 		border: 1.5px solid #c5a880 !important;
 		border-radius: 9999px !important;
 		color: #e5d5be !important;
-		padding: 0.5rem 1.5rem !important;
+	    padding: 0.8rem 1.2rem !important;
 		font-size: 0.75rem !important;
 		letter-spacing: 0.12em !important;
 		text-transform: none !important;
@@ -725,12 +799,10 @@
     inset:0;
     padding:24px 24px;
     border-radius:40px;
-
     overflow:hidden;
- 
-
-
     transition:.6s cubic-bezier(.19,1,.22,1);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
 }
 
 .nav-card::before{
@@ -775,15 +847,20 @@
 	/* Concentric Cutout Mask for Thumbnail on Right Side */
 	.thumbnail-cutout {
 		position: absolute;
-		top: 30px;
-		bottom: 30px;
+		top: 15px;
+		bottom: 15px;
 		right: 14px;
 		width: 48%;
 		background: transparent;
-		border-radius: 2.2rem;
 		overflow: hidden;
-		-webkit-mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
-		mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
+		-webkit-mask-image: var(--subtract-mask);
+		mask-image: var(--subtract-mask);
+		-webkit-mask-size: 100% 100%;
+		mask-size: 100% 100%;
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-position: center;
 	}
 
 	.thumbnail-cutout img {
@@ -992,27 +1069,89 @@
 	   the destination page. GSAP drives the actual motion (see
 	   handleExploreClick) for one continuous smooth tween; these rules just
 	   set the static size/position/starting look. */
-	.explore-cloud-overlay {
-		position: fixed;
-		inset: 0;
-		z-index: 40;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		pointer-events: none;
+	.explore-transition-overlay {
+		background-color: rgba(0,0,0,0);
+		backdrop-filter: blur(0px);
+		-webkit-backdrop-filter: blur(0px);
 		will-change: background-color, backdrop-filter;
 	}
 
-	.explore-cloud-img {
-		width: 180vw;
-		max-width: none;
-		height: 170vh;
-		object-fit: contain;
+	.transition-text-content {
+		background: transparent !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+		border: none !important;
+		box-shadow: none !important;
+		padding: 0 !important;
+		max-width: 90% !important;
+		width: auto !important;
+		z-index: 30 !important;
+		text-align: center !important;
+	}
+
+	.transition-title {
+		font-family: 'Viaoda Libre', 'The Seasons', serif !important;
+		font-size: clamp(4rem, 11vw, 8rem) !important;
+		font-weight: 300 !important;
+		letter-spacing: 0.22em !important;
+		text-transform: uppercase !important;
+		margin: 0;
+		padding: 0;
+		color: rgba(255, 255, 255, 0.12) !important;
+		-webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.75) !important;
+		text-shadow: 
+			-2px -2px 0px rgba(255, 255, 255, 0.3),
+			2px 2px 2px rgba(0, 0, 0, 0.25),
+			0px 10px 25px rgba(0, 0, 0, 0.35) !important;
+		line-height: 1.0 !important;
+		text-align: center;
+	}
+
+	.transition-subheading {
+		font-family: 'Imprima', sans-serif;
+		font-size: clamp(0.75rem, 1.4vw, 0.95rem);
+		font-weight: 300;
+		letter-spacing: 0.08em;
+		max-width: 620px;
+		text-transform: none;
+		line-height: 1.7;
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+	}
+
+	.transition-cloud-left {
 		position: absolute;
-		transform-origin: center center;
-		will-change: transform, opacity, filter;
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
+		top: -15%;
+		left: -15%;
+		width: 50vw;
+		max-width: 700px;
+		height: auto;
+		filter: blur(4px) brightness(1.15);
+		transform-origin: bottom left;
+		z-index: 20;
+	}
+
+	.transition-cloud-right {
+		position: absolute;
+		top: -15%;
+		right: -15%;
+		width: 50vw;
+		max-width: 700px;
+		height: auto;
+		filter: blur(4px) brightness(1.15) scaleX(-1);
+		transform-origin: bottom right;
+		z-index: 20;
+	}
+
+	.transition-big-cloud {
+		position: absolute;
+		bottom: -50%;
+		left: -40%;
+		width: 180vw;
+		height: auto;
+		z-index: 10;
+		filter: blur(15px);
+		will-change: transform, opacity;
 	}
 
 	/* Collapsible navigation slider menu */

@@ -12,6 +12,7 @@
 	import newRahejaVid from '$lib/videos/new-raheja.mp4';
 	import views1Video from '$lib/videos/views1.mp4';
 	import vicinityVideo from '$lib/videos/vicinity.mp4';
+	import subtractImg from '$lib/images/subtract.png';
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { gsap } from 'gsap';
 	// Create a store and update it when necessary...
@@ -548,7 +549,7 @@
 		activeCategoryTitle = destination === 'views' ? 'VIEWS' : 'VICINITY';
 		activeCategoryDesc = destination === 'views' 
 			? 'Discover South Mumbai Through Immersive Aerial Perspectives, Revealing The Landmarks That Define This Exceptional Address.'
-			: 'Navigate Through The Landmarks And Prime Conveniences Surrounding Sobo Residences, Connecting You To The Finest Of South Mumbai.';
+			: 'Discover the neighbourhood from an aerial perspective. Explore key landmarks, local destinations, and the vibrant surroundings through an interactive experience.';
 
 		menuUIHidden = true;
 		showClouds = true;
@@ -562,8 +563,9 @@
 			gsap.set(cloudImgEl, { yPercent: 100, opacity: 0, scale: 1.8, filter: 'blur(15px)' });
 			gsap.set('.transition-cloud-left', { yPercent: 100, xPercent: -50, scale: 1.8, opacity: 0 });
 			gsap.set('.transition-cloud-right', { yPercent: 100, xPercent: 50, scale: 1.8, opacity: 0 });
-			gsap.set('.transition-title', { y: 250, opacity: 0, scale: 0.95 });
-			gsap.set('.transition-subheading', { y: 150, opacity: 0 });
+			gsap.set('.transition-text-content', { y: 60, opacity: 0, scale: 0.95 });
+			gsap.set('.transition-title', { opacity: 0 });
+			gsap.set('.transition-subheading', { opacity: 0 });
 
 			// Blur transition background overlay (pure blur, no background overlay color/whites tint)
 			gsap.fromTo(cloudOverlayEl, 
@@ -583,8 +585,8 @@
 			// 2. The center text and the two corner clouds follow it up (after a 0.4s delay)
 			const followDelay = 0.4;
 
-			// Center Title comes up and settles
-			gsap.to('.transition-title', {
+			// Center Card comes up and settles
+			gsap.to('.transition-text-content', {
 				opacity: 1,
 				y: 0,
 				scale: 1,
@@ -593,13 +595,19 @@
 				delay: followDelay
 			});
 
-			// Subheading description follows title
+			// Staggered text fade in inside the card
+			gsap.to('.transition-title', {
+				opacity: 1,
+				duration: 1.2,
+				ease: 'power2.out',
+				delay: followDelay + 0.3
+			});
+
 			gsap.to('.transition-subheading', {
 				opacity: 1,
-				y: 0,
-				duration: 1.6,
+				duration: 1.2,
 				ease: 'power2.out',
-				delay: followDelay + 0.2
+				delay: followDelay + 0.5
 			});
 
 			// Left cloud comes up and settles in the top-left corner
@@ -1094,14 +1102,14 @@
 					<div class="glass-blur-bg"></div>
 					<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
 						<path d="M 40,0 L {card2W - 40},0 A 40,40 0 0 1 {card2W},40 L {card2W},{card2H - 40} A 40,40 0 0 1 {card2W - 40},{card2H} L 40,{card2H} A 40,40 0 0 1 0,{card2H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
-						      fill="rgba(255, 255, 255, 0.02)" 
+						      fill="rgba(18, 18, 18, 0.45)" 
 						      stroke="rgba(255, 255, 255, 0.12)" 
 						      stroke-width="1.2" />
 					</svg>
 					
 					<!-- Text section -->
 					<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
-						<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
+						<h2 class="text-3xl tracking-[0.03em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
 							VICINITY
 						</h2>
 						<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
@@ -1113,7 +1121,7 @@
 							class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
 							style="font-family: 'Imprima', sans-serif;"
 						>
-							<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
+							<svg width="18" height="18" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
 								<circle cx="5" cy="2" r="1" />
 								<circle cx="2" cy="7" r="1" />
 								<circle cx="8" cy="7" r="1" />
@@ -1123,7 +1131,7 @@
 					</div>
 					
 					<!-- Thumbnail Video -->
-					<div class="thumbnail-cutout z-10">
+					<div class="thumbnail-cutout z-10" style="--subtract-mask: url({subtractImg});">
 						<video 
 							class="w-full h-full object-cover pointer-events-none" 
 							src={vicinityVideo} 
@@ -1145,14 +1153,14 @@
 					<div class="glass-blur-bg"></div>
 					<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
 						<path d="M 40,0 L {card1W - 40},0 A 40,40 0 0 1 {card1W},40 L {card1W},{card1H - 40} A 40,40 0 0 1 {card1W - 40},{card1H} L 40,{card1H} A 40,40 0 0 1 0,{card1H - 40} L 0,40 A 40,40 0 0 1 40,0 Z" 
-						      fill="rgba(255, 255, 255, 0.02)" 
+						      fill="rgba(18, 18, 18, 0.45)" 
 						      stroke="rgba(255, 255, 255, 0.12)" 
 						      stroke-width="1.2" />
 					</svg>
 
 					<!-- Text section -->
 					<div class="flex flex-col flex-1 text-left relative z-10 max-w-[48%]">
-						<h2 class="text-3xl tracking-[0.1em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
+						<h2 class="text-3xl tracking-[0.03em] text-white mb-2 font-normal uppercase" style="font-family: 'The Seasons', serif;">
 							VIEWS
 						</h2>
 						<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
@@ -1164,7 +1172,7 @@
 							class="explore-card-btn self-start flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#c5a880] text-[10px] text-[#e5d5be] tracking-widest bg-transparent hover:bg-[#c5a880] hover:text-[#1e1e1e] transition-all duration-300 cursor-pointer !h-auto !w-auto"
 							style="font-family: 'Imprima', sans-serif;"
 						>
-							<svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
+							<svg width="18" height="18" viewBox="0 0 10 10" fill="currentColor" style="transform: rotate(-40deg);">
 								<circle cx="5" cy="2" r="1" />
 								<circle cx="2" cy="7" r="1" />
 								<circle cx="8" cy="7" r="1" />
@@ -1174,7 +1182,7 @@
 					</div>
 					
 					<!-- Thumbnail Video -->
-					<div class="thumbnail-cutout z-10">
+					<div class="thumbnail-cutout z-10" style="--subtract-mask: url({subtractImg});">
 						<video 
 							class="w-full h-full object-cover pointer-events-none" 
 							src={views1Video} 
@@ -1429,8 +1437,8 @@
 		border: 1.5px solid #c5a880 !important;
 		border-radius: 9999px !important;
 		color: #e5d5be !important;
-		padding: 0.5rem 1.5rem !important;
-		font-size: 0.75rem !important;
+		padding: 0.8rem 1.2rem !important;
+		font-size: 1rem !important;
 		letter-spacing: 0.12em !important;
 		text-transform: none !important;
 		font-weight: normal !important;
@@ -1460,6 +1468,8 @@
 		border-radius:40px;
 		overflow:hidden;
 		transition:.6s cubic-bezier(.19,1,.22,1);
+		backdrop-filter: blur(25px);
+		-webkit-backdrop-filter: blur(25px);
 	}
 
 	.nav-card::before{
@@ -1502,15 +1512,20 @@
 	/* Concentric Cutout Mask for Thumbnail on Right Side */
 	.thumbnail-cutout {
 		position: absolute;
-		top: 30px;
-		bottom: 30px;
+		top: 15px;
+		bottom: 15px;
 		right: 14px;
 		width: 48%;
 		background: transparent;
-		border-radius: 2.2rem;
 		overflow: hidden;
-		-webkit-mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
-		mask-image: radial-gradient(circle at calc(100% + 14px) calc(100% + 30px), transparent 48px, black 49px);
+		-webkit-mask-image: var(--subtract-mask);
+		mask-image: var(--subtract-mask);
+		-webkit-mask-size: 100% 100%;
+		mask-size: 100% 100%;
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-position: center;
 	}
 
 	.thumbnail-cutout img {
@@ -1726,26 +1741,34 @@
 		pointer-events: none;
 	}
 
-	.explore-transition-overlay {
-		background-color: rgba(0,0,0,0);
-		backdrop-filter: blur(0px);
-		-webkit-backdrop-filter: blur(0px);
-		will-change: background-color, backdrop-filter;
+	.transition-text-content {
+		background: transparent !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+		border: none !important;
+		box-shadow: none !important;
+		padding: 0 !important;
+		max-width: 90% !important;
+		width: auto !important;
+		z-index: 30 !important;
+		text-align: center !important;
 	}
 
 	.transition-title {
-		font-family: 'Viaoda Libre', serif;
-		font-size: clamp(3rem, 9vw, 6.5rem);
-		font-weight: 300;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
+		font-family: 'Viaoda Libre', 'The Seasons', serif !important;
+		font-size: clamp(4rem, 11vw, 8rem) !important;
+		font-weight: 300 !important;
+		letter-spacing: 0.22em !important;
+		text-transform: uppercase !important;
 		margin: 0;
 		padding: 0;
-		background: linear-gradient(180deg, #ffffff 20%, #e2e8f0 50%, #cbd5e1 80%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.45));
-		line-height: 1.1;
+		color: rgba(255, 255, 255, 0.12) !important;
+		-webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.75) !important;
+		text-shadow: 
+			-2px -2px 0px rgba(255, 255, 255, 0.3),
+			2px 2px 2px rgba(0, 0, 0, 0.25),
+			0px 10px 25px rgba(0, 0, 0, 0.35) !important;
+		line-height: 1.0 !important;
 		text-align: center;
 	}
 
