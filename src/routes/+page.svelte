@@ -1036,25 +1036,12 @@
 			></canvas>
 		</div>
 
-		<!-- Subtle progressive gradient blur columns behind side items -->
-		<div 
-			class="fixed left-0 top-0 w-[40vw] h-screen backdrop-blur-[6px] bg-black/5 pointer-events-none"
-			style="z-index: 5; mask-image: linear-gradient(to right, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 60%, transparent 100%);"
-		></div>
-		<div 
-			class="fixed right-0 top-0 w-[40vw] h-screen backdrop-blur-[6px] bg-black/5 pointer-events-none"
-			style="z-index: 5; mask-image: linear-gradient(to left, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to left, black 60%, transparent 100%);"
-		></div>
+
 
 		<!-- Bottom Dark Overlay Gradient -->
 		<div class="fixed bottom-0 left-0 w-full h-[20rem] bg-gradient-to-t from-black/75 via-black/35 to-transparent pointer-events-none" style="z-index: 10;"></div>
 
-		<!-- Navigation UI Description Overlay -->
-		<div bind:this={menuDescEl} class="menu-desc-container fixed bottom-6 left-0 flex flex-col gap-2 pointer-events-auto text-left" class:menu-fading-out={menuUIHidden} style="z-index: 25;">
-			<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
-				In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
-			</p>
-		</div>
+	
 
 		<!-- Bottom Right Navigation Card & Controls -->
 		<div bind:this={sliderMenuEl} class="slider-menu fixed bottom-12 flex items-end gap-4 pointer-events-auto" class:menu-fading-out={menuUIHidden} style="z-index: 25;">
