@@ -12,6 +12,7 @@
 	let menuBgUrl = $derived($introVideoLastFrame || '/rahejanew1.png');
 
 	let currentSlide = $state(1);
+	let cardsCollapsed = $state(true);
 	let card1W = $state(420);
 	let card1H = $state(231);
 	let card2W = $state(420);
@@ -475,13 +476,23 @@
 	</div>
 
 	<!-- Bottom Right Navigation Card & Controls -->
-	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto" class:animate-fade-in={menuReady} class:menu-fading-out={menuUIHidden}>
+	<div class="slider-menu fixed bottom-12 z-[25] flex items-end gap-4 pointer-events-auto" class:animate-fade-in={menuReady} class:menu-fading-out={menuUIHidden} class:collapsed={cardsCollapsed}>
 		<div class="relative card-slider-wrapper w-[420px] h-[255px]">
-			<!-- Toggle/Next circular button -->
+			<!-- Toggle/Collapse circular button -->
 			<button
-				on:click={() => currentSlide = currentSlide === 1 ? 2 : 1}
-				class="toggle-slide-btn absolute -left-12 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 transition-all duration-300 flex items-center justify-center text-[#DEAD66] cursor-pointer z-30 !p-0"
-				aria-label="Next slide"
+				on:click={(e) => {
+					e.stopPropagation();
+					if (cardsCollapsed) {
+						cardsCollapsed = false;
+					} else {
+						currentSlide = currentSlide === 1 ? 2 : 1;
+					}
+				}}
+				class="toggle-slide-btn w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 transition-all duration-300 flex items-center justify-center text-[#DEAD66] cursor-pointer z-30 !p-0"
+				class:absolute={!cardsCollapsed}
+				class:expanded-btn={!cardsCollapsed}
+				class:collapsed-btn={cardsCollapsed}
+				aria-label={cardsCollapsed ? "Expand menu" : "Collapse menu"}
 			>
 				<svg width="8" height="8" viewBox="0 0 10 10" fill="#DEAD66" style="transform: rotate(-40deg);">
 					<circle cx="5" cy="2" r="1.1" />
@@ -489,6 +500,20 @@
 					<circle cx="8" cy="6.8" r="1.1" />
 				</svg>
 			</button>
+
+			<!-- Close/Collapse circular button (on the right side) -->
+			{#if !cardsCollapsed}
+				<button
+					on:click={(e) => { e.stopPropagation(); cardsCollapsed = true; }}
+					class="close-cards-btn w-10 h-10 rounded-full flex items-center justify-center cursor-pointer z-30 !p-0"
+					aria-label="Collapse menu"
+				>
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			{/if}
 
 			<!-- Card 2 (VICINITY) -->
 			<div 
@@ -988,5 +1013,75 @@
 		will-change: transform, opacity, filter;
 		backface-visibility: hidden;
 		-webkit-backface-visibility: hidden;
+	}
+
+	/* Collapsible navigation slider menu */
+	.slider-menu {
+		transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+	}
+	.card-slider-wrapper {
+		transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+	}
+	.nav-card {
+		transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+	}
+	.custom-indicator {
+		transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+	}
+	.toggle-slide-btn {
+		transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+	}
+
+	.expanded-btn {
+		position: absolute !important;
+		left: -3rem !important;
+		top: 50% !important;
+		transform: translateY(-50%) !important;
+	}
+
+	.collapsed-btn {
+		position: absolute !important;
+		left: 0 !important;
+		top: 0 !important;
+		transform: none !important;
+	}
+
+	.slider-menu.collapsed .card-slider-wrapper {
+		width: 40px !important;
+		height: 40px !important;
+	}
+
+	.slider-menu.collapsed .nav-card {
+		opacity: 0 !important;
+		pointer-events: none !important;
+		transform: scale(0.6) translateX(100px) !important;
+	}
+
+	.slider-menu.collapsed .custom-indicator {
+		opacity: 0 !important;
+		pointer-events: none !important;
+		width: 0 !important;
+		margin: 0 !important;
+		overflow: hidden !important;
+	}
+
+	.close-cards-btn {
+		position: absolute !important;
+		right: -3rem !important;
+		top: 50% !important;
+		transform: translateY(-50%) !important;
+		border: 1.8px solid rgba(255, 255, 255, 0.15) !important;
+		background: rgba(30, 30, 30, 0.45) !important;
+		color: #DEAD66 !important;
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		transition: all 0.3s ease !important;
+	}
+
+	.close-cards-btn:hover {
+		background: rgba(222, 173, 102, 1) !important;
+		border-color: rgba(222, 173, 102, 1) !important;
+		color: white !important;
+		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
 	}
 </style>

@@ -95,6 +95,11 @@
 	let floorCollapsed = true;
 	let timeCollapsed = true;
 
+	// Working Compass state
+	let activeViewListener = null;
+	const currentYaw = writable(initialView.yaw);
+	const COMPASS_YAW_OFFSET = -0.99; // Align E with sunrise in panorama (~ -15 degrees)
+
 	// Track which hotspots have been shown
 	const shownHotspots = new Set();
 
@@ -196,6 +201,11 @@
 			scene.view().removeEventListener('change', viewChangeHandler);
 		}
 
+		// Remove previous compass listener
+		if (activeViewListener && currentScene) {
+			currentScene.view().removeEventListener('change', activeViewListener);
+		}
+
 		// Add info hotspots only for main overview (22nd floor) AND when enabled
 		const shouldShowHotspots = floorIndex === mainFloorIndex && $hotspotsEnabled;
 
@@ -215,6 +225,13 @@
 				checkHotspotVisibility(scene);
 			}, 300);
 		}
+
+		// Register compass change listener
+		activeViewListener = () => {
+			currentYaw.set(scene.view().yaw());
+		};
+		scene.view().addEventListener('change', activeViewListener);
+		currentYaw.set(scene.view().yaw());
 
 		scene.switchTo();
 		currentScene = scene;
@@ -482,6 +499,9 @@
 	}
 
 	onDestroy(() => {
+		if (activeViewListener && currentScene) {
+			currentScene.view().removeEventListener('change', activeViewListener);
+		}
 		if (viewer) {
 			viewer = null;
 		}
@@ -709,6 +729,28 @@
 			</button>
 		</div>
 	{/if}
+
+	<!-- Working Compass -->
+	<div class="compass-container animate-fade-in">
+		<div class="compass-dial" style="transform: rotate({((-$currentYaw + COMPASS_YAW_OFFSET) * 180 / Math.PI)}deg);">
+			<div class="direction-n">N</div>
+			<div class="direction-e">E</div>
+			<div class="direction-s">S</div>
+			<div class="direction-w">W</div>
+			
+			<!-- Elegant Needle -->
+			<div class="compass-needle-wrapper">
+				<svg class="compass-needle-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<!-- North Needle (Gold) -->
+					<path d="M12 2L16 12H8L12 2Z" fill="#DEAD66" />
+					<!-- South Needle (Gray) -->
+					<path d="M12 22L8 12H16L12 22Z" fill="rgba(255, 255, 255, 0.4)" />
+				</svg>
+			</div>
+		</div>
+		<!-- Fixed heading marker at the top of the compass -->
+		<div class="compass-heading-marker"></div>
+	</div>
 
 	<!-- Go Back Button at bottom-left corner -->
 	<button
@@ -1366,6 +1408,114 @@
 		}
 		:global(.overview-hotspot .hotspot-label-subtitle) {
 			font-size: 10px !important;
+		}
+	}
+
+	/* Working Compass Styles */
+	.compass-container {
+		position: fixed;
+		top: 80px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		background: rgba(30, 30, 30, 0.45);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1.2px solid rgba(255, 255, 255, 0.15);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+		z-index: 1000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.compass-dial {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		transition: transform 0.1s ease-out;
+	}
+
+	.direction-n, .direction-s, .direction-e, .direction-w {
+		position: absolute;
+		font-family: 'Imprima', sans-serif;
+		font-size: 9px;
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.7);
+		line-height: 1;
+	}
+
+	.direction-n {
+		top: 6px;
+		left: 50%;
+		transform: translateX(-50%);
+		color: #DEAD66;
+	}
+
+	.direction-s {
+		bottom: 6px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	.direction-e {
+		right: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.direction-w {
+		left: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.compass-needle-wrapper {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 18px;
+		height: 36px;
+	}
+
+	.compass-needle-svg {
+		width: 100%;
+		height: 100%;
+	}
+
+	.compass-heading-marker {
+		position: absolute;
+		top: -4px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 0;
+		height: 0;
+		border-left: 4px solid transparent;
+		border-right: 4px solid transparent;
+		border-bottom: 6px solid #DEAD66;
+		z-index: 1001;
+	}
+
+	@media (max-width: 768px) {
+		.compass-container {
+			top: 70px !important;
+			width: 50px !important;
+			height: 50px !important;
+		}
+		.direction-n, .direction-s, .direction-e, .direction-w {
+			font-size: 8px !important;
+		}
+		.direction-n { top: 4px; }
+		.direction-s { bottom: 4px; }
+		.direction-e { right: 4px; }
+		.direction-w { left: 4px; }
+		.compass-needle-wrapper {
+			width: 14px !important;
+			height: 28px !important;
 		}
 	}
 
