@@ -6,7 +6,6 @@
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import 'iconify-icon';
-	import rahejaLogo from '$lib/images/rahejanew.png';
 	import poweredByVretail from '$lib/images/powered-vretail.png';
 	import instructionIcon from '$lib/images/instruction-icon.svg';
 	import instructionPanoIcon from '$lib/images/instruction-pano.svg';
@@ -116,12 +115,7 @@
 		}
 	});
 
-	// Reset menu content state when going back to loading screen
-	$effect(() => {
-		if ($UIPanel === 'loading') {
-			showMenuContent = false;
-		}
-	});
+	let unsubscribeUIPanel;
 
 	// Initialize WebGL when the canvas is mounted
 	$effect(() => {
@@ -569,7 +563,6 @@
 			gsap.set('.transition-cloud-right', { yPercent: 100, xPercent: 50, scale: 1.8, opacity: 0 });
 			gsap.set('.transition-title', { y: 250, opacity: 0, scale: 0.95 });
 			gsap.set('.transition-subheading', { y: 150, opacity: 0 });
-			gsap.set('.transition-logo-wrapper', { opacity: 0, y: -20 });
 
 			// Blur transition background overlay (pure blur, no background overlay color/whites tint)
 			gsap.fromTo(cloudOverlayEl, 
@@ -588,15 +581,6 @@
 
 			// 2. The center text and the two corner clouds follow it up (after a 0.4s delay)
 			const followDelay = 0.4;
-
-			// Top logo fade in
-			gsap.to('.transition-logo-wrapper', {
-				opacity: 1,
-				y: 0,
-				duration: 1.2,
-				ease: 'power2.out',
-				delay: followDelay + 0.2
-			});
 
 			// Center Title comes up and settles
 			gsap.to('.transition-title', {
@@ -680,6 +664,7 @@
 		introTimers.forEach(clearTimeout);
 		cloudTimeline?.kill();
 		introOverlayTween?.kill();
+		if (unsubscribeUIPanel) unsubscribeUIPanel();
 	});
 
 	const toggleIntroAudio = (event) => {
@@ -695,6 +680,21 @@
 	};
 
 	onMount(async () => {
+		unsubscribeUIPanel = UIPanel.subscribe((val) => {
+			if (val === 'loading') {
+				showMenuContent = false;
+				showVideoIntro = false;
+				typedSubheading = '';
+				transitionTriggered = false;
+				if (introPlaybackEl) {
+					try {
+						introPlaybackEl.pause();
+						introPlaybackEl.currentTime = 0;
+					} catch (e) {}
+				}
+			}
+		});
+
 		function setElementHeight() {
 			const vh = window.innerHeight * 0.01;
 			document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -1204,12 +1204,7 @@
 
 		<!-- Transition loading screen showing early page branding & corner clouds -->
 		{#if showClouds}
-			<div class="explore-transition-overlay fixed inset-0 w-screen h-screen z-[2000000000] flex flex-col items-center justify-between py-16 pointer-events-none" bind:this={cloudOverlayEl}>
-				<!-- Top Logo -->
-				<div class="transition-logo-wrapper opacity-0 flex justify-center mt-6">
-					<img src={rahejaLogo} alt="Raheja Logo" class="h-16 w-auto object-contain" />
-				</div>
-
+			<div class="explore-transition-overlay fixed inset-0 w-screen h-screen z-[2000000000] flex flex-col items-center justify-center py-16 pointer-events-none" bind:this={cloudOverlayEl}>
 				<!-- Center Text Content -->
 				<div class="transition-text-content flex flex-col items-center text-center px-4 max-w-4xl">
 					<!-- Page Title with Metallic Silver Reflection Gradient -->
@@ -1221,9 +1216,6 @@
 						{activeCategoryDesc}
 					</p>
 				</div>
-
-				<!-- Placeholder to balance flex layout -->
-				<div class="h-16"></div>
 
 				<!-- Big sweeping cloud -->
 				<img src="/clouds.png" alt="" class="transition-big-cloud absolute pointer-events-none" bind:this={cloudImgEl} />

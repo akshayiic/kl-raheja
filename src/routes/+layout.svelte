@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page, navigating } from '$app/stores';
 	import { onMount, setContext } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { writable, get } from 'svelte/store';
 	import '../app.pcss';
 	import './styles.css';
 	import rahejaLogo from '$lib/images/rahejanew.png';
@@ -108,7 +108,8 @@
 		switchChecker();
 		if ($page.url.pathname === '/') {
 			show('overview');
-			if ($UIPanel !== 'menu' && $page.url.searchParams.get('menu') !== 'true') {
+			const currentPanelVal = get(UIPanel);
+			if (currentPanelVal !== 'menu' && $page.url.searchParams.get('menu') !== 'true') {
 				UIPanel.set('loading');
 			} else if ($page.url.searchParams.get('menu') === 'true') {
 				UIPanel.set('menu');
@@ -188,7 +189,10 @@
 		alt="Raheja Logo" 
 		class="raheja-logo cursor-pointer" 
 		class:hidden={$UIPanel == 'loading'} 
-		on:click={() => goto('/')} 
+		on:click={() => {
+			UIPanel.set('loading');
+			goto('/');
+		}} 
 	/>
 	<img src={poweredLogo} alt="Powered by Vretail" class="vretail-watermark" class:hidden={$UIPanel == 'loading'} />
 
