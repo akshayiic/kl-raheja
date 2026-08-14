@@ -2,14 +2,13 @@
 	import Home from './Home.svelte';
 	import { setContext, getContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { goto, preloadCode } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import 'iconify-icon';
-	import poweredByVretail from '$lib/images/powered-vretail.png';
 	import instructionIcon from '$lib/images/instruction-icon.svg';
 	import instructionPanoIcon from '$lib/images/instruction-pano.svg';
-	import newRahejaVid from '$lib/videos/new-raheja.mp4';
+	import newRahejaVid from '$lib/videos/new-raheja1.mp4';
 	import views1Video from '$lib/videos/views1.mp4';
 	import vicinityVideo from '$lib/videos/vicinity.mp4';
 	import subtractImg from '$lib/images/subtract.png';
@@ -166,13 +165,7 @@
 	}
 
 	function handleVideoTimeUpdate() {
-		if (!introPlaybackEl) return;
-		if (introPlaybackEl.duration && introPlaybackEl.currentTime >= introPlaybackEl.duration - 2.0) {
-			if (!transitionTriggered) {
-				transitionTriggered = true;
-				triggerMenuTransition();
-			}
-		}
+		// Do nothing to let the video play to the very end
 	}
 
 	function handleIntroVideoEnded() {
@@ -185,9 +178,10 @@
 	async function triggerMenuTransition() {
 		captureIntroLastFrame();
 
-		// Mount menu content immediately behind the video intro screen
-		shouldAnimateMenu = true;
+		// Mount menu content immediately with no entry animations, and keep the navcard open
+		shouldAnimateMenu = false;
 		showMenuContent = true;
+		cardsCollapsed = false;
 		UIPanel?.set('menu');
 
 		// Wait for Svelte to mount the menu elements in the DOM
@@ -196,14 +190,14 @@
 		// Fade out the center text slowly and naturally
 		gsap.to('.video-intro-text', {
 			opacity: 0,
-			duration: 1.8,
+			duration: 1.2,
 			ease: 'sine.inOut'
 		});
 
-		// Fade out the video intro screen container to reveal the menu container behind it
+		// Fade out the video intro screen container to reveal the menu container behind it smoothly
 		gsap.to('.video-intro-screen', {
 			opacity: 0,
-			duration: 1.8,
+			duration: 1.5,
 			ease: 'power2.out',
 			onComplete: () => {
 				try {
@@ -214,23 +208,6 @@
 				}
 			}
 		});
-
-		// Scale up and fade in the menu items (coming from back to front slowly, without delay or stagger)
-		gsap.fromTo('.menu-desc-container, .slider-menu', 
-			{
-				opacity: 0,
-				scale: 0.1,
-				z: -500,
-				transformPerspective: 1000
-			},
-			{
-				opacity: 1,
-				scale: 1,
-				z: 0,
-				duration: 1.8, // matched duration
-				ease: 'power2.out'
-			}
-		);
 	}
 
 	function typeSubheadingLoop() {
@@ -843,11 +820,11 @@
 			</button>
 			<div class="intro-container fixed inset-0 z-[2000000003] pointer-events-none select-none">
 				<!-- Left Bottom Text Section -->
-				<div class="intro-text-container absolute left-6 md:left-16 bottom-6 md:bottom-16 flex flex-col items-start text-left text-white max-w-[55%] md:max-w-[480px]">
+				<div class="intro-text-container absolute left-6 md:left-16 bottom-6 md:bottom-16 flex flex-col items-start text-left text-white max-w-[55%] md:max-w-[32%] ">
 					<!-- STEP › INTO -->
-					<div class="flex items-center gap-2 text-[10px] md:text-sm font-light tracking-[0.3em] uppercase text-white/90">
+					<div class="flex items-center gap-2 text-[10px] md:text-2xl font-light tracking-[0.3em] uppercase text-white/90">
 						<span style="font-family: 'Viaoda Libre', serif !important;">STEP</span>
-						<span class="text-[#c5a880] text-sm md:text-lg font-normal leading-none" style="transform: translateY(-1px); font-family: 'Viaoda Libre', serif !important;">›</span>
+						<span class="text-[#c5a880] text-sm md:text-5xl font-normal leading-none" style="transform: translateY(-5px); font-family: 'Viaoda Libre', serif !important;">›</span>
 						<span style="font-family: 'Viaoda Libre', serif !important;">INTO</span>
 					</div>
 
@@ -857,8 +834,8 @@
 					</h1>
 
 					<!-- Description -->
-					<p class="text-[9px] md:text-xs font-light text-white/70 leading-relaxed tracking-wider normal-case" style="font-family: 'Imprima', sans-serif;">
-						Discover a location surrounded by South Mumbai's finest landmarks, cultural destinations, and lifestyle experiences, all thoughtfully connected to your everyday life.
+					<p class="text-[9px] md:text-sm font-light text-white/70 leading-relaxed tracking-wider normal-case " style="font-family: 'Imprima', sans-serif;">
+						Discover a location surrounded by South Mumbai's finest landmarks, cultural destinations and lifestyle experiences, all thoughtfully connected to your everyday life.
 					</p>
 				</div>
 

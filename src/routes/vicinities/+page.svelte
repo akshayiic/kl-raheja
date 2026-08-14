@@ -21,7 +21,8 @@
 	import totosVid from '$lib/videos/Totos.mp4';
 	import veronicasVid from '$lib/videos/Veronicas Pali Hill Cafe.mp4';
 	import willingdonVid from '$lib/videos/Willingdon Club.mp4';
-	import introVid from '$lib/videos/introvideo.mp4';
+	import introVid from '$lib/videos/360-video.mp4';
+	import connectivityVid from '$lib/videos/connectivity-360.mp4';
 
 	let currentUI = getContext('currentUI');
 	let cleanId;
@@ -43,6 +44,17 @@
 	let galleryCollapsed = false;
 	let openAccordionItems = []; // persists which sidebar categories are expanded across minimize/reopen
 	let isLoaded = true;
+
+	let selectedCategory = '';
+	$: {
+		if (openAccordionItems && openAccordionItems.includes('connectivity')) {
+			selectedCategory = 'connectivity';
+		} else {
+			if (selectedCategory === 'connectivity') {
+				selectedCategory = '';
+			}
+		}
+	}
 	let activeSrc = '';
 	let prevSrc = '';
 	let imgEl;
@@ -380,14 +392,23 @@
 
 						{#each vicinityCategories as category}
 							<Accordion.Item value={category.id}>
-								<Accordion.Trigger id={category.id + '-level'}>
+								<Accordion.Trigger id={category.id + '-level'} on:click={() => vicinityImg.set('-')}>
 									<div class="flex items-center gap-3 w-full text-left">
 										<img 
 											src={`/${category.id === 'cafe-club' ? 'cafe' : category.id === 'retail-lifestyle' ? 'retail' : category.id === 'faith-heritage' ? 'faith' : category.id === 'connectivity' ? 'connectivity1' : category.id === 'hospital' ? 'hospital1' : category.id}.png`} 
 											alt={category.name} 
 											class="category-icon w-5 h-5 object-contain" 
 										/>
-										<span class="category-name">{category.name === 'Cafes & Clubs' ? 'Cafe & Clubs' : category.name}</span>
+										<span 
+											class="category-name"
+											style={category.id === 'connectivity'
+												? ((selectedCategory === 'connectivity' && $vicinityImg === '-') 
+													? 'color: rgba(222, 173, 102, 1) !important; opacity: 1 !important;' 
+													: 'color: rgba(255, 255, 255, 0.85) !important; opacity: 0.65 !important;')
+												: ''}
+										>
+											{category.name === 'Cafes & Clubs' ? 'Cafe & Clubs' : category.name}
+										</span>
 									</div>
 								</Accordion.Trigger>
 								<Accordion.Content>
@@ -414,13 +435,15 @@
 
 <div class="vicinity-bg-wrapper d-block visible absolute bottom-0 left-0 right-0 top-0 overflow-hidden bg-black">
 	{#if $vicinityImg === '-'}
-		<video
-			src={introVid}
-			autoplay
-			muted
-			playsinline
-			class="absolute top-0 left-0 h-full w-full object-cover z-40"
-		></video>
+		{#key selectedCategory}
+			<video
+				src={selectedCategory === 'connectivity' ? connectivityVid : introVid}
+				autoplay
+				muted
+				playsinline
+				class="absolute top-0 left-0 h-full w-full object-cover z-40"
+			></video>
+		{/key}
 	{/if}
 
 	{#if $vicinityImg != '-'}
