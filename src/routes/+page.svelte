@@ -178,10 +178,10 @@
 	async function triggerMenuTransition() {
 		captureIntroLastFrame();
 
-		// Mount menu content immediately with no entry animations, and keep the navcard open
+		// Mount menu content immediately with no entry animations, and keep the navcard closed
 		shouldAnimateMenu = false;
 		showMenuContent = true;
-		cardsCollapsed = false;
+		cardsCollapsed = true;
 		UIPanel?.set('menu');
 
 		// Wait for Svelte to mount the menu elements in the DOM
