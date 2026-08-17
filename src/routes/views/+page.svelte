@@ -30,33 +30,33 @@
 
 	// Info hotspots data - using correct yaw/pitch from APP_DATA
 	const infoHotspots = [
-		{ yaw: 1.8844940263482037, pitch: -0.05054815947613989, title: 'Bandra Worli Sea Link', side: 'left', height: 80 },
+		{ yaw: 1.8844940263482037, pitch: -0.05054815947613989, title: 'Bandra Worli Sea Link', side: 'left', height: 60 },
 		{
 			yaw: -1.9542776260578663,
 			pitch: 0.22421612137353364,
 			title: 'Bandstand & Carter Road Promenade',
 			side: 'right',
-			height: 100
+			height: 60
 		},
-		{ yaw: -0.4555211228580287, pitch: 0.01301193885635854, title: 'BKC (Bandra-Kurla Complex)', side: 'right', height: 140 },
-		{ yaw: -0.6126043828326306, pitch: 0.12261471785871336, title: 'Lilavati Hospital', side: 'right', height: 170 },
+		{ yaw: -0.4555211228580287, pitch: 0.01301193885635854, title: 'BKC (Bandra-Kurla Complex)', side: 'right', height: 60 },
+		{ yaw: -0.6126043828326306, pitch: 0.12261471785871336, title: 'Lilavati Hospital', side: 'right', height: 60 },
 		{
 			yaw: -0.58810601011943326,
 			pitch: 0.059821744772238006,
 			title: 'Dhirubhai Ambani International School',
 			side: 'left',
-			height: 120
+			height: 60
 		},
-		{ yaw: -1.6807002432938933, pitch: 0.08104243591002991, title: 'Otters Club', side: 'left', height: 140 },
-		{ yaw: 2.073285248111959, pitch: -0.015141630319693178, title: 'Taj Lands End', side: 'right', height: 120 },
-		{ yaw: -0.1492642036394205, pitch: 0.02223561794271589, title: 'Jio World Centre (NMACC)', side: 'left', height: 200 },
-		{ yaw: -0.18302367651812048, pitch: 0.06513596391294918, title: 'Jio World Drive', side: 'right', height: 130 },
+		{ yaw: -1.6807002432938933, pitch: 0.08104243591002991, title: 'Otters Club', side: 'left', height: 60 },
+		{ yaw: 2.073285248111959, pitch: -0.015141630319693178, title: 'Taj Lands End', side: 'right', height: 60 },
+		{ yaw: -0.1492642036394205, pitch: 0.02223561794271589, title: 'Jio World Centre (NMACC)', side: 'left', height: 60 },
+		{ yaw: -0.18302367651812048, pitch: 0.06513596391294918, title: 'Jio World Drive', side: 'right', height: 60 },
 		{ yaw: -2.1649118474316467, pitch: -0.010187657007763917, title: 'Versova–Bandra Sea Link', side: 'left', height: 60 },
-		{ yaw: 1.407461676916748, pitch: -0.06262553263736237, title: 'Worli business district', side: 'left', height: 90 },
-		{ yaw: 1.41569761010296, pitch: 0.22940729869127985, title: 'Mount Mary Basilica', side: 'right', height: 150 },
-		{ yaw: -0.32055851759378484, pitch: 0.06708659007874473, title: 'American School of Bombay', side: 'left', height: 65 },
+		{ yaw: 1.407461676916748, pitch: -0.06262553263736237, title: 'Worli business district', side: 'left', height: 60 },
+		{ yaw: 1.41569761010296, pitch: 0.22940729869127985, title: 'Mount Mary Basilica', side: 'right', height: 60 },
+		{ yaw: -0.32055851759378484, pitch: 0.06708659007874473, title: 'American School of Bombay', side: 'left', height: 60 },
 		{ yaw: -0.6243483273298018, pitch: 0.03932089879253553, title: 'Asian Heart Institute', side: 'left', height: 60 },
-		{ yaw: -1.1134199121902082, pitch: 0.013543448224595522, title: 'Pali Hill/Linking Road', side: 'left', height: 150 }
+		{ yaw: -1.1134199121902082, pitch: 0.013543448224595522, title: 'Pali Hill/Linking Road', side: 'left', height: 60 }
 	];
 
 	// Initial view parameters from APP_DATA
@@ -283,6 +283,35 @@
 			if (inViewport) {
 				wrapper.classList.add('visible');
 				shownHotspots.add(index);
+
+				// Dynamically change direction of the label if it's near the top-center controls
+				// (to prevent it from getting hidden behind / overlapping the "Info Hotspots" pill and compass)
+				const rect = wrapper.getBoundingClientRect();
+				const centerX = window.innerWidth / 2;
+				
+				// Center controls are at top: 0-150px, left: 50%
+				// Check if the hotspot is near the center horizontally (within 160px) and near the top (top < 350px)
+				if (Math.abs(rect.left - centerX) < 160 && rect.top < 350) {
+					if (rect.left < centerX) {
+						// Hotspot is to the left of center, so label should extend to the left
+						wrapper.classList.remove('hotspot-right');
+						wrapper.classList.add('hotspot-left');
+					} else {
+						// Hotspot is to the right of center, so label should extend to the right
+						wrapper.classList.remove('hotspot-left');
+						wrapper.classList.add('hotspot-right');
+					}
+				} else {
+					// Fallback to the configured static side
+					const originalSide = hotspot.side || (index % 2 === 0 ? 'right' : 'left');
+					if (originalSide === 'left') {
+						wrapper.classList.remove('hotspot-right');
+						wrapper.classList.add('hotspot-left');
+					} else {
+						wrapper.classList.remove('hotspot-left');
+						wrapper.classList.add('hotspot-right');
+					}
+				}
 			} else {
 				wrapper.classList.remove('visible');
 				shownHotspots.delete(index);
@@ -380,8 +409,8 @@
 		
 		wrapper.id = `hotspot-wrapper-${index}`;
 
-		// Use hand-tailored height from data (fallback to 75)
-		const height = hotspotData.height || 75;
+		// Use hand-tailored height from data (fallback to 60)
+		const height = hotspotData.height || 60;
 		wrapper.style.setProperty('--hotspot-height', `${height}px`);
 
 		// Center pulse dot
@@ -1112,8 +1141,7 @@
 		}
 	}
 
-	/* Info Hotspots - uses global .hotspot styles from styles.css */
-	.info-hotspot {
+	:global(.info-hotspot) {
 		position: absolute;
 	}
 
@@ -1243,6 +1271,22 @@
 	:global(.overview-hotspot) {
 		position: absolute;
 		pointer-events: none;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.3s ease, visibility 0.3s ease;
+	}
+
+	:global(.overview-hotspot.visible) {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	:global(.overview-hotspot:hover) {
+		z-index: 2147483647 !important;
+	}
+
+	:global(.overview-hotspot:hover .overview-hotspot-label) {
+		z-index: 2147483647 !important;
 	}
 
 	:global(.overview-hotspot .hotspot-pulse-dot) {
@@ -1409,6 +1453,23 @@
 		transform: translateX(-2px) scale(1.03) !important;
 	}
 
+	@media (max-width: 1600px) {
+		:global(.overview-hotspot .overview-hotspot-label) {
+			padding: 5px 22px 5px 5px !important;
+			gap: 12px !important;
+		}
+		:global(.overview-hotspot .hotspot-label-img) {
+			width: 40px !important;
+			height: 40px !important;
+		}
+		:global(.overview-hotspot .hotspot-label-title) {
+			font-size: 14px !important;
+		}
+		:global(.overview-hotspot .hotspot-label-subtitle) {
+			font-size: 12px !important;
+		}
+	}
+
 	@media (max-width: 768px) {
 		:global(.overview-hotspot .overview-hotspot-label) {
 			padding: 4px 16px 4px 4px !important;
@@ -1532,6 +1593,14 @@
 			width: 14px !important;
 			height: 28px !important;
 		}
+	}
+
+	/* Elevate the z-index of Marzipano's hotspot container to be higher than controls/dials,
+	   while keeping #pano and its canvas at z-index: auto (under the controls/dials). */
+	:global(.mz-hotspot-container),
+	:global(.marzipano-hotspots-container),
+	:global(#pano div:has(> .overview-hotspot)) {
+		z-index: 2000 !important;
 	}
 
 </style>
