@@ -45,16 +45,11 @@
 	let openAccordionItems = []; // persists which sidebar categories are expanded across minimize/reopen
 	let isLoaded = true;
 
-	let selectedCategory = '';
-	$: {
-		if (openAccordionItems && openAccordionItems.includes('connectivity')) {
-			selectedCategory = 'connectivity';
-		} else {
-			if (selectedCategory === 'connectivity') {
-				selectedCategory = '';
-			}
-		}
-	}
+	// Tracks the last category clicked in the sidebar, independent of accordion expand/collapse,
+	// so re-clicking or collapsing the same category doesn't reset its video back to the default.
+	let activeCategoryId = '';
+	$: activeCategoryVideo =
+		(vicinityCategories.find((cat) => cat.id === activeCategoryId) || {}).video360 || introVid;
 	let activeSrc = '';
 	let prevSrc = '';
 	let imgEl;
@@ -129,6 +124,68 @@
 	let activeDistance = '';
 	let activeVideo = '';
 	let prevVideo = '';
+	let activeVideoEl;
+	let activeVideoLoopFrame = null;
+	// True for the brief window around the loop-back seek. Seeking a <video> always forces a
+	// short decode stall that renders as a black blink; a dedicated overlay masks it instead of
+	// fighting over opacity/transition-duration with the item-switch crossfade classes.
+	let isLoopSeeking = false;
+	let loopSeekSafetyTimer;
+	const END_TRIM_SECONDS = 0; // play all the way to the clip's real end before looping back
+	const LOOP_TAIL_SECONDS = 2; // loop this stretch just before the trimmed end
+	const MIN_LOOP_DURATION = 4; // clips shorter than this just play through once, no loop
+
+	function stopActiveVideoLoopWatch() {
+		if (activeVideoLoopFrame !== null) {
+			cancelAnimationFrame(activeVideoLoopFrame);
+			activeVideoLoopFrame = null;
+		}
+	}
+
+	function seekActiveVideoToLoopStart(el, loopPoint) {
+		isLoopSeeking = true;
+		if (loopSeekSafetyTimer) clearTimeout(loopSeekSafetyTimer);
+		// Safety net in case 'seeked' never fires for some reason — don't leave the mask stuck up.
+		loopSeekSafetyTimer = setTimeout(() => { isLoopSeeking = false; }, 400);
+		el.currentTime = Math.max(0, loopPoint - LOOP_TAIL_SECONDS);
+	}
+
+	function handleActiveVideoSeeked() {
+		if (!isLoopSeeking) return;
+		if (loopSeekSafetyTimer) {
+			clearTimeout(loopSeekSafetyTimer);
+			loopSeekSafetyTimer = null;
+		}
+		isLoopSeeking = false;
+	}
+
+	// Polls every animation frame (~60fps) instead of relying on the native `timeupdate`
+	// event, which only fires a few times a second and lets the clip's trailing black
+	// frames slip through before the loop-back seek gets a chance to run.
+	function watchActiveVideoLoop() {
+		const el = activeVideoEl;
+		if (el && !el.paused && !el.ended && isFinite(el.duration) && el.duration >= MIN_LOOP_DURATION) {
+			const loopPoint = el.duration - END_TRIM_SECONDS;
+			if (el.currentTime >= loopPoint) {
+				seekActiveVideoToLoopStart(el, loopPoint);
+			}
+		}
+		activeVideoLoopFrame = requestAnimationFrame(watchActiveVideoLoop);
+	}
+
+	function startActiveVideoLoopWatch() {
+		stopActiveVideoLoopWatch();
+		activeVideoLoopFrame = requestAnimationFrame(watchActiveVideoLoop);
+	}
+
+	function handleActiveVideoEnded() {
+		const el = activeVideoEl;
+		if (!el || !isFinite(el.duration) || el.duration < MIN_LOOP_DURATION) return;
+		seekActiveVideoToLoopStart(el, el.duration - END_TRIM_SECONDS);
+		el.play();
+	}
+
+	$: if ($vicinityImg === '-') stopActiveVideoLoopWatch();
 	let cardSlideIndex = 1;
 	let galleryInterval;
 	let transitionTimeout;
@@ -166,8 +223,10 @@
 
 	onDestroy(() => {
 		stopGalleryTimer();
+		stopActiveVideoLoopWatch();
 		if (transitionTimeout) clearTimeout(transitionTimeout);
 		if (videoLoadSafetyTimer) clearTimeout(videoLoadSafetyTimer);
+		if (loopSeekSafetyTimer) clearTimeout(loopSeekSafetyTimer);
 	});
 
 	$: {
@@ -188,8 +247,9 @@
 				if (found.video) {
 					nextVideo = found.video;
 				} else if (found.folder && cat.folder) {
-					// Encode folder names for URL safety
-					const encodedCat = cat.folder;
+					// `folder` names the image gallery path; `videoFolder`/`videoName` override it
+					// when the video CDN uses a different (usually shorter) folder/file name.
+					const encodedCat = cat.videoFolder || cat.folder;
 					const encodedSub = encodeURIComponent(found.videoName || found.folder);
 					nextVideo = `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}.mp4`;
 				}
@@ -239,6 +299,7 @@
 			id: 'connectivity',
 			name: 'Connectivity',
 			folder: 'Connectivity',
+			video360: "https://assets.vestate.io/kl-rahega/videos/touch-points/Connectivity.mp4",
 			items: [
 				{ id: 'Connectivity/BandraTerminus.webp', label: 'Bandra Terminus', folder: 'Bandra Terminus', distance: '2.5 KM', subcategory: 'Railway' },
 				{ id: 'Connectivity/BKCMetrostation.webp', label: 'BKC Metro Station', folder: 'BKC Metro station', videoName: 'BKC Metro Station', distance: '1.8 KM', subcategory: 'Metro' },
@@ -253,6 +314,8 @@
 			id: 'cafe-club',
 			name: 'Cafes & Clubs',
 			folder: 'Cafe%20%26%20Clubs',
+			videoFolder: 'Cafes',
+			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/Cafe.mp4',
 			items: [
 				{ id: 'Cafe%20and%20Club/Bastian.webp', label: 'Bastian', video: bastianVid, folder: 'Bastian', distance: '1.2 KM' },
 				{ id: 'Cafe%20and%20Club/Khar Gymkhana.webp', label: 'Khar Gymkhana', video: kharVid, folder: 'Khar Gymkhana', distance: '0.8 KM' },
@@ -270,6 +333,7 @@
 			id: 'commercial',
 			name: 'Commercial',
 			folder: 'Commercial',
+			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/Commercial.mp4',
 			items: [
 				{ id: 'Commercial/BKC  .webp', label: 'BKC', folder: 'BKC', distance: '1.8 KM' },
 				{ id: 'Commercial/JioWorldCentre.webp', label: 'Jio World Centre', folder: 'Jio World Centre', distance: '2.0 KM' },
@@ -282,35 +346,43 @@
 			id: 'hospital',
 			name: 'Hospitals',
 			folder: 'Hospitals',
+			videoFolder: 'Hospitals2',
+			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/Hospital.mp4',
 			items: [
 				{ id: 'Hospital/Asian Heart Institute.webp', label: 'Asian Heart Institute', folder: 'Asian Heart Institute', distance: '2.2 KM' },
-				{ id: 'Hospital/HolyFamily  .webp', label: 'Holy Family', folder: 'Holy Family Hospital', distance: '1.6 KM' },
-				{ id: 'Hospital/LilavatiHospital.webp', label: 'Lilavati Hospital', folder: 'Lilavati Hospital', videoName: 'Lilavati Hospital & Research Centre', distance: '1.3 KM' }
+				{ id: 'Hospital/HolyFamily  .webp', label: 'Holy Family', folder: 'Holy Family Hospital', videoName: 'Holy Family Hosp', distance: '1.6 KM' },
+				{ id: 'Hospital/LilavatiHospital.webp', label: 'Lilavati Hospital', folder: 'Lilavati Hospital', videoName: 'Lilavati Hospital', distance: '1.3 KM' }
 			]
 		},
 		{
 			id: 'education',
 			name: 'Education Institutes',
 			folder: 'Education%20Institutes',
+			videoFolder: 'Education',
+			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/School.mp4',
 			items: [
-				{ id: 'Education/AmericanSchoolofBombay.webp', label: 'American School of Bombay', folder: 'American School of Bombay', distance: '2.4 KM' },
-				{ id: 'Education/DhirubhaiAmbani.webp', label: 'Dhirubhai Ambani International School', folder: 'Dhirubhai Ambani International School', distance: '2.2 KM' },
-				{ id: 'Education/StAndrews .webp', label: 'St. Andrews', folder: 'St. Andrews College', videoName: 'St. Andrew_s College', distance: '1.1 KM' },
-				{ id: 'Education/StStanislaus.webp', label: 'St. Stanislaus', folder: 'St. Stanislaus International School', videoName: 'St. Stanislaus High School', distance: '0.8 KM' }
+				{ id: 'Education/AmericanSchoolofBombay.webp', label: 'American School of Bombay', folder: 'American School of Bombay', videoName: 'American School', distance: '2.4 KM' },
+				{ id: 'Education/DhirubhaiAmbani.webp', label: 'Dhirubhai Ambani International School', folder: 'Dhirubhai Ambani International School', videoName: 'Dhirubhai Ambani', distance: '2.2 KM' },
+				{ id: 'Education/StAndrews .webp', label: 'St. Andrews', folder: 'St. Andrews College', videoName: 'St Andrew_s College', distance: '1.1 KM' },
+				{ id: 'Education/StStanislaus.webp', label: 'St. Stanislaus', folder: 'St. Stanislaus International School', videoName: 'St Stanislaus School', distance: '0.8 KM' }
 			]
 		},
 		{
 			id: 'faith-heritage',
 			name: 'Faith & Heritage',
 			folder: 'Faith%20%26%20Heritage',
+			videoFolder: 'Faith',
+			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/Faith.mp4',
 			items: [
-				{ id: 'Faith%20And%20Heritage/Mount Mary Basilica.webp', label: 'Mount Mary Basilica', folder: 'Mount Mary', videoName: 'Mount Mary Basilica', distance: '1.7 KM' }
+				{ id: 'Faith%20And%20Heritage/Mount Mary Basilica.webp', label: 'Mount Mary Basilica', folder: 'Mount Mary', videoName: 'Mount Mary', distance: '1.7 KM' }
 			]
 		},
 		{
 			id: 'retail-lifestyle',
 			name: 'Retail & Lifestyle',
 			folder: 'Retail%20%26%20Lifestyle',
+			videoFolder: 'Retail',
+			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/Retail.mp4',
 			items: [
 				{ id: 'Retail%20And%20Lifestyle/Bandstand.webp', label: 'Bandstand', folder: 'Bandstand', distance: '1.4 KM' },
 				{ id: 'Retail%20And%20Lifestyle/CarterRoad.webp', label: 'Carter Road', folder: 'Carter Road', distance: '1.5 KM' },
@@ -392,20 +464,18 @@
 
 						{#each vicinityCategories as category}
 							<Accordion.Item value={category.id}>
-								<Accordion.Trigger id={category.id + '-level'} on:click={() => vicinityImg.set('-')}>
+								<Accordion.Trigger id={category.id + '-level'} on:click={() => { vicinityImg.set('-'); activeCategoryId = category.id; }}>
 									<div class="flex items-center gap-3 w-full text-left">
 										<img 
 											src={`/${category.id === 'cafe-club' ? 'cafe' : category.id === 'retail-lifestyle' ? 'retail' : category.id === 'faith-heritage' ? 'faith' : category.id === 'connectivity' ? 'connectivity1' : category.id === 'hospital' ? 'hospital1' : category.id}.png`} 
 											alt={category.name} 
 											class="category-icon w-5 h-5 object-contain" 
 										/>
-										<span 
+										<span
 											class="category-name"
-											style={category.id === 'connectivity'
-												? ((selectedCategory === 'connectivity' && $vicinityImg === '-') 
-													? 'color: rgba(222, 173, 102, 1) !important; opacity: 1 !important;' 
-													: 'color: rgba(255, 255, 255, 0.85) !important; opacity: 0.65 !important;')
-												: ''}
+											style={(activeCategoryId === category.id && $vicinityImg === '-')
+												? 'color: rgba(222, 173, 102, 1) !important; opacity: 1 !important;'
+												: 'color: rgba(255, 255, 255, 0.85) !important; opacity: 0.65 !important;'}
 										>
 											{category.name === 'Cafes & Clubs' ? 'Cafe & Clubs' : category.name}
 										</span>
@@ -435,11 +505,12 @@
 
 <div class="vicinity-bg-wrapper d-block visible absolute bottom-0 left-0 right-0 top-0 overflow-hidden bg-black">
 	{#if $vicinityImg === '-'}
-		{#key selectedCategory}
+		{#key activeCategoryId}
 			<video
-				src={selectedCategory === 'connectivity' ? connectivityVid : introVid}
+				src={activeCategoryVideo}
 				autoplay
 				muted
+				loop
 				playsinline
 				class="absolute top-0 left-0 h-full w-full object-cover z-40"
 			></video>
@@ -461,16 +532,23 @@
 
 				<!-- Layer 2: New active video (blurs in on top only once it can actually play) -->
 				<video
+					bind:this={activeVideoEl}
 					src={activeVideo}
 					autoplay
 					muted
 					playsinline
 					class="vicinity-active-video absolute top-0 left-0 h-full w-full object-cover z-20 vicinity-video-fade {videoLoading ? 'is-loading' : 'is-ready'}"
-					on:playing={() => videoLoading = false}
+					on:playing={() => { videoLoading = false; startActiveVideoLoopWatch(); }}
 					on:canplay={() => videoLoading = false}
 					on:loadstart={() => videoLoading = true}
 					on:waiting={() => videoLoading = true}
+					on:seeked={handleActiveVideoSeeked}
+					on:pause={stopActiveVideoLoopWatch}
+					on:ended={handleActiveVideoEnded}
 				></video>
+
+				<!-- Masks the brief decode-stall blink from the tail-loop seek; independent of the crossfade above -->
+				<div class="vicinity-loop-mask {isLoopSeeking ? 'is-visible' : ''}"></div>
 			{:else}
 				{#if !isLoaded && prevSrc}
 					<img
@@ -677,6 +755,22 @@
 	.vicinity-video-fade.is-ready {
 		opacity: 1;
 		filter: blur(0);
+	}
+
+	/* Masks the loop-back seek's decode-stall blink. Deliberately its own element/transition,
+	   not layered onto the crossfade classes above, so the fast in/out here never fights the
+	   slower 700ms item-switch fade for control of opacity. */
+	.vicinity-loop-mask {
+		position: absolute;
+		inset: 0;
+		z-index: 25;
+		background: #000;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 120ms ease;
+	}
+	.vicinity-loop-mask.is-visible {
+		opacity: 1;
 	}
 
 	/* Outgoing video mirrors the blur as it fades out underneath, so the swap reads as one motion */

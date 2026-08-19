@@ -335,7 +335,7 @@
 		const destination = currentSlide === 1 ? 'views' : 'vicinity';
 		activeCategoryTitle = destination === 'views' ? 'VIEWS' : 'VICINITY';
 		activeCategoryDesc = destination === 'views' 
-			? 'Discover South Mumbai Through Immersive Aerial Perspectives, Revealing The Landmarks That Define This Exceptional Address.'
+			? 'Discover Mumbai Through Immersive Aerial Perspectives, Revealing The Landmarks That Define This Exceptional Address.'
 			: 'Discover the neighbourhood from an aerial perspective. Explore key landmarks, local destinations, and the vibrant surroundings through an interactive experience.';
 
 		menuUIHidden = true;
@@ -528,7 +528,7 @@
 	<!-- Navigation UI Description Overlay -->
 	<div class="menu-desc-container fixed bottom-6 left-0 z-[25] flex flex-col gap-2 pointer-events-auto text-left" class:animate-fade-in={menuReady} class:menu-fading-out={menuUIHidden}>
 		<p class="text-white/80 text-xs md:text-[16px] text-justify font-normal leading-relaxed tracking-wide normal-case" style="font-family: 'Imprima', sans-serif;">
-			In the heart of South Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
+			In the heart of Mumbai, where heritage meets contemporary living, Raheja SOBO Residences presents a rare collection of thoughtfully crafted homes. An address defined by timeless architecture, exceptional views, and a neighbourhood that has shaped the city's finest lifestyles.
 		</p>
 	</div>
 
@@ -593,7 +593,7 @@
 						VICINITY
 					</h2>
 					<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
-						Discover South Mumbai's finest landmarks, cultural destinations, and lifestyle experiences close to your home.
+						Discover Mumbai's finest landmarks, cultural destinations, and lifestyle experiences close to your home.
 					</p>
 					<!-- Explore button -->
 					<button

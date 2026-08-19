@@ -525,7 +525,7 @@
 
 		activeCategoryTitle = destination === 'views' ? 'VIEWS' : 'VICINITY';
 		activeCategoryDesc = destination === 'views' 
-			? 'Discover South Mumbai Through Immersive Aerial Perspectives, Revealing The Landmarks That Define This Exceptional Address.'
+			? 'Discover Mumbai Through Immersive Aerial Perspectives, Revealing The Landmarks That Define This Exceptional Address.'
 			: 'Discover the neighbourhood from an aerial perspective. Explore key landmarks, local destinations, and the vibrant surroundings through an interactive experience.';
 
 		menuUIHidden = true;
@@ -820,7 +820,7 @@
 			</button>
 			<div class="intro-container fixed inset-0 z-[2000000003] pointer-events-none select-none">
 				<!-- Left Bottom Text Section -->
-				<div class="intro-text-container absolute left-6 md:left-16 bottom-6 md:bottom-16 flex flex-col items-start text-left text-white max-w-[55%] md:max-w-[32%] ">
+				<div class="intro-text-container absolute left-6 md:left-16 bottom-6 md:bottom-16 flex flex-col items-start text-left text-white max-w-[55%] md:max-w-[40%] lg:max-w-[40%] xl:max-w-[38%] pointer-events-none">
 					<!-- STEP › INTO -->
 					<div class="flex items-center gap-2 text-[10px] md:text-2xl font-light tracking-[0.3em] uppercase text-white/90">
 						<span style="font-family: 'Viaoda Libre', serif !important;">STEP</span>
@@ -834,9 +834,8 @@
 					</h1>
 
 					<!-- Description -->
-					<p class="text-[9px] md:text-sm font-light text-white/70 leading-relaxed tracking-wider normal-case " style="font-family: 'Imprima', sans-serif;">
-						Discover a location surrounded by South Mumbai's finest landmarks, cultural destinations and lifestyle experiences, all thoughtfully connected to your everyday life.
-					</p>
+					<p class="text-[9px] md:text-[15px] font-light text-white/70 leading-relaxed tracking-wider normal-case " style="font-family: 'Imprima', sans-serif;">
+			 Explore a location where iconic landmarks, cultural destinations and everyday experiences come together, seamlessly connected to your lifestyle.				</p>
 				</div>
 
 				<!-- Right Bottom Button Container -->
@@ -1090,7 +1089,7 @@
 							VICINITY
 						</h2>
 						<p class="text-white/70 text-[13px] mb-2 normal-case font-light max-w-[225px]" style="font-family: 'Imprima', sans-serif; letter-spacing: 0.02em; line-height: 1.7;">
-							Discover South Mumbai's finest landmarks, cultural destinations, and lifestyle experiences close to your home.
+							Discover Mumbai's finest landmarks, cultural destinations, and lifestyle experiences close to your home.
 						</p>
 						<!-- Explore button -->
 						<button
