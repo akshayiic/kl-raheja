@@ -125,67 +125,6 @@
 	let activeVideo = '';
 	let prevVideo = '';
 	let activeVideoEl;
-	let activeVideoLoopFrame = null;
-	// True for the brief window around the loop-back seek. Seeking a <video> always forces a
-	// short decode stall that renders as a black blink; a dedicated overlay masks it instead of
-	// fighting over opacity/transition-duration with the item-switch crossfade classes.
-	let isLoopSeeking = false;
-	let loopSeekSafetyTimer;
-	const END_TRIM_SECONDS = 0; // play all the way to the clip's real end before looping back
-	const LOOP_TAIL_SECONDS = 2; // loop this stretch just before the trimmed end
-	const MIN_LOOP_DURATION = 4; // clips shorter than this just play through once, no loop
-
-	function stopActiveVideoLoopWatch() {
-		if (activeVideoLoopFrame !== null) {
-			cancelAnimationFrame(activeVideoLoopFrame);
-			activeVideoLoopFrame = null;
-		}
-	}
-
-	function seekActiveVideoToLoopStart(el, loopPoint) {
-		isLoopSeeking = true;
-		if (loopSeekSafetyTimer) clearTimeout(loopSeekSafetyTimer);
-		// Safety net in case 'seeked' never fires for some reason — don't leave the mask stuck up.
-		loopSeekSafetyTimer = setTimeout(() => { isLoopSeeking = false; }, 400);
-		el.currentTime = Math.max(0, loopPoint - LOOP_TAIL_SECONDS);
-	}
-
-	function handleActiveVideoSeeked() {
-		if (!isLoopSeeking) return;
-		if (loopSeekSafetyTimer) {
-			clearTimeout(loopSeekSafetyTimer);
-			loopSeekSafetyTimer = null;
-		}
-		isLoopSeeking = false;
-	}
-
-	// Polls every animation frame (~60fps) instead of relying on the native `timeupdate`
-	// event, which only fires a few times a second and lets the clip's trailing black
-	// frames slip through before the loop-back seek gets a chance to run.
-	function watchActiveVideoLoop() {
-		const el = activeVideoEl;
-		if (el && !el.paused && !el.ended && isFinite(el.duration) && el.duration >= MIN_LOOP_DURATION) {
-			const loopPoint = el.duration - END_TRIM_SECONDS;
-			if (el.currentTime >= loopPoint) {
-				seekActiveVideoToLoopStart(el, loopPoint);
-			}
-		}
-		activeVideoLoopFrame = requestAnimationFrame(watchActiveVideoLoop);
-	}
-
-	function startActiveVideoLoopWatch() {
-		stopActiveVideoLoopWatch();
-		activeVideoLoopFrame = requestAnimationFrame(watchActiveVideoLoop);
-	}
-
-	function handleActiveVideoEnded() {
-		const el = activeVideoEl;
-		if (!el || !isFinite(el.duration) || el.duration < MIN_LOOP_DURATION) return;
-		seekActiveVideoToLoopStart(el, el.duration - END_TRIM_SECONDS);
-		el.play();
-	}
-
-	$: if ($vicinityImg === '-') stopActiveVideoLoopWatch();
 	let cardSlideIndex = 1;
 	let galleryInterval;
 	let transitionTimeout;
@@ -223,10 +162,8 @@
 
 	onDestroy(() => {
 		stopGalleryTimer();
-		stopActiveVideoLoopWatch();
 		if (transitionTimeout) clearTimeout(transitionTimeout);
 		if (videoLoadSafetyTimer) clearTimeout(videoLoadSafetyTimer);
-		if (loopSeekSafetyTimer) clearTimeout(loopSeekSafetyTimer);
 	});
 
 	$: {
@@ -392,6 +329,16 @@
 		}
 	];
 
+	// Only these vicinities get the "Towards X" signpost label (matched to closest item by name)
+	const towardsLabelIds = [
+		'Connectivity/SantacruzMetroLine.webp', // Towards Santacruz Metro Line3
+		'Connectivity/WesternExpressHighway.webp', // Towards Western Express Highway
+		'Cafe%20and%20Club/NationalSportsClubofIndia.webp', // Towards National Sports Club of India
+		'Cafe%20and%20Club/WillingdonClub .webp', // Towards Willingdon club
+		'Commercial/Worli.webp', // Towards Worli
+		'Commercial/LowerParel.webp' // Towards Lower Parel
+	];
+
 	function toggleDayNight() {
 		isDay.update((value) => !value);
 		isDay.subscribe((value) => {
@@ -538,17 +485,11 @@
 					muted
 					playsinline
 					class="vicinity-active-video absolute top-0 left-0 h-full w-full object-cover z-20 vicinity-video-fade {videoLoading ? 'is-loading' : 'is-ready'}"
-					on:playing={() => { videoLoading = false; startActiveVideoLoopWatch(); }}
+					on:playing={() => { videoLoading = false; }}
 					on:canplay={() => videoLoading = false}
 					on:loadstart={() => videoLoading = true}
 					on:waiting={() => videoLoading = true}
-					on:seeked={handleActiveVideoSeeked}
-					on:pause={stopActiveVideoLoopWatch}
-					on:ended={handleActiveVideoEnded}
 				></video>
-
-				<!-- Masks the brief decode-stall blink from the tail-loop seek; independent of the crossfade above -->
-				<div class="vicinity-loop-mask {isLoopSeeking ? 'is-visible' : ''}"></div>
 			{:else}
 				{#if !isLoaded && prevSrc}
 					<img
@@ -742,6 +683,17 @@
 	Go Back
 </button>
 
+<!-- "Towards X" signpost label, shown only while a specific vicinity item is selected -->
+{#if $vicinityImg !== '-' && activeFolder && towardsLabelIds.includes($vicinityImg)}
+	<div class="towards-label animate-fade-in">
+		<span class="towards-label-pill">Towards {activeFolder}</span>
+		<svg class="towards-label-arrows" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M7 6L13 12L7 18" stroke="rgba(222, 173, 102, 0.55)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+			<path d="M14 6L20 12L14 18" stroke="rgba(222, 173, 102, 1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+		</svg>
+	</div>
+{/if}
+
 <style>
 	/* Video Crossfade – incoming video blurs in as it fades in on top */
 	.vicinity-video-fade {
@@ -755,22 +707,6 @@
 	.vicinity-video-fade.is-ready {
 		opacity: 1;
 		filter: blur(0);
-	}
-
-	/* Masks the loop-back seek's decode-stall blink. Deliberately its own element/transition,
-	   not layered onto the crossfade classes above, so the fast in/out here never fights the
-	   slower 700ms item-switch fade for control of opacity. */
-	.vicinity-loop-mask {
-		position: absolute;
-		inset: 0;
-		z-index: 25;
-		background: #000;
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity 120ms ease;
-	}
-	.vicinity-loop-mask.is-visible {
-		opacity: 1;
 	}
 
 	/* Outgoing video mirrors the blur as it fades out underneath, so the swap reads as one motion */
@@ -816,6 +752,37 @@
 		border-color: rgba(222, 173, 102, 1);
 		color: white;
 		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
+	}
+
+	/* "Towards X" signpost label */
+	.towards-label {
+		position: fixed;
+		right: 24px;
+		bottom: 24px;
+		z-index: 1000;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.towards-label-pill {
+		background: rgba(20, 20, 20, 0.55);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1.2px solid rgba(222, 173, 102, 0.5);
+		border-radius: 9999px;
+		padding: 10px 22px;
+		color: rgba(255, 255, 255, 0.9);
+		font-size: 13px;
+		font-weight: 500;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+		font-family: 'Imprima', sans-serif;
+	}
+
+	.towards-label-arrows {
+		filter: drop-shadow(0 0 6px rgba(222, 173, 102, 0.65));
+		flex-shrink: 0;
 	}
 
 	:global(.left-panel-wrapper) {
