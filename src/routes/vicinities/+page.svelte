@@ -56,31 +56,6 @@
 	let videoLoading = false;
 	let videoLoadSafetyTimer;
 
-	$: {
-		if (activeVideo) {
-			videoLoading = true;
-			// Safety: auto-clear loading after 5s so UI never feels stuck
-			if (videoLoadSafetyTimer) clearTimeout(videoLoadSafetyTimer);
-			videoLoadSafetyTimer = setTimeout(() => {
-				videoLoading = false;
-			}, 5000);
-		}
-	}
-
-	function onNewVideoReady() {
-		if (!videoLoading) return; // already handled this swap, avoid re-triggering the fade
-		videoLoading = false;
-		if (videoLoadSafetyTimer) {
-			clearTimeout(videoLoadSafetyTimer);
-			videoLoadSafetyTimer = null;
-		}
-		// Clear prevVideo once the blur crossfade finishes (match CSS transition duration)
-		if (transitionTimeout) clearTimeout(transitionTimeout);
-		transitionTimeout = setTimeout(() => {
-			prevVideo = '';
-		}, 750);
-	}
-
 	$: displaySrc = $vicinityImg != '-' ? 'https://assets.vestate.io/webtool/kraheja/kraheja/vicinities/' + $vicinityImg : '';
 	$: {
 		if (displaySrc && displaySrc !== activeSrc) {
@@ -122,12 +97,17 @@
 	let activeCategoryFolder = '';
 	let activeLabel = '';
 	let activeDistance = '';
-	let activeVideo = '';
-	let prevVideo = '';
-	let activeVideoEl;
+	// Two persistent video layers ping-pong the "front" role: whichever one isn't
+	// front keeps its already-loaded src and just fades out, instead of being
+	// reassigned a new src and having to reload from scratch (that reload was
+	// showing up as a stray blank/unloaded flash mid-transition).
+	let videoSrcA = '';
+	let videoSrcB = '';
+	let frontIsA = true;
+	let videoElA;
+	let videoElB;
 	let cardSlideIndex = 1;
 	let galleryInterval;
-	let transitionTimeout;
 
 	function startGalleryTimer() {
 		stopGalleryTimer();
@@ -162,17 +142,51 @@
 
 	onDestroy(() => {
 		stopGalleryTimer();
-		if (transitionTimeout) clearTimeout(transitionTimeout);
 		if (videoLoadSafetyTimer) clearTimeout(videoLoadSafetyTimer);
 	});
 
+	// Marks the layer that just became playable as ready, and pauses the other
+	// (now-hidden) layer so it isn't left decoding video in the background forever.
+	function markLayerReady(isLayerA) {
+		if (isLayerA !== frontIsA) return; // event from the layer that's currently fading out, ignore
+		videoLoading = false;
+		if (videoLoadSafetyTimer) {
+			clearTimeout(videoLoadSafetyTimer);
+			videoLoadSafetyTimer = null;
+		}
+		const backEl = isLayerA ? videoElB : videoElA;
+		backEl?.pause();
+	}
+
+	// A video that fails to load (bad/missing CDN file) would otherwise leave the
+	// crossfade stuck on the old video until the 5s safety timer expires — reveal
+	// immediately instead so a broken clip doesn't look like a frozen UI.
+	function markLayerErrored(isLayerA, src) {
+		console.warn('Vicinity video failed to load:', src);
+		markLayerReady(isLayerA);
+	}
+
+	function markLayerLoading(isLayerA) {
+		if (isLayerA !== frontIsA) return;
+		videoLoading = true;
+	}
+
+	function handleTimeUpdate(isLayerA) {
+		const currentEl = isLayerA ? videoElA : videoElB;
+		if (currentEl && $vicinityImg === 'Retail%20And%20Lifestyle/JioWorldDrive.webp') {
+			if (currentEl.currentTime >= 6) {
+				currentEl.pause();
+			}
+		}
+	}
+
 	$: {
-		const oldVideo = activeVideo;
+		const oldVideo = frontIsA ? videoSrcA : videoSrcB;
 		activeFolder = '';
 		activeCategoryFolder = '';
 		activeLabel = '';
 		activeDistance = '';
-		
+
 		let nextVideo = '';
 		for (const cat of vicinityCategories) {
 			const found = cat.items.find((item) => item.id === $vicinityImg);
@@ -193,10 +207,77 @@
 				break;
 			}
 		}
-		
-		if (nextVideo !== oldVideo) {
-			prevVideo = oldVideo;
-			activeVideo = nextVideo;
+
+		if (nextVideo && (
+			$vicinityImg === 'Connectivity/BKCMetrostation.webp' || 
+			$vicinityImg === 'Commercial/LowerParel.webp' ||
+			$vicinityImg === 'Connectivity/CoastalRoad.webp'
+		)) {
+			nextVideo += '#t=1';
+		}
+
+		if (nextVideo && $vicinityImg === 'Retail%20And%20Lifestyle/JioWorldDrive.webp') {
+			nextVideo += '#t=0,6';
+		}
+
+		if ($vicinityImg !== '-') {
+			if (nextVideo !== oldVideo) {
+				// Send the new video to whichever layer is currently in back — the layer
+				// coming to front loads nextVideo, the layer going to back keeps showing
+				// whatever it already had loaded.
+				const nextFrontIsA = !frontIsA;
+				const targetSrc = nextFrontIsA ? videoSrcA : videoSrcB;
+				
+				if (targetSrc === nextVideo) {
+					// The target layer already has this video loaded! Svelte won't trigger a reload.
+					// We must manually reset, play, and mark it ready immediately.
+					frontIsA = nextFrontIsA;
+					videoLoading = false;
+					
+					const currentEl = frontIsA ? videoElA : videoElB;
+					const backEl = frontIsA ? videoElB : videoElA;
+					
+					if (currentEl) {
+						const startSec = ($vicinityImg === 'Connectivity/BKCMetrostation.webp' || 
+										  $vicinityImg === 'Commercial/LowerParel.webp' || 
+										  $vicinityImg === 'Connectivity/CoastalRoad.webp') ? 1 : 0;
+						currentEl.currentTime = startSec;
+						currentEl.play().catch((err) => console.log('Autoplay play error:', err));
+					}
+					if (backEl) {
+						backEl.pause();
+					}
+				} else {
+					if (frontIsA) {
+						videoSrcB = nextVideo;
+					} else {
+						videoSrcA = nextVideo;
+					}
+					frontIsA = !frontIsA;
+
+					videoLoading = true;
+					if (videoLoadSafetyTimer) clearTimeout(videoLoadSafetyTimer);
+					videoLoadSafetyTimer = setTimeout(() => {
+						videoLoading = false;
+					}, 5000);
+				}
+			} else {
+				// The video is already loaded on the front layer, but the user re-selected it.
+				// We should seek to the start (or 1s for special videos) and play.
+				const currentEl = frontIsA ? videoElA : videoElB;
+				if (currentEl) {
+					const startSec = ($vicinityImg === 'Connectivity/BKCMetrostation.webp' || 
+									  $vicinityImg === 'Commercial/LowerParel.webp' || 
+									  $vicinityImg === 'Connectivity/CoastalRoad.webp') ? 1 : 0;
+					currentEl.currentTime = startSec;
+					currentEl.play().catch((err) => console.log('Autoplay play error:', err));
+				}
+			}
+		} else {
+			// Clear video sources when switching back to category level to prevent stale state leak
+			videoSrcA = '';
+			videoSrcB = '';
+			videoLoading = false;
 		}
 	}
 
@@ -236,15 +317,16 @@
 			id: 'connectivity',
 			name: 'Connectivity',
 			folder: 'Connectivity',
+			videoFolder: 'Connectivity3',
 			video360: "https://assets.vestate.io/kl-rahega/videos/touch-points/Connectivity.mp4",
 			items: [
-				{ id: 'Connectivity/BandraTerminus.webp', label: 'Bandra Terminus', folder: 'Bandra Terminus', distance: '2.5 KM', subcategory: 'Railway' },
+				{ id: 'Connectivity/BandraTerminus.webp', label: 'Bandra Terminus', folder: 'Bandra Terminus', videoName: 'Bandra Terminus', distance: '2.5 KM', subcategory: 'Railway' },
 				{ id: 'Connectivity/BKCMetrostation.webp', label: 'BKC Metro Station', folder: 'BKC Metro station', videoName: 'BKC Metro Station', distance: '1.8 KM', subcategory: 'Metro' },
 				{ id: 'Connectivity/SantacruzMetroLine.webp', label: 'Santa Cruz Metro Line', folder: 'Santacruz Metro line 3', videoName: 'Santacruz Metro Line 3', distance: '2.1 KM', subcategory: 'Metro' },
-				{ id: 'Connectivity/CoastalRoad.webp', label: 'Coastal Road', folder: 'Coastal Road', distance: '4.2 KM', subcategory: 'Roadways' },
+				{ id: 'Connectivity/CoastalRoad.webp', label: 'Coastal Road', folder: 'Coastal Road', videoName: 'Coastal Road', distance: '4.2 KM', subcategory: 'Roadways' },
 				{ id: 'Connectivity/Versova Bandra Sea Link.webp', label: 'Versova–Bandra Sea Link', folder: 'Versova-Bandra sea link', videoName: 'Versova', distance: '3.5 KM', subcategory: 'Roadways' },
-				{ id: 'Connectivity/WesternExpressHighway.webp', label: 'Western Express Highway', folder: 'Western Express Highway', distance: '1.0 KM', subcategory: 'Roadways' },
-				{ id: 'Connectivity/WorliSeaLink.webp', label: 'Bandra Worli Sea Link', folder: 'Bandra Worli Sea Link', distance: '3.8 KM', subcategory: 'Roadways' }
+				{ id: 'Connectivity/WesternExpressHighway.webp', label: 'Western Express Highway', folder: 'Western Express Highway', videoName: 'Western Express Highway', distance: '1.0 KM', subcategory: 'Roadways' },
+				{ id: 'Connectivity/WorliSeaLink.webp', label: 'Bandra Worli Sea Link', folder: 'Bandra Worli Sea Link', videoName: 'Bandra Worli Sea Link', distance: '3.8 KM', subcategory: 'Roadways' }
 			]
 		},
 		{
@@ -272,10 +354,10 @@
 			folder: 'Commercial',
 			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/Commercial.mp4',
 			items: [
-				{ id: 'Commercial/BKC  .webp', label: 'BKC', folder: 'BKC', distance: '1.8 KM' },
-				{ id: 'Commercial/JioWorldCentre.webp', label: 'Jio World Centre', folder: 'Jio World Centre', distance: '2.0 KM' },
-				{ id: 'Commercial/LowerParel.webp', label: 'Lower Parel', folder: 'Lower Parel', distance: '8.5 KM' },
-				{ id: 'Commercial/NMAC .webp', label: 'NMACC', folder: 'NMAC', videoName: 'NMACC (1)', distance: '2.0 KM' },
+				{ id: 'Commercial/BKC  .webp', label: 'BKC', folder: 'BKC',  distance: '1.8 KM' },
+				{ id: 'Commercial/JioWorldCentre.webp', label: 'Jio World Centre', folder: 'Jio World Centre',  distance: '2.0 KM' },
+				{ id: 'Commercial/LowerParel.webp', label: 'Lower Parel', folder: 'Lower Parel', videoName: 'Lower Parel', distance: '8.5 KM' },
+				{ id: 'Commercial/NMAC .webp', label: 'NMACC', folder: 'NMAC', videoName: 'NMACC', distance: '2.0 KM' },
 				{ id: 'Commercial/Worli.webp', label: 'Worli Business District', folder: 'Worli', distance: '9.0 KM' }
 			]
 		},
@@ -288,7 +370,7 @@
 			items: [
 				{ id: 'Hospital/Asian Heart Institute.webp', label: 'Asian Heart Institute', folder: 'Asian Heart Institute', distance: '2.2 KM' },
 				{ id: 'Hospital/HolyFamily  .webp', label: 'Holy Family', folder: 'Holy Family Hospital', videoName: 'Holy Family Hosp', distance: '1.6 KM' },
-				{ id: 'Hospital/LilavatiHospital.webp', label: 'Lilavati Hospital', folder: 'Lilavati Hospital', videoName: 'Lilavati Hospital', distance: '1.3 KM' }
+				{ id: 'Hospital/LilavatiHospital.webp', label: 'Lilavati Hospital', folder: 'Lilavati Hospital', videoName: 'Lilavati Hospital ', distance: '1.3 KM' }
 			]
 		},
 		{
@@ -324,7 +406,7 @@
 				{ id: 'Retail%20And%20Lifestyle/Bandstand.webp', label: 'Bandstand', folder: 'Bandstand', distance: '1.4 KM' },
 				{ id: 'Retail%20And%20Lifestyle/CarterRoad.webp', label: 'Carter Road', folder: 'Carter Road', distance: '1.5 KM' },
 				{ id: 'Retail%20And%20Lifestyle/JioWorldDrive.webp', label: 'Jio World Drive', folder: 'Jio World Drive', distance: '2.3 KM' },
-				{ id: 'Retail%20And%20Lifestyle/LinkingHillRoad .webp', label: 'Pali Hill/Linking Road', folder: 'Linking-Hill Road', videoName: 'Linking Hill Road', distance: '0.5 KM' }
+				{ id: 'Retail%20And%20Lifestyle/LinkingHillRoad .webp', label: 'Pali Hill/Linking Road', folder: 'Linking-Hill Road', videoName: 'Linking Road', distance: '0.5 KM' }
 			]
 		}
 	];
@@ -435,7 +517,7 @@
 												? 'active inner-modal-btn'
 												: 'inner-modal-btn'}
 											id={'x-' + item.id.replaceAll(/[\s./]+/g, '-') + '-am'}
-											on:click={() => { vicinityImg.set(item.id); $isAmenitiesMinimized = true; }}
+											on:click={() => { vicinityImg.set(item.id);  }}
 										>
 											{item.label}
 										</button>
@@ -466,29 +548,39 @@
 
 	{#if $vicinityImg != '-'}
 		<div class="absolute top-0 left-0 w-full h-full z-50 bg-black overflow-hidden">
-			{#if activeVideo}
-						{#if prevVideo}
-					<video
-						src={prevVideo}
-						autoplay
-						muted
-						playsinline
-						class="absolute top-0 left-0 h-full w-full object-cover z-10 vicinity-prev-fade {videoLoading ? '' : 'is-fading'}"
-					></video>
-				{/if}
-
-				<!-- Layer 2: New active video (blurs in on top only once it can actually play) -->
+			{#if videoSrcA || videoSrcB}
+				<!-- Layer A: front while frontIsA, otherwise sits in back keeping its already-loaded content -->
 				<video
-					bind:this={activeVideoEl}
-					src={activeVideo}
+					bind:this={videoElA}
+					src={videoSrcA}
 					autoplay
 					muted
 					playsinline
-					class="vicinity-active-video absolute top-0 left-0 h-full w-full object-cover z-20 vicinity-video-fade {videoLoading ? 'is-loading' : 'is-ready'}"
-					on:playing={() => { videoLoading = false; }}
-					on:canplay={() => videoLoading = false}
-					on:loadstart={() => videoLoading = true}
-					on:waiting={() => videoLoading = true}
+					preload="auto"
+					class="absolute top-0 left-0 h-full w-full object-cover vicinity-video-fade {frontIsA ? 'z-20' : 'z-10'} {(frontIsA ? videoLoading : !videoLoading) ? 'is-loading' : 'is-ready'}"
+					on:playing={() => markLayerReady(true)}
+					on:canplay={() => markLayerReady(true)}
+					on:timeupdate={() => handleTimeUpdate(true)}
+					on:loadstart={() => markLayerLoading(true)}
+					on:waiting={() => markLayerLoading(true)}
+					on:error={() => markLayerErrored(true, videoSrcA)}
+				></video>
+
+				<!-- Layer B: front while !frontIsA, otherwise sits in back keeping its already-loaded content -->
+				<video
+					bind:this={videoElB}
+					src={videoSrcB}
+					autoplay
+					muted
+					playsinline
+					preload="auto"
+					class="absolute top-0 left-0 h-full w-full object-cover vicinity-video-fade {!frontIsA ? 'z-20' : 'z-10'} {(!frontIsA ? videoLoading : !videoLoading) ? 'is-loading' : 'is-ready'}"
+					on:playing={() => markLayerReady(false)}
+					on:canplay={() => markLayerReady(false)}
+					on:timeupdate={() => handleTimeUpdate(false)}
+					on:loadstart={() => markLayerLoading(false)}
+					on:waiting={() => markLayerLoading(false)}
+					on:error={() => markLayerErrored(false, videoSrcB)}
 				></video>
 			{:else}
 				{#if !isLoaded && prevSrc}
@@ -581,23 +673,23 @@
 {#if lightboxOpen && activeFolder && activeCategoryFolder}
 	<div class="lightbox-overlay-glass fixed inset-0 z-[10000] flex flex-col items-center justify-center animate-fade-in" on:click={closeLightbox}>
 		
-		<!-- Viewport close button (top right) -->
-		<button
-			class="lightbox-close-glass absolute top-6 right-6 cursor-pointer transition-all flex items-center justify-center w-11 h-11 rounded-full shadow-lg"
-			on:click={closeLightbox}
-			type="button"
-		>
-			<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-				<line x1="18" y1="6" x2="6" y2="18"></line>
-				<line x1="6" y1="6" x2="18" y2="18"></line>
-			</svg>
-		</button>
-
 		<!-- Main Image Container -->
 		<div 
 			class="lightbox-card-glass relative max-w-6xl w-[90vw] h-[78vh] rounded-[16px] overflow-hidden shadow-2xl flex items-center justify-center p-2.5"
 			on:click|stopPropagation
 		>
+			<!-- Viewport close button (top right of the image container) -->
+			<button
+				class="lightbox-close-glass cursor-pointer transition-all flex items-center justify-center w-11 h-11 rounded-full shadow-lg"
+				on:click={closeLightbox}
+				type="button"
+			>
+				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+
 			<img
 				src={`https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${lightboxIndex}.png`}
 				alt={`${activeLabel} Gallery`}
@@ -709,18 +801,6 @@
 		filter: blur(0);
 	}
 
-	/* Outgoing video mirrors the blur as it fades out underneath, so the swap reads as one motion */
-	.vicinity-prev-fade {
-		opacity: 1;
-		filter: blur(0);
-		transition: opacity 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms cubic-bezier(0.4, 0, 0.2, 1);
-		will-change: opacity, filter;
-	}
-	.vicinity-prev-fade.is-fading {
-		opacity: 0;
-		filter: blur(20px);
-	}
-
 	/* Go Back Button */
 	.go-back-btn {
 		position: fixed;
@@ -803,7 +883,10 @@
 
 	/* Glass Close Button */
 	.lightbox-close-glass {
-		position: relative;
+		position: absolute !important;
+		top: 16px !important;
+		right: 16px !important;
+		z-index: 50 !important;
 		background: rgba(18, 18, 18, 0.38) !important;
 		backdrop-filter: blur(20px) !important;
 		-webkit-backdrop-filter: blur(20px) !important;
