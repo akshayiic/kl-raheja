@@ -9,7 +9,10 @@
 	import instructionIcon from '$lib/images/instruction-icon.svg';
 	import instructionPanoIcon from '$lib/images/instruction-pano.svg';
 	import newRahejaVid from '$lib/videos/new-raheja1.mp4';
-	import introPoster from '$lib/images/intro-poster.webp';
+	// Poster is a base64 data URI baked into this .js module (see intro-poster.js) rather
+	// than a plain asset import — a plain import emits a separate hashed file, and on a
+	// slow connection that extra round-trip recreates the exact black-flash we're fixing.
+	import introPoster from '$lib/images/intro-poster.js';
 	import views1Video from '$lib/videos/views1.mp4';
 	import vicinityVideo from '$lib/videos/vicinity.mp4';
 	import subtractImg from '$lib/images/subtract.png';

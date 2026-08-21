@@ -9,6 +9,10 @@
 	import { slide } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import { gsap } from 'gsap';
+	// Poster is a base64 data URI baked into this .js module (see vicinity-intro-poster.js)
+	// rather than a plain asset import — a plain import emits a separate hashed file, and
+	// on a slow connection that extra round-trip recreates the exact black-flash we're fixing.
+	import vicinityIntroPoster from '$lib/images/vicinity-intro-poster.js';
 
 	// Segmented (HLS) version of the intro loop — lets the browser start playing
 	// after the first few-second chunk instead of waiting on the whole file.
@@ -590,6 +594,7 @@
 		{#key activeCategoryId}
 			<video
 				use:attachVideoSource={activeCategoryVideo}
+				poster={activeCategoryVideo === introVid ? vicinityIntroPoster : undefined}
 				autoplay
 				muted
 				loop
