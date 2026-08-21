@@ -260,7 +260,7 @@
 					// until then, leave it pointing at the plain .mp4.
 					nextVideo = found.hls
 						? `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}/master.m3u8`
-						: `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}.mp4`;
+						: `https://assets.vestate.io/k_raheja/${encodedCat}/${encodedSub}.mp4`;
 				}
 				break;
 			}
