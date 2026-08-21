@@ -9,6 +9,7 @@
 	import instructionIcon from '$lib/images/instruction-icon.svg';
 	import instructionPanoIcon from '$lib/images/instruction-pano.svg';
 	import newRahejaVid from '$lib/videos/new-raheja1.mp4';
+	import introPoster from '$lib/images/intro-poster.webp';
 	import views1Video from '$lib/videos/views1.mp4';
 	import vicinityVideo from '$lib/videos/vicinity.mp4';
 	import subtractImg from '$lib/images/subtract.png';
@@ -37,6 +38,8 @@
 	let isIframe = $state(inIframe());
 	let introVideoMuted = $state(true);
 	let showVideoIntro = $state(false);
+	let introVideoReady = $state(false);
+	let introAudioBlocked = $state(false);
 	let introTransitioning = $state(false);
 	let typedSubheading = $state('');
 	let introPlaybackEl = null;
@@ -224,7 +227,7 @@
 		tickLoop();
 	}
 
-	function startExperience() {
+	async function startExperience() {
 		if (!(window.self !== window.top) && window.innerWidth < 1200) {
 			if (document.body.requestFullscreen) {
 				document.body.requestFullscreen();
@@ -236,9 +239,33 @@
 		}
 
 		transitionTriggered = false;
+		introVideoReady = false;
+		introAudioBlocked = false;
 		UIPanel?.set('loaded');
 		showVideoIntro = true;
 		typeSubheadingLoop();
+
+		// Attempt unmuted playback while still inside this click's user-activation
+		// window (tick() is only a microtask away, so the gesture still counts).
+		// Falls back to muted + a tap-to-unmute affordance if the browser blocks it.
+		await tick();
+		if (introPlaybackEl) {
+			introPlaybackEl.muted = false;
+			introPlaybackEl.play().catch(() => {
+				introPlaybackEl.muted = true;
+				introAudioBlocked = true;
+				introPlaybackEl.play().catch(() => {});
+			});
+		}
+	}
+
+	function unmuteIntro(event) {
+		event?.stopPropagation();
+		if (introPlaybackEl) {
+			introPlaybackEl.muted = false;
+			introPlaybackEl.play().catch(() => {});
+			introAudioBlocked = false;
+		}
 	}
 
 	// WebGL ripple background logic
@@ -672,6 +699,8 @@
 				showVideoIntro = false;
 				typedSubheading = '';
 				transitionTriggered = false;
+				introVideoReady = false;
+				introAudioBlocked = false;
 				if (introPlaybackEl) {
 					try {
 						introPlaybackEl.pause();
@@ -983,16 +1012,40 @@
 
 {#if showVideoIntro}
 	<div bind:this={videoIntroScreenEl} class="video-intro-screen fixed left-0 top-0 z-[2000000010] h-screen w-screen bg-black overflow-hidden">
+		<img
+			src={introPoster}
+			alt=""
+			aria-hidden="true"
+			class="video-intro-poster absolute left-0 top-0 h-full w-full object-cover"
+		/>
 		<video
 			bind:this={introPlaybackEl}
 			class="video-intro-bg absolute left-0 top-0 h-full w-full object-cover"
+			class:video-ready={introVideoReady}
 			src={newRahejaVid}
+			poster={introPoster}
+			preload="auto"
 			autoplay
 			muted
 			playsinline
+			on:loadeddata={() => (introVideoReady = true)}
 			on:ended={handleIntroVideoEnded}
 			on:timeupdate={handleVideoTimeUpdate}
 		></video>
+		{#if introAudioBlocked}
+			<button
+				on:click={unmuteIntro}
+				class="intro-mute-btn fixed top-5 left-5 z-[2000000013] rounded-full text-white cursor-pointer flex items-center justify-center"
+				type="button"
+				aria-label="Unmute audio"
+			>
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+					<line x1="23" y1="9" x2="17" y2="15"></line>
+					<line x1="17" y1="9" x2="23" y2="15"></line>
+				</svg>
+			</button>
+		{/if}
 		<div class="video-intro-text absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none" class:transitioning={introTransitioning}>
 			<h1 class="video-intro-heading">K RAHEJA</h1>
 			<p class="video-intro-subheading">
@@ -1335,8 +1388,18 @@
 	}
 
 	/* Video Intro Screen (post-Discover) */
+	.video-intro-poster {
+		z-index: 0;
+	}
+
 	.video-intro-bg {
 		z-index: 1;
+		opacity: 0;
+		transition: opacity 600ms ease;
+	}
+
+	.video-intro-bg.video-ready {
+		opacity: 1;
 	}
 
 	.video-intro-overlay {

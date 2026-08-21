@@ -10,7 +10,68 @@
 	import { browser } from '$app/environment';
 	import { gsap } from 'gsap';
 
-	import introVid from '$lib/videos/360-video.mp4';
+	// Segmented (HLS) version of the intro loop — lets the browser start playing
+	// after the first few-second chunk instead of waiting on the whole file.
+	const introVid = '/hls/intro/master.m3u8';
+
+	// Attaches whatever `url` points at to a <video> element: native <source> for
+	// a plain file, or an hls.js MediaSource session for a .m3u8 playlist (native
+	// HLS in Safari/iOS needs no library). Re-run by Svelte via `update()` whenever
+	// the bound url changes, so a single element can be reused across sources.
+	function attachVideoSource(node, url) {
+		let hls;
+		let currentUrl;
+
+		function teardownHls() {
+			if (hls) {
+				hls.destroy();
+				hls = null;
+			}
+		}
+
+		async function apply(u) {
+			if (u === currentUrl) return;
+			currentUrl = u;
+			teardownHls();
+
+			if (!u) {
+				node.removeAttribute('src');
+				node.load();
+				return;
+			}
+
+			if (!u.includes('.m3u8')) {
+				node.src = u;
+				return;
+			}
+
+			// Prefer hls.js (MediaSource-backed) wherever it's actually supported —
+			// checking canPlayType() first is a trap: some Chromium builds report
+			// "maybe" for the HLS mimetype without being able to decode it at all.
+			const { default: Hls } = await import('hls.js');
+			if (currentUrl !== u) return; // superseded while hls.js was loading
+			if (Hls.isSupported()) {
+				hls = new Hls();
+				hls.loadSource(u);
+				hls.attachMedia(node);
+				hls.on(Hls.Events.MANIFEST_PARSED, () => {
+					node.play().catch(() => {});
+				});
+			} else if (node.canPlayType('application/vnd.apple.mpegurl')) {
+				// Real native HLS (Safari/iOS)
+				node.src = u;
+			} else {
+				node.src = u; // last-resort fallback, likely won't play
+			}
+		}
+
+		apply(url);
+
+		return {
+			update: apply,
+			destroy: teardownHls
+		};
+	}
 
 	let currentUI = getContext('currentUI');
 	let cleanId;
@@ -190,7 +251,12 @@
 					// when the video CDN uses a different (usually shorter) folder/file name.
 					const encodedCat = cat.videoFolder || cat.folder;
 					const encodedSub = encodeURIComponent(found.videoName || found.folder);
-					nextVideo = `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}.mp4`;
+					// `hls: true` opts a clip into chunked playback once its segmented
+					// master.m3u8 + .ts files have been uploaded to that same CDN folder —
+					// until then, leave it pointing at the plain .mp4.
+					nextVideo = found.hls
+						? `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}/master.m3u8`
+						: `https://assets.vestate.io/kl-rahega/videos/${encodedCat}/${encodedSub}.mp4`;
 				}
 				break;
 			}
@@ -254,8 +320,7 @@
 				// We should seek to the start (or 1s for special videos) and play.
 				const currentEl = frontIsA ? videoElA : videoElB;
 				if (currentEl) {
-					const startSec = ($vicinityImg === 'Connectivity/BKCMetrostation.webp' || 
-									  $vicinityImg === 'Commercial/LowerParel.webp' || 
+					const startSec = ($vicinityImg === 'Connectivity/BKCMetrostation.webp' ||   
 									  $vicinityImg === 'Connectivity/CoastalRoad.webp') ? 1 : 0;
 					currentEl.currentTime = startSec;
 					currentEl.play().catch((err) => console.log('Autoplay play error:', err));
@@ -344,9 +409,9 @@
 			items: [
 				{ id: 'Commercial/BKC  .webp', label: 'BKC', folder: 'BKC',  distance: '1.8 KM' },
 				{ id: 'Commercial/JioWorldCentre.webp', label: 'Jio World Centre', folder: 'Jio World Centre',  distance: '2.0 KM' },
-				{ id: 'Commercial/LowerParel.webp', label: 'Lower Parel', folder: 'Lower Parel', videoName: 'Lower Parel', distance: '8.5 KM' },
+				{ id: 'Commercial/LowerParel.webp', label: 'Lower Parel', folder: 'Lower Parel', videoName: 'Lower Parel1', distance: '8.5 KM' },
 				{ id: 'Commercial/NMAC .webp', label: 'NMACC', folder: 'NMAC', videoName: 'NMACC', distance: '2.0 KM' },
-				{ id: 'Commercial/Worli.webp', label: 'Worli Business District', folder: 'Worli', distance: '9.0 KM' }
+				{ id: 'Commercial/Worli.webp', label: 'Worli Business District', folder: 'Worli',videoName: "Worli1" , distance: '9.0 KM' }
 			]
 		},
 		{
@@ -524,7 +589,7 @@
 	{#if $vicinityImg === '-'}
 		{#key activeCategoryId}
 			<video
-				src={activeCategoryVideo}
+				use:attachVideoSource={activeCategoryVideo}
 				autoplay
 				muted
 				loop
@@ -540,7 +605,7 @@
 				<!-- Layer A: front while frontIsA, otherwise sits in back keeping its already-loaded content -->
 				<video
 					bind:this={videoElA}
-					src={videoSrcA}
+					use:attachVideoSource={videoSrcA}
 					autoplay
 					muted
 					playsinline
@@ -557,7 +622,7 @@
 				<!-- Layer B: front while !frontIsA, otherwise sits in back keeping its already-loaded content -->
 				<video
 					bind:this={videoElB}
-					src={videoSrcB}
+					use:attachVideoSource={videoSrcB}
 					autoplay
 					muted
 					playsinline
