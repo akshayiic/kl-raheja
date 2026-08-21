@@ -10,19 +10,7 @@
 	import { browser } from '$app/environment';
 	import { gsap } from 'gsap';
 
-	// Video asset imports for Cafes & Clubs
-	import bastianVid from '$lib/videos/Bastian.mp4';
-	import kharVid from '$lib/videos/Khar Gymkhana.mp4';
-	import migVid from '$lib/videos/MIG.mp4';
-	import nsciVid from '$lib/videos/National Sports Club of India.mp4';
-	import ottersVid from '$lib/videos/Otters.mp4';
-	import paliVid from '$lib/videos/Pali Village Cafe.mp4';
-	import tajVid from '$lib/videos/Taj lounges.mp4';
-	import totosVid from '$lib/videos/Totos.mp4';
-	import veronicasVid from '$lib/videos/Veronicas Pali Hill Cafe.mp4';
-	import willingdonVid from '$lib/videos/Willingdon Club.mp4';
 	import introVid from '$lib/videos/360-video.mp4';
-	import connectivityVid from '$lib/videos/connectivity-360.mp4';
 
 	let currentUI = getContext('currentUI');
 	let cleanId;
@@ -322,10 +310,10 @@
 			items: [
 				{ id: 'Connectivity/BandraTerminus.webp', label: 'Bandra Terminus', folder: 'Bandra Terminus', videoName: 'Bandra Terminus', distance: '2.5 KM', subcategory: 'Railway' },
 				{ id: 'Connectivity/BKCMetrostation.webp', label: 'BKC Metro Station', folder: 'BKC Metro station', videoName: 'BKC Metro Station', distance: '1.8 KM', subcategory: 'Metro' },
-				{ id: 'Connectivity/SantacruzMetroLine.webp', label: 'Santa Cruz Metro Line', folder: 'Santacruz Metro line 3', videoName: 'Santacruz Metro Line 3', distance: '2.1 KM', subcategory: 'Metro' },
+				{ id: 'Connectivity/SantacruzMetroLine.webp', label: 'Santa Cruz Metro Line', folder: 'Santacruz Metro line 3', videoName: 'St.cruz metro', distance: '2.1 KM', subcategory: 'Metro' },
 				{ id: 'Connectivity/CoastalRoad.webp', label: 'Coastal Road', folder: 'Coastal Road', videoName: 'Coastal Road', distance: '4.2 KM', subcategory: 'Roadways' },
 				{ id: 'Connectivity/Versova Bandra Sea Link.webp', label: 'Versova–Bandra Sea Link', folder: 'Versova-Bandra sea link', videoName: 'Versova', distance: '3.5 KM', subcategory: 'Roadways' },
-				{ id: 'Connectivity/WesternExpressHighway.webp', label: 'Western Express Highway', folder: 'Western Express Highway', videoName: 'Western Express Highway', distance: '1.0 KM', subcategory: 'Roadways' },
+				{ id: 'Connectivity/WesternExpressHighway.webp', label: 'Western Express Highway', folder: 'Western Express Highway', videoName: 'Western Express', distance: '1.0 KM', subcategory: 'Roadways' },
 				{ id: 'Connectivity/WorliSeaLink.webp', label: 'Bandra Worli Sea Link', folder: 'Bandra Worli Sea Link', videoName: 'Bandra Worli Sea Link', distance: '3.8 KM', subcategory: 'Roadways' }
 			]
 		},
@@ -336,16 +324,16 @@
 			videoFolder: 'Cafes',
 			video360: 'https://assets.vestate.io/kl-rahega/videos/touch-points/Cafe.mp4',
 			items: [
-				{ id: 'Cafe%20and%20Club/Bastian.webp', label: 'Bastian', video: bastianVid, folder: 'Bastian', distance: '1.2 KM' },
-				{ id: 'Cafe%20and%20Club/Khar Gymkhana.webp', label: 'Khar Gymkhana', video: kharVid, folder: 'Khar Gymkhana', distance: '0.8 KM' },
-				{ id: 'Cafe%20and%20Club/MIG.webp', label: 'MIG', video: migVid, folder: 'MIG', distance: '1.5 KM' },
-				{ id: 'Cafe%20and%20Club/NationalSportsClubofIndia.webp', label: 'National Sports Club of India', video: nsciVid, folder: 'National Sports Club of India', distance: '5.0 KM' },
-				{ id: 'Cafe%20and%20Club/Otters.webp', label: 'Otters Club', video: ottersVid, folder: 'Otter_s', distance: '1.1 KM' },
-				{ id: 'Cafe%20and%20Club/PaliVillageCafé.webp', label: 'Pali Village Café', video: paliVid, folder: 'Pali Village Cafe', distance: '0.9 KM' },
-				{ id: 'Cafe%20and%20Club/Taj lounges .webp', label: 'Taj Lands End', video: tajVid, folder: 'Taj Lounges', distance: '4.5 KM' },
-				{ id: 'Cafe%20and%20Club/Toto\'s.webp', label: 'Toto\'s', video: totosVid, folder: 'Toto_s', distance: '0.7 KM' },
-				{ id: 'Cafe%20and%20Club/Veronicas Pali Hill Cafes.webp', label: 'Veronicas Pali Hill Cafes', video: veronicasVid, folder: 'Veronica_s-Pali Hill Cafes', distance: '0.6 KM' },
-				{ id: 'Cafe%20and%20Club/WillingdonClub .webp', label: 'Willingdon Club', video: willingdonVid, folder: 'Willingdon club', distance: '6.2 KM' }
+				{ id: 'Cafe%20and%20Club/Bastian.webp', label: 'Bastian', folder: 'Bastian', distance: '1.2 KM' },
+				{ id: 'Cafe%20and%20Club/Khar Gymkhana.webp', label: 'Khar Gymkhana', folder: 'Khar Gymkhana', distance: '0.8 KM' },
+				{ id: 'Cafe%20and%20Club/MIG.webp', label: 'MIG', folder: 'MIG', distance: '1.5 KM' },
+				{ id: 'Cafe%20and%20Club/NationalSportsClubofIndia.webp', label: 'National Sports Club of India', folder: 'National Sports Club of India', videoName: 'National sports', distance: '5.0 KM' },
+				{ id: 'Cafe%20and%20Club/Otters.webp', label: 'Otters Club', folder: 'Otter_s', videoName: 'Otters', distance: '1.1 KM' },
+				{ id: 'Cafe%20and%20Club/PaliVillageCafé.webp', label: 'Pali Village Café', folder: 'Pali Village Cafe', distance: '0.9 KM' },
+				{ id: 'Cafe%20and%20Club/Taj lounges .webp', label: 'Taj Lands End', folder: 'Taj Lounges', videoName: 'Taj Lounges', distance: '4.5 KM' },
+				{ id: 'Cafe%20and%20Club/Toto\'s.webp', label: 'Toto\'s', folder: 'Toto_s', distance: '0.7 KM' },
+				{ id: 'Cafe%20and%20Club/Veronicas Pali Hill Cafes.webp', label: 'Veronicas Pali Hill Cafes', folder: 'Veronica_s-Pali Hill Cafes', videoName: 'Veronica_s', distance: '0.6 KM' },
+				{ id: 'Cafe%20and%20Club/WillingdonClub .webp', label: 'Willingdon Club', folder: 'Willingdon club', videoName: 'Willington', distance: '6.2 KM' }
 			]
 		},
 		{
@@ -517,7 +505,7 @@
 												? 'active inner-modal-btn'
 												: 'inner-modal-btn'}
 											id={'x-' + item.id.replaceAll(/[\s./]+/g, '-') + '-am'}
-											on:click={() => { vicinityImg.set(item.id);  }}
+											on:click={() => { vicinityImg.set(item.id); $isAmenitiesMinimized = true; }}
 										>
 											{item.label}
 										</button>
@@ -607,7 +595,7 @@
 <!-- Right-side gallery card (preview with dots) -->
 {#if activeFolder && activeCategoryFolder && !galleryCollapsed}
 	{@const activePreviewUrl = `https://assets.vestate.io/kl-rahega/images/${activeCategoryFolder}/${encodeURIComponent(activeFolder)}/${cardSlideIndex}.png`}
-	<div class="right-gallery-card p-4 select-none animate-fade-in text-left">
+	<div class="right-gallery-card p-4 select-none animate-fade-in text-left {activeFolder === 'Willingdon club' ? 'right-gallery-card--willingdon' : ''}">
 		<!-- Header with Title & Distance & Close Button -->
 		<div class="flex justify-between items-start mb-4">
 			<div class="flex flex-col pr-4">
@@ -775,16 +763,7 @@
 	Go Back
 </button>
 
-<!-- "Towards X" signpost label, shown only while a specific vicinity item is selected -->
-{#if $vicinityImg !== '-' && activeFolder && towardsLabelIds.includes($vicinityImg)}
-	<div class="towards-label animate-fade-in">
-		<span class="towards-label-pill">Towards {activeFolder}</span>
-		<svg class="towards-label-arrows" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M7 6L13 12L7 18" stroke="rgba(222, 173, 102, 0.55)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-			<path d="M14 6L20 12L14 18" stroke="rgba(222, 173, 102, 1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-		</svg>
-	</div>
-{/if}
+
 
 <style>
 	/* Video Crossfade – incoming video blurs in as it fades in on top */
@@ -834,36 +813,9 @@
 		box-shadow: 0 0 15px rgba(222, 173, 102, 0.45);
 	}
 
-	/* "Towards X" signpost label */
-	.towards-label {
-		position: fixed;
-		right: 24px;
-		bottom: 24px;
-		z-index: 1000;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-	}
+ 
 
-	.towards-label-pill {
-		background: rgba(20, 20, 20, 0.55);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		border: 1.2px solid rgba(222, 173, 102, 0.5);
-		border-radius: 9999px;
-		padding: 10px 22px;
-		color: rgba(255, 255, 255, 0.9);
-		font-size: 13px;
-		font-weight: 500;
-		letter-spacing: 0.02em;
-		white-space: nowrap;
-		font-family: 'Imprima', sans-serif;
-	}
-
-	.towards-label-arrows {
-		filter: drop-shadow(0 0 6px rgba(222, 173, 102, 0.65));
-		flex-shrink: 0;
-	}
+ 
 
 	:global(.left-panel-wrapper) {
 		bottom: 6.5rem !important;
@@ -983,6 +935,10 @@
 		border-radius: 12px !important;
 		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
 		transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+	}
+
+	.right-gallery-card--willingdon {
+		top: 75%;
 	}
 
 	.right-gallery-card::before {
